@@ -27,13 +27,13 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - The full `AGENTS.md` distribution: `find . -name AGENTS.md -not -path '*/node_modules/*'`. In a Makerkit monorepo this returns the root file plus one per app and per package. Note which paths have their own and which don't.
 - `agents-docs/`: does this skill's prior output already exist?
 - `.scratch/`: a sign that a local-markdown issue tracker convention is already in use
-- Is the `triage` skill installed? (a `triage` skill folder alongside this one, or `triage` in your available skills.) This decides whether Section B runs at all.
+- Is the `makerkit-matt-triage` skill installed? (a `makerkit-matt-triage` skill folder alongside this one, or `makerkit-matt-triage` in your available skills.) This decides whether Section B runs at all.
 
 ### 2. Present findings and ask
 
 Summarise what's present and what's missing. Then take the sections in order. One section, one answer, then the next.
 
-Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed).
+Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `makerkit-matt-triage` isn't installed).
 
 **Section A: Issue tracker.**
 
@@ -48,13 +48,13 @@ Default posture: these skills were designed for GitHub. If a `git remote` points
 
 Record the choice in `agents-docs/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
 
-**Section B: Triage label vocabulary.** Skip this section entirely if the `triage` skill isn't installed (exploration told you), since an uninstalled skill needs no labels.
+**Section B: Triage label vocabulary.** Skip this section entirely if the `makerkit-matt-triage` skill isn't installed (exploration told you), since an uninstalled skill needs no labels.
 
 If it is installed, ask exactly one question:
 
 > Do you want to keep the default triage labels? (recommended: **yes**)
 
-The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`), collect the overrides so `triage` applies existing labels instead of creating duplicates.
+The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`), collect the overrides so `makerkit-matt-triage` applies existing labels instead of creating duplicates.
 
 **Section C: Project docs.** This repo documents itself through a **distribution of `AGENTS.md` files**: a root file that maps the monorepo, plus one per app and per package that owns the conventions for that subtree. There is no separate glossary file and no ADR directory; vocabulary and decisions live in whichever `AGENTS.md` owns the code they describe.
 
