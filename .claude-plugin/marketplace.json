@@ -4,7 +4,7 @@
     "name": "Alvaro F",
     "url": "https://github.com/DevAlvaroF"
   },
-  "description": "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic.",
+  "description": "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic, plus standalone extras.",
   "plugins": [
     {
       "name": "makerkit-skills",
@@ -19,7 +19,6 @@
         "grilling"
       ],
       "skills": [
-        "./makerkit-adversarial-reviewer",
         "./makerkit-matt-code-review",
         "./makerkit-matt-codebase-design",
         "./makerkit-matt-diagnosing-bugs",
@@ -42,9 +41,9 @@
       ]
     },
     {
-      "name": "alvaro-skills",
-      "source": "./skills/alvaro",
-      "description": "The same engineering skills without the Makerkit-specific assumptions. For any repo.",
+      "name": "modified-matt-skills",
+      "source": "./skills/modified-matt",
+      "description": "The same engineering skills without the Makerkit-specific assumptions. For any repo. Agent-written docs live in a flat agents-docs/ directory rather than docs/.",
       "category": "engineering",
       "keywords": [
         "engineering",
@@ -53,26 +52,38 @@
         "grilling"
       ],
       "skills": [
-        "./alvaro-adversarial-reviewer",
-        "./alvaro-matt-code-review",
-        "./alvaro-matt-codebase-design",
-        "./alvaro-matt-diagnosing-bugs",
-        "./alvaro-matt-domain-modeling",
-        "./alvaro-matt-grill-me",
-        "./alvaro-matt-grill-with-docs",
-        "./alvaro-matt-grilling",
-        "./alvaro-matt-handoff",
-        "./alvaro-matt-implement",
-        "./alvaro-matt-improve-codebase-architecture",
-        "./alvaro-matt-prototype",
-        "./alvaro-matt-research",
-        "./alvaro-matt-resolving-merge-conflicts",
-        "./alvaro-matt-tdd",
-        "./alvaro-matt-to-spec",
-        "./alvaro-matt-to-tickets",
-        "./alvaro-matt-triage",
-        "./alvaro-matt-wayfinder",
-        "./alvaro-setup-matt-pocock-skills"
+        "./mod-matt-code-review",
+        "./mod-matt-codebase-design",
+        "./mod-matt-diagnosing-bugs",
+        "./mod-matt-domain-modeling",
+        "./mod-matt-grill-me",
+        "./mod-matt-grill-with-docs",
+        "./mod-matt-grilling",
+        "./mod-matt-handoff",
+        "./mod-matt-implement",
+        "./mod-matt-improve-codebase-architecture",
+        "./mod-matt-prototype",
+        "./mod-matt-research",
+        "./mod-matt-resolving-merge-conflicts",
+        "./mod-matt-setup-matt-pocock-skills",
+        "./mod-matt-tdd",
+        "./mod-matt-to-spec",
+        "./mod-matt-to-tickets",
+        "./mod-matt-triage",
+        "./mod-matt-wayfinder"
+      ]
+    },
+    {
+      "name": "alvaro-skills",
+      "source": "./skills/alvaro",
+      "description": "Standalone skills that aren't part of the Matt Pocock engineering set.",
+      "category": "engineering",
+      "keywords": [
+        "engineering",
+        "code-review"
+      ],
+      "skills": [
+        "./alvaro-adversarial-reviewer"
       ]
     }
   ]

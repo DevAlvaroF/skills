@@ -2,8 +2,9 @@
 // Regenerates .claude-plugin/marketplace.json from whatever is on disk.
 //
 // The manifest is what makes `npx skills add DevAlvaroF/skills`
-// show "Makerkit Skills" and "Alvaro Skills" as toggleable groups in its
-// picker: the CLI reads plugins[].skills and tags each skill with the owning
+// show "Makerkit Skills", "Modified Matt Skills" and "Alvaro Skills" as
+// toggleable groups in its picker: the CLI reads plugins[].skills and tags
+// each skill with the owning
 // plugin name. A skill missing from the manifest still installs, but lands in
 // an "Other" group. Run this after adding or renaming a skill.
 //
@@ -24,11 +25,18 @@ const GROUPS = [
     keywords: ["makerkit", "engineering", "tdd", "code-review", "grilling"],
   },
   {
+    dir: "modified-matt",
+    name: "modified-matt-skills",
+    description:
+      "The same engineering skills without the Makerkit-specific assumptions. For any repo. Agent-written docs live in a flat agents-docs/ directory rather than docs/.",
+    keywords: ["engineering", "tdd", "code-review", "grilling"],
+  },
+  {
     dir: "alvaro",
     name: "alvaro-skills",
     description:
-      "The same engineering skills without the Makerkit-specific assumptions. For any repo.",
-    keywords: ["engineering", "tdd", "code-review", "grilling"],
+      "Standalone skills that aren't part of the Matt Pocock engineering set.",
+    keywords: ["engineering", "code-review"],
   },
 ];
 
@@ -44,7 +52,7 @@ const manifest = {
   name: "devalvarof-skills",
   owner: { name: "Alvaro F", url: "https://github.com/DevAlvaroF" },
   description:
-    "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic.",
+    "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic, plus standalone extras.",
   plugins: GROUPS.map((g) => ({
     name: g.name,
     source: `./skills/${g.dir}`,
