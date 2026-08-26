@@ -19,7 +19,7 @@ root, not under `skills/`, so it is not discovered as a skill itself.
 
 ```bash
 cd /path/to/your-project
-npx skills add DevAlvaroF/agent-skills -a claude-code codex --all
+npx skills add DevAlvaroF/agent-skills -a claude-code codex -s '*' -y
 ```
 
 Install only what that project needs instead of everything:
@@ -82,3 +82,7 @@ skills-refresh() {
   installing or updating.
 - Don't install the same skills globally (`-g`) as well, or both agents
   will see every skill twice.
+- Do not use `--all`. It is shorthand for `--skill '*' --agent '*'`, and the
+  `--agent '*'` part silently overrides `-a claude-code codex`, installing
+  into every agent the CLI knows about and littering the project with
+  directories like `agent/skills/`. Use `-s '*' -y` instead.
