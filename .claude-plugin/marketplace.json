@@ -23,21 +23,17 @@
         "./makerkit-matt-codebase-design",
         "./makerkit-matt-diagnosing-bugs",
         "./makerkit-matt-domain-modeling",
-        "./makerkit-matt-grill-me",
         "./makerkit-matt-grill-with-docs",
         "./makerkit-matt-grilling",
         "./makerkit-matt-handoff",
         "./makerkit-matt-implement",
         "./makerkit-matt-improve-codebase-architecture",
-        "./makerkit-matt-prototype",
-        "./makerkit-matt-research",
         "./makerkit-matt-resolving-merge-conflicts",
         "./makerkit-matt-setup-matt-pocock-skills",
         "./makerkit-matt-tdd",
         "./makerkit-matt-to-spec",
         "./makerkit-matt-to-tickets",
-        "./makerkit-matt-triage",
-        "./makerkit-matt-wayfinder"
+        "./makerkit-matt-triage"
       ]
     },
     {
@@ -56,21 +52,17 @@
         "./mod-matt-codebase-design",
         "./mod-matt-diagnosing-bugs",
         "./mod-matt-domain-modeling",
-        "./mod-matt-grill-me",
         "./mod-matt-grill-with-docs",
         "./mod-matt-grilling",
         "./mod-matt-handoff",
         "./mod-matt-implement",
         "./mod-matt-improve-codebase-architecture",
-        "./mod-matt-prototype",
-        "./mod-matt-research",
         "./mod-matt-resolving-merge-conflicts",
         "./mod-matt-setup-matt-pocock-skills",
         "./mod-matt-tdd",
         "./mod-matt-to-spec",
         "./mod-matt-to-tickets",
-        "./mod-matt-triage",
-        "./mod-matt-wayfinder"
+        "./mod-matt-triage"
       ]
     },
     {

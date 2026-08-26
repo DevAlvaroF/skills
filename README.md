@@ -19,8 +19,8 @@ group that sits happily alongside either.
 
 | Group in the picker | Directory | Prefix | Skills | For |
 |---|---|---|---|---|
-| **Makerkit Matt Skills** | `skills/makerkit-matt/` | `makerkit-*` | 19 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
-| **Modified Matt Skills** | `skills/modified-matt/` | `mod-matt-*` | 19 | Every other repo. Agent-written docs go in a flat `agents-docs/` directory |
+| **Makerkit Matt Skills** | `skills/makerkit-matt/` | `makerkit-*` | 15 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
+| **Modified Matt Skills** | `skills/modified-matt/` | `mod-matt-*` | 15 | Every other repo. Agent-written docs go in a flat `agents-docs/` directory |
 | **Alvaro Skills** | `skills/alvaro/` | `alvaro-*` | 1 | Standalone extras, not part of the Matt Pocock set; safe next to either flavour |
 
 Note the one place directory and prefix disagree: the **Modified Matt Skills**
@@ -46,7 +46,7 @@ Four prompts, in order:
 1. **Select skills.** All three groups are drawn as collapsible headings —
    move to **Makerkit Matt Skills** or **Modified Matt Skills** and hit space to
    take that whole flavour in one keystroke. Don't tick *Select All*: that's
-   all 39 skills across all three groups.
+   all 31 skills across all three groups.
 2. **Which agents.** `Claude Code` is preselected. Add `Codex` if you use it.
    The Universal target (`.agents/skills`) is always included.
 3. **Installation method.** Symlink is labelled "Recommended" — **pick
@@ -58,7 +58,7 @@ Two things silently skip the menu, so run this in a plain terminal:
 
 - Running it from inside a Claude Code or Codex session. The CLI detects the
   agent and installs everything non-interactively.
-- Passing `-s`/`--skill`, `-y`/`--yes`, or `--all`. Any of them takes all 39
+- Passing `-s`/`--skill`, `-y`/`--yes`, or `--all`. Any of them takes all 31
   skills across all three groups with no prompt.
 
 ### Why "Copy", not "Symlink"
@@ -110,7 +110,7 @@ npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/alva
 ```
 
 **Never combine the bare `devalvarof/skills` name with `-s '*'` or `-y`.**
-That walks into all three groups and installs all 39 skills. Either prompt (no
+That walks into all three groups and installs all 31 skills. Either prompt (no
 `-s`, no `-y`) or scope with the `tree/main/skills/<group>` URL.
 
 Named subsets work too:
@@ -236,13 +236,12 @@ It writes an `## Agent skills` block in the project's root `AGENTS.md` (or
 The other skills read those files.
 
 **User-invoked only** (you have to ask for them by name):
-`grill-me`, `grill-with-docs`, `handoff`, `implement`,
-`improve-codebase-architecture`, `setup-matt-pocock-skills`, `to-spec`,
-`to-tickets`, `triage`, `wayfinder`
+`grill-with-docs`, `handoff`, `implement`, `improve-codebase-architecture`,
+`setup-matt-pocock-skills`, `to-spec`, `to-tickets`, `triage`
 
 **Model-invoked** (the agent may reach for them on its own):
 `code-review`, `codebase-design`, `diagnosing-bugs`, `domain-modeling`,
-`grilling`, `prototype`, `research`, `resolving-merge-conflicts`, `tdd`
+`grilling`, `resolving-merge-conflicts`, `tdd`
 
 Those names are unprefixed above; in the picker each carries its group's
 prefix (`makerkit-matt-tdd`, `mod-matt-tdd`). One exception:
