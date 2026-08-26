@@ -1,30 +1,68 @@
-# Issue tracker: Local Markdown
+# Issue tracker: Local Files
 
-Issues and specs for this repo live as markdown files in `.scratch/`.
+Specs and maps for this repo live as markdown files in `.scratch/`; **tickets are JSON files**, so other software can read them without parsing prose.
 
 ## Conventions
 
 - One feature per directory: `.scratch/<feature-slug>/`
-- The spec is `.scratch/<feature-slug>/spec.md`
-- Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
-- Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
-- Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- The spec is `.scratch/<feature-slug>/spec.md` (markdown: it is prose, not a ticket)
+- Implementation issues are one JSON file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.json`, numbered from `01`, never a single combined tickets file
+- Triage state is the ticket's `status` field (see `triage-labels.md` for the role strings)
+- Comments and conversation history append to the ticket's `comments` array, oldest first
+- Every file under `issues/` is strict JSON: no comments, no trailing commas, every field present. Parse it, mutate the object, write the whole file back; never append loose text to a ticket file
+
+## Ticket shape
+
+Implementation tickets (written by `/mod-matt-to-tickets`):
+
+```json
+{
+  "id": "<NN>",
+  "slug": "<slug>",
+  "title": "<Ticket title>",
+  "status": "ready-for-agent",
+  "whatToBuild": "The end-to-end behaviour this ticket makes work, from the user's perspective, not a layer-by-layer implementation list.",
+  "blockedBy": ["<NN>-<slug>"],
+  "acceptanceCriteria": [
+    { "text": "Acceptance criterion 1", "done": false }
+  ],
+  "comments": [
+    { "author": "<who>", "body": "<comment>" }
+  ]
+}
+```
+
+`blockedBy` holds the `<NN>-<slug>` id of each ticket that gates this one, and is `[]` when the ticket can start immediately. `comments` starts as `[]`.
 
 ## When a skill says "publish to the issue tracker"
 
-Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed).
+Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed): a `.json` ticket under `issues/`, or a markdown file for a spec or a map.
 
 ## When a skill says "fetch the relevant ticket"
 
-Read the file at the referenced path. The user will normally pass the path or the issue number directly.
+Read the file at the referenced path and parse it as JSON. The user will normally pass the path or the ticket number directly.
 
 ## Wayfinding operations
 
 Used by `/mod-matt-wayfinder`. The **map** is a file with one **child** file per ticket.
 
-- **Map**: `.scratch/<effort>/map.md` (the Notes / Decisions-so-far / Fog body).
-- **Child ticket**: `.scratch/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question in the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a `Status:` line records `claimed`/`resolved`.
-- **Blocking**: a `Blocked by: NN, NN` line near the top. A ticket is unblocked when every file it lists is `resolved`.
-- **Frontier**: scan `.scratch/<effort>/issues/` for files that are open, unblocked, and unclaimed; first by number wins.
-- **Claim**: set `Status: claimed` and save before any work.
-- **Resolve**: append the answer under an `## Answer` heading, set `Status: resolved`, then append a context pointer (gist + link) to the map's Decisions-so-far in `map.md`.
+- **Map**: `.scratch/<effort>/map.md` (the Notes / Decisions-so-far / Fog body). Stays markdown: it is the narrative a human reads, not a ticket.
+- **Child ticket**: `.scratch/<effort>/issues/<NN>-<slug>.json`, numbered from `01`, with the question in `question`. `type` records the ticket type (`research`/`prototype`/`grilling`/`task`); `status` records `open`/`claimed`/`resolved`.
+
+```json
+{
+  "id": "<NN>",
+  "slug": "<slug>",
+  "title": "<Ticket title>",
+  "type": "research",
+  "status": "open",
+  "question": "The decision or investigation this ticket resolves.",
+  "blockedBy": ["<NN>-<slug>"],
+  "answer": null
+}
+```
+
+- **Blocking**: the `blockedBy` array. A ticket is unblocked when every ticket it lists has `"status": "resolved"`.
+- **Frontier**: scan `.scratch/<effort>/issues/*.json` for tickets that are unblocked and still `"status": "open"` (`claimed` means another session has it); lowest `id` wins.
+- **Claim**: set `"status": "claimed"` and save before any work.
+- **Resolve**: write the answer into `answer`, set `"status": "resolved"`, then append a context pointer (gist + link) to the map's Decisions-so-far in `map.md`.
