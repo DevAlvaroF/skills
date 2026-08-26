@@ -20,17 +20,18 @@ skills/
 ## Installing into a project
 
 Both agents in one command. `-a claude-code codex` targets exactly those
-two; `-s '*'` takes every skill; `-y` skips the prompts.
+two; `-s '*'` takes every skill; `--copy` gives each agent its own real
+files; `-y` skips the prompts.
 
 ```bash
 cd /path/to/your-project
-npx skills add DevAlvaroF/agent-skills-makerkit -a claude-code codex -s '*' -y
+npx skills add DevAlvaroF/agent-skills-makerkit -a claude-code codex -s '*' --copy -y
 ```
 
 Install only what that project needs instead of everything:
 
 ```bash
-npx skills add DevAlvaroF/agent-skills-makerkit -a claude-code codex \
+npx skills add DevAlvaroF/agent-skills-makerkit -a claude-code codex --copy \
   -s makerkit-alvaro-matt-tdd makerkit-alvaro-matt-implement
 ```
 
@@ -38,18 +39,24 @@ This writes into the project:
 
 ```
 .agents/skills/<name>/     real files; Codex reads this directory natively
-.claude/skills/<name>   -> ../../.agents/skills/<name>   (relative symlink)
+.claude/skills/<name>/     real files; an independent copy, not a link
 skills-lock.json           source + content hash per installed skill
 ```
 
-**Commit all three.** Git stores the symlink correctly (mode `120000`) and
-the path is relative, so a fresh `git clone` gives a working setup for both
-agents with no install step.
+**Always pass `--copy`.** Without it the CLI symlinks `.claude/skills/<name>`
+at `.agents/skills/<name>` instead of writing real files.
+
+**Commit all three.** They are ordinary files and directories, so a fresh
+`git clone` gives a working setup for both agents with no install step.
 
 Do *not* gitignore the skill directories and rely on
 `npx skills experimental_install` to restore them. That command rebuilds
-`.agents/skills/` but does not recreate the `.claude/skills/` symlink, so
-Codex keeps working while Claude silently sees nothing.
+`.agents/skills/` only, so Codex keeps working while Claude silently sees
+nothing.
+
+Because each agent holds its own copy, an edit under `.claude/skills/` does
+not reach Codex, and vice versa. Edit skills here in this repo and reinstall;
+treat the copies in a consuming project as build output.
 
 Then restart Claude Code and Codex: both read skills at session start.
 
@@ -61,12 +68,12 @@ npx skills ls -a claude-code          # what Claude sees
 npx skills ls -a codex                # what Codex sees
 ```
 
-If Claude's list is empty but Codex's isn't, the `.claude/skills/` symlink
-is missing or broken. Re-run `add`.
+If Claude's list is empty but Codex's isn't, `.claude/skills/` didn't get
+written. Re-run `add` with `--copy`.
 
 ## Using them
 
-Same files, different invocation syntax per agent:
+Same content in both trees, different invocation syntax per agent:
 
 | | Claude Code | Codex |
 |---|---|---|
@@ -102,19 +109,19 @@ fetches from GitHub, not from your working copy.
 
 ### A project, after this repo changes
 
+Re-run `add`, don't use `update`:
+
 ```bash
 cd /path/to/your-project
-npx skills update -p -y
+npx skills add DevAlvaroF/agent-skills-makerkit -a claude-code codex -s '*' --copy -y
 git commit -am "Update agent skills"
 ```
 
-`-p` limits it to project-scoped skills, `-y` skips prompts. It re-fetches
-from GitHub and updates every skill in `skills-lock.json`, both agents at
-once; name one to narrow it:
-
-```bash
-npx skills update -p -y makerkit-alvaro-matt-tdd
-```
+`npx skills update` looks like the right command here, but it is not.
+`skills-lock.json` does not record that you installed with `--copy`, so
+update falls back to the default and **replaces `.claude/skills/<name>` with
+a symlink**, silently undoing copy mode. Re-running `add --copy` refreshes
+the content and keeps both trees as real files.
 
 Restart both agents afterwards.
 
@@ -126,10 +133,15 @@ add this to your shell profile:
 ```bash
 skills-refresh() {
   for d in ~/Coding/*/skills-lock.json; do
-    (cd "${d%/skills-lock.json}" && echo "-> $PWD" && npx skills update -p -y)
+    (cd "${d%/skills-lock.json}" && echo "-> $PWD" && \
+      npx skills add DevAlvaroF/agent-skills-makerkit \
+        -a claude-code codex -s '*' --copy -y)
   done
 }
 ```
+
+This reinstalls every skill in the repo into every project it finds. If some
+projects are meant to have only a subset, refresh those by hand instead.
 
 ### Removing
 
@@ -179,6 +191,8 @@ Skills that are fine to trigger automatically need neither.
 
 - Skills are loaded at session start. Restart Claude or Codex after
   installing or updating.
+- `npx skills update` reverts copy mode to symlinks. Refresh with
+  `npx skills add ... --copy -y` instead.
 - Don't install the same skills globally (`-g`) as well, or both agents
   will see every skill twice.
 - Do not use `--all`. It is shorthand for `--skill '*' --agent '*'`, and the
