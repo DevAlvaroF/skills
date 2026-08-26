@@ -43,7 +43,7 @@ Default posture: these skills were designed for GitHub. If a `git remote` points
 
 - **GitHub**: issues live in the repo's GitHub Issues (uses the `gh` CLI)
 - **GitLab**: issues live in the repo's GitLab Issues (uses the [`glab`](https://gitlab.com/gitlab-org/cli) CLI)
-- **Local files**: issues live as JSON ticket files under `.scratch/<feature>/issues/` in this repo, with specs and maps as markdown alongside them (good for solo projects or repos without a remote)
+- **Local files**: issues live as JSON ticket files under `.scratch/<NN>-<feature-slug>/issues/` in this repo, where `NN` is a two-digit feature sequence number, with specs and maps as markdown alongside them (good for solo projects or repos without a remote)
 - **Other** (Jira, Linear, etc.): ask the user to describe the workflow in one paragraph; the skill will record it as freeform prose
 
 Record the choice in `agents-docs/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off**. Leave it off and don't raise it: a user who wants external PRs in the triage queue can flip the flag in the file later.
