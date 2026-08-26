@@ -9,7 +9,7 @@ disable-model-invocation: true
 Scaffold the per-repo configuration that the engineering skills assume:
 
 - **Issue tracker**: where issues live (GitHub by default; local files are also supported out of the box)
-- **Triage labels**: the strings used for the five canonical triage roles
+- **Triage labels**: the strings used for the seven canonical workflow state roles
 - **Project docs**: which `AGENTS.md` files exist and the consumer rules for reading them
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
@@ -54,7 +54,7 @@ If it is installed, ask exactly one question:
 
 > Do you want to keep the default triage labels? (recommended: **yes**)
 
-The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`), collect the overrides so `makerkit-matt-triage` applies existing labels instead of creating duplicates.
+The defaults are the seven canonical workflow state roles, each tracker string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done-coding-awaiting-final-review`, `done-final-review`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`), collect the overrides so `makerkit-matt-triage` applies existing labels instead of creating duplicates.
 
 **Section C: Project docs.** This repo documents itself through a **distribution of `AGENTS.md` files**: a root file that maps the monorepo, plus one per app and per package that owns the conventions for that subtree. There is no separate glossary file and no ADR directory; vocabulary and decisions live in whichever `AGENTS.md` owns the code they describe.
 

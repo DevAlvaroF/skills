@@ -6,7 +6,10 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or tickets.
 
-Before writing code, read the root `AGENTS.md` and the nearest `AGENTS.md` to the code you're changing, so you inherit the vocabulary, conventions, and recorded decisions for that subtree. For anything touching Next.js, read the relevant doc under `apps/web/node_modules/next/dist/docs/` first: the vendored docs are the source of truth, not your training data.
+Before writing code, read the root `AGENTS.md` and the nearest `AGENTS.md` to the code you're changing, so you inherit
+the vocabulary, conventions, and recorded decisions for that subtree. For anything touching Next.js, read the relevant
+doc under `apps/web/node_modules/next/dist/docs/` first: the vendored docs are the source of truth, not your training
+data.
 
 Use /makerkit-matt-tdd where possible, at pre-agreed seams.
 
@@ -18,21 +21,36 @@ Once the implementation is done, run the root `AGENTS.md` verification list in o
 2. `pnpm lint:fix`
 3. `pnpm format:fix`
 4. /reviewer
-5. /rls-review — only if the change touched RLS or the database schema: any policy, grant, `SECURITY DEFINER` function, view, migration, or file under `apps/web/supabase/`.
+5. /rls-review — only if the change touched RLS or the database schema: any policy, grant, `SECURITY DEFINER` function,
+   view, migration, or file under `apps/web/supabase/`.
 
 Then use /makerkit-matt-code-review to review the work.
 
-## Close the tickets
+## Advance or close the tickets
 
-Closing the tickets you implemented is part of the job, not an optional extra. Once the review is done and the suite is green, close every ticket whose work landed. **How** depends on the tracker `/makerkit-matt-setup-matt-pocock-skills` configured:
+Updating the tickets you implemented is part of the job, not an optional extra. Once the implementing agent's review is
+done and the suite is green, advance or close every ticket whose work landed. **How** depends on the tracker
+`/makerkit-matt-setup-matt-pocock-skills` configured:
 
-- **Local files** (`.scratch/<feature-slug>/issues/<NN>-<slug>.json`) → for each implemented ticket, flip every satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done"`. Rewrite the whole file as strict JSON, keeping every other field (`id`, `slug`, `title`, `whatToBuild`, `blockedBy`) intact. Re-read each file after writing to confirm it still parses.
-- **A real issue tracker (GitHub, Linear, …)** → close each implemented issue (`gh issue close <N>` or the tracker's equivalent), tick the acceptance-criteria checkboxes in the body, and leave a one-paragraph comment saying what landed. Do NOT close or modify the parent issue.
+- **Local files** (`.scratch/<feature-slug>/issues/<NN>-<slug>.json`) → for each implemented ticket, flip every
+  satisfied entry in `acceptanceCriteria` to `"done": true` and set
+  `"status": "done-coding-awaiting-final-review"`. This state means the implementation and this skill's own review are
+  complete, but independent final review is still pending; this skill must never set `done-final-review`. Rewrite the
+  whole file as strict JSON, keeping every other field (`id`, `slug`, `title`, `whatToBuild`, `blockedBy`) intact. Re-read
+  each file after writing to confirm it still parses.
+- **A real issue tracker (GitHub, Linear, …)** → close each implemented issue (`gh issue close <N>` or the tracker's
+  equivalent), tick the acceptance-criteria checkboxes in the body, and leave a one-paragraph comment saying what
+  landed. Do NOT close or modify the parent issue.
 
-If a ticket is only partly done, leave it open: tick only the criteria that are genuinely met and say which are outstanding. Never tick a criterion you did not verify.
+If a ticket is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
+outstanding. Never tick a criterion you did not verify.
 
-Then report which tickets you closed and which you left open, with a one-line reason for each one still open.
+Then report which tickets you advanced or closed and which you left open, with a one-line reason for each one still
+open.
 
 Do not commit, stage, or push anything — the user commits manually.
 
-Instead, finish by returning a suggested commit message for the work: a concise imperative subject line (≤72 chars) plus a short body explaining the *why* when the change isn't self-evident. Match the repo's existing commit style (check `git log`). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no emoji badge.
+Instead, finish by returning a suggested commit message for the work: a concise imperative subject line (≤72 chars) plus
+a short body explaining the *why* when the change isn't self-evident. Match the repo's existing commit style (check
+`git log`). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no emoji
+badge.

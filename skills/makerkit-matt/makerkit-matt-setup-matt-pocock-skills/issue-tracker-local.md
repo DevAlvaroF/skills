@@ -7,7 +7,7 @@ Specs for this repo live as markdown files in `.scratch/`; **tickets are JSON fi
 - One feature per directory: `.scratch/<feature-slug>/`
 - The spec is `.scratch/<feature-slug>/spec.md` (markdown: it is prose, not a ticket)
 - Implementation issues are one JSON file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.json`, numbered from `01`, never a single combined tickets file
-- Triage state is the ticket's `status` field (see `triage-labels.md` for the role strings)
+- Workflow state is the ticket's `status` field (see `triage-labels.md` for the canonical state strings)
 - Comments and conversation history append to the ticket's `comments` array, oldest first
 - Every file under `issues/` is strict JSON: no comments, no trailing commas, every field present. Parse it, mutate the object, write the whole file back; never append loose text to a ticket file
 
@@ -33,6 +33,14 @@ Implementation tickets (written by `/makerkit-matt-to-tickets`):
 ```
 
 `blockedBy` holds the `<NN>-<slug>` id of each ticket that gates this one, and is `[]` when the ticket can start immediately. `comments` starts as `[]`.
+
+The successful local implementation and review lifecycle is:
+
+```text
+ready-for-agent -> done-coding-awaiting-final-review -> done-final-review
+```
+
+`done-coding-awaiting-final-review` means coding, verification, and the implementing agent's own review are complete. Only the independent final reviewer sets `done-final-review`. If final review requires changes, return the ticket to `ready-for-agent` and append the findings to `comments`.
 
 ## When a skill says "publish to the issue tracker"
 

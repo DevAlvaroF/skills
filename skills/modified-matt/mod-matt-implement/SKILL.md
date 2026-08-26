@@ -12,17 +12,31 @@ Run typechecking regularly, single test files regularly, and the full test suite
 
 Once done, use /mod-matt-code-review to review the work.
 
-## Close the tickets
+## Advance or close the tickets
 
-Closing the tickets you implemented is part of the job, not an optional extra. Once the review is done and the suite is green, close every ticket whose work landed. **How** depends on the tracker `/mod-matt-setup-matt-pocock-skills` configured:
+Updating the tickets you implemented is part of the job, not an optional extra. Once the implementing agent's review is
+done and the suite is green, advance or close every ticket whose work landed. **How** depends on the tracker
+`/mod-matt-setup-matt-pocock-skills` configured:
 
-- **Local files** (`.scratch/<feature-slug>/issues/<NN>-<slug>.json`) → for each implemented ticket, flip every satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done"`. Rewrite the whole file as strict JSON, keeping every other field (`id`, `slug`, `title`, `whatToBuild`, `blockedBy`) intact. Re-read each file after writing to confirm it still parses.
-- **A real issue tracker (GitHub, Linear, …)** → close each implemented issue (`gh issue close <N>` or the tracker's equivalent), tick the acceptance-criteria checkboxes in the body, and leave a one-paragraph comment saying what landed. Do NOT close or modify the parent issue.
+- **Local files** (`.scratch/<feature-slug>/issues/<NN>-<slug>.json`) → for each implemented ticket, flip every
+  satisfied entry in `acceptanceCriteria` to `"done": true` and set
+  `"status": "done-coding-awaiting-final-review"`. This state means the implementation and this skill's own review are
+  complete, but independent final review is still pending; this skill must never set `done-final-review`. Rewrite the
+  whole file as strict JSON, keeping every other field (`id`, `slug`, `title`, `whatToBuild`, `blockedBy`) intact. Re-read
+  each file after writing to confirm it still parses.
+- **A real issue tracker (GitHub, Linear, …)** → close each implemented issue (`gh issue close <N>` or the tracker's
+  equivalent), tick the acceptance-criteria checkboxes in the body, and leave a one-paragraph comment saying what
+  landed. Do NOT close or modify the parent issue.
 
-If a ticket is only partly done, leave it open: tick only the criteria that are genuinely met and say which are outstanding. Never tick a criterion you did not verify.
+If a ticket is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
+outstanding. Never tick a criterion you did not verify.
 
-Then report which tickets you closed and which you left open, with a one-line reason for each one still open.
+Then report which tickets you advanced or closed and which you left open, with a one-line reason for each one still
+open.
 
 Do not commit, stage, or push anything — the user commits manually.
 
-Instead, finish by returning a suggested commit message for the work: a concise imperative subject line (≤72 chars) plus a short body explaining the *why* when the change isn't self-evident. Match the repo's existing commit style (check `git log`). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no emoji badge.
+Instead, finish by returning a suggested commit message for the work: a concise imperative subject line (≤72 chars) plus
+a short body explaining the *why* when the change isn't self-evident. Match the repo's existing commit style (check
+`git log`). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no emoji
+badge.
