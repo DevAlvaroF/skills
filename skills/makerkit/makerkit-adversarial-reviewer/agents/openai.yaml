@@ -1,3 +1,0 @@
-interface:
-  display_name: "Makerkit Adversarial Reviewer"
-  short_description: "Break confidence in a diff and find simpler designs"
