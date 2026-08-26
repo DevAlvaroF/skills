@@ -1,0 +1,3 @@
+interface:
+  display_name: "Alvaro Adversarial Reviewer"
+  short_description: "Break confidence in a diff and find simpler designs"

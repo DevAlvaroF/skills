@@ -3,36 +3,63 @@
 Custom skills for Claude Code and Codex, installed per project with
 [`npx skills`](https://github.com/vercel-labs/skills).
 
-Skill names are prefixed `makerkit-*` so they can coexist with
-bundled and third-party skills of the same origin (`triage`, `implement`,
-`tdd` and friends all exist upstream under bare names).
+The same skill set ships in two flavours, one per group directory. Install
+one or the other, never both: they are the same skills under different
+names, and a project that installed both would offer the agent two copies
+of every skill.
+
+| Group | Prefix | For |
+|---|---|---|
+| `skills/makerkit/` | `makerkit-*` | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
+| `skills/alvaro/` | `alvaro-*` | Everything else |
+
+Names are prefixed either way so they can coexist with bundled and
+third-party skills of the same origin (`triage`, `implement`, `tdd` and
+friends all exist upstream under bare names).
 
 ## Layout
 
 ```
 skills/
-  <skill-name>/
-    SKILL.md            # required
-    references/         # optional, loaded on demand
-    agents/openai.yaml  # optional, Codex-only metadata and policy
+  <group>/                  # makerkit | alvaro
+    <group>-<skill-name>/
+      SKILL.md            # required
+      references/         # optional, loaded on demand
+      agents/openai.yaml  # optional, Codex-only metadata and policy
 ```
+
+The group is a real directory, and it is the *source URL* that selects it
+at install time. `-s` takes exact skill names or `'*'`; it does **not**
+accept glob patterns, so `-s 'makerkit-*'` matches nothing.
 
 ## Installing into a project
 
-Both agents in one command. `-a claude-code codex` targets exactly those
-two; `-s '*'` takes every skill; `--copy` gives each agent its own real
-files; `-y` skips the prompts.
+Point the source at one group's directory. `-a claude-code codex` targets
+exactly those two agents; `-s '*'` takes every skill *in that group*;
+`--copy` gives each agent its own real files; `-y` skips the prompts.
 
 ```bash
 cd /path/to/your-project
-npx skills add DevAlvaroF/agent-skills-makerkit -a claude-code codex -s '*' --copy -y
+
+# Makerkit repo
+npx skills add https://github.com/DevAlvaroF/agent-skills-makerkit/tree/main/skills/makerkit \
+  -a claude-code codex -s '*' --copy -y
+
+# any other repo
+npx skills add https://github.com/DevAlvaroF/agent-skills-makerkit/tree/main/skills/alvaro \
+  -a claude-code codex -s '*' --copy -y
 ```
+
+**Do not install from the bare repo name.** `npx skills add
+DevAlvaroF/agent-skills-makerkit -s '*'` walks three levels into `skills/`,
+finds both groups, and installs all 40 skills. The `tree/main/skills/<group>`
+URL is what scopes the install.
 
 Install only what that project needs instead of everything:
 
 ```bash
-npx skills add DevAlvaroF/agent-skills-makerkit -a claude-code codex --copy \
-  -s makerkit-matt-tdd makerkit-matt-implement
+npx skills add https://github.com/DevAlvaroF/agent-skills-makerkit/tree/main/skills/makerkit \
+  -a claude-code codex --copy -s makerkit-matt-tdd makerkit-matt-implement
 ```
 
 This writes into the project:
@@ -73,14 +100,15 @@ written. Re-run `add` with `--copy`.
 
 ## Using them
 
-Same content in both trees, different invocation syntax per agent:
+Same content in both agent trees, different invocation syntax per agent.
+`<group>` is whichever flavour you installed, `makerkit` or `alvaro`:
 
 | | Claude Code | Codex |
 |---|---|---|
-| Invoke by name | `/makerkit-matt-tdd` | `$makerkit-matt-tdd` |
+| Invoke by name | `/<group>-matt-tdd` | `$<group>-matt-tdd` |
 | Fires on its own | unless `disable-model-invocation: true` | unless `allow_implicit_invocation: false` |
 
-Run `/makerkit-setup-matt-pocock-skills` once per project before
+Run `/<group>-setup-matt-pocock-skills` once per project before
 using the rest. It writes `agents-docs/{issue-tracker,triage-labels,project-docs}.md`
 and an `## Agent skills` block in the project's root `AGENTS.md` (or
 `CLAUDE.md` if that's the real document), which the other skills read.
@@ -95,9 +123,9 @@ and an `## Agent skills` block in the project's root `AGENTS.md` (or
 `domain-modeling`, `grilling`, `prototype`, `research`,
 `resolving-merge-conflicts`, `tdd`
 
-(all prefixed `makerkit-matt-`, except `adversarial-reviewer` and
-`setup-matt-pocock-skills`, which are `makerkit-adversarial-reviewer` and
-`makerkit-setup-matt-pocock-skills`)
+(all prefixed `<group>-matt-`, except `adversarial-reviewer` and
+`setup-matt-pocock-skills`, which are `<group>-adversarial-reviewer` and
+`<group>-setup-matt-pocock-skills`)
 
 ## Updating
 
@@ -116,7 +144,8 @@ Re-run `add`, don't use `update`:
 
 ```bash
 cd /path/to/your-project
-npx skills add DevAlvaroF/agent-skills-makerkit -a claude-code codex -s '*' --copy -y
+npx skills add https://github.com/DevAlvaroF/agent-skills-makerkit/tree/main/skills/<group> \
+  -a claude-code codex -s '*' --copy -y
 git commit -am "Update agent skills"
 ```
 
@@ -135,16 +164,24 @@ add this to your shell profile:
 
 ```bash
 skills-refresh() {
+  local base=https://github.com/DevAlvaroF/agent-skills-makerkit/tree/main/skills
   for d in ~/Coding/*/skills-lock.json; do
-    (cd "${d%/skills-lock.json}" && echo "-> $PWD" && \
-      npx skills add DevAlvaroF/agent-skills-makerkit \
-        -a claude-code codex -s '*' --copy -y)
+    # skills-lock.json records a skillPath per skill; the group is in it
+    group=$(grep -o '"skillPath": "skills/[a-z]*' "$d" | head -1 | sed 's|.*skills/||')
+    case "$group" in
+      makerkit|alvaro) ;;
+      *) echo "-- skip ${d%/skills-lock.json} (not from this repo)"; continue ;;
+    esac
+    (cd "${d%/skills-lock.json}" && echo "-> $PWD ($group)" && \
+      npx skills add "$base/$group" -a claude-code codex -s '*' --copy -y)
   done
 }
 ```
 
-This reinstalls every skill in the repo into every project it finds. If some
-projects are meant to have only a subset, refresh those by hand instead.
+Each project keeps the flavour it already had: the group is read back out of
+its `skills-lock.json`, and projects holding skills from anywhere else are
+skipped. This reinstalls every skill in that group. If some projects are meant
+to have only a subset, refresh those by hand instead.
 
 ### Removing
 
@@ -162,7 +199,9 @@ npx skills remove -s '*' -a claude-code codex -y    # all of them
   `license`, `allowed-tools`, `metadata`. Stick to these unless you have a
   reason; unrecognised keys are at best ignored and at worst rejected.
 - Skill names share one namespace with bundled and third-party skills.
-  Keep the `makerkit-` prefix.
+  Keep the group prefix (`makerkit-` or `alvaro-`).
+- Edit both groups, or neither. They are independent copies; a fix applied
+  to `skills/makerkit/` does not reach `skills/alvaro/`.
 - Keep `SKILL.md` short; push detail into `references/` so it loads only
   when needed.
 
@@ -204,9 +243,10 @@ Skills that are fine to trigger automatically need neither.
   directories like `agent/skills/`. Use `-s '*' -y` instead.
 - Don't also install `mattpocock/skills` into the same project. These are
   adapted copies of those skills; you'd get both sets.
+- Don't install both groups into the same project, and don't install from
+  the bare repo name (which does exactly that). Same skills, two prefixes.
 
 ## Attribution
 
-The `makerkit-matt-*` skills and
-`makerkit-setup-matt-pocock-skills` are adapted from
-[mattpocock/skills](https://github.com/mattpocock/skills) (MIT).
+The `*-matt-*` skills and `*-setup-matt-pocock-skills`, in both groups, are
+adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT).
