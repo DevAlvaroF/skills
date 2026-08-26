@@ -3,7 +3,7 @@
 Custom skills for Claude Code and Codex, installed per project with
 [`npx skills`](https://github.com/vercel-labs/skills).
 
-Skill names are prefixed `makerkit-alvaro-*` so they can coexist with
+Skill names are prefixed `makerkit-*` so they can coexist with
 bundled and third-party skills of the same origin (`triage`, `implement`,
 `tdd` and friends all exist upstream under bare names).
 
@@ -32,7 +32,7 @@ Install only what that project needs instead of everything:
 
 ```bash
 npx skills add DevAlvaroF/agent-skills-makerkit -a claude-code codex --copy \
-  -s makerkit-alvaro-matt-tdd makerkit-alvaro-matt-implement
+  -s makerkit-matt-tdd makerkit-matt-implement
 ```
 
 This writes into the project:
@@ -77,10 +77,10 @@ Same content in both trees, different invocation syntax per agent:
 
 | | Claude Code | Codex |
 |---|---|---|
-| Invoke by name | `/makerkit-alvaro-matt-tdd` | `$makerkit-alvaro-matt-tdd` |
+| Invoke by name | `/makerkit-matt-tdd` | `$makerkit-matt-tdd` |
 | Fires on its own | unless `disable-model-invocation: true` | unless `allow_implicit_invocation: false` |
 
-Run `/makerkit-alvaro-setup-matt-pocock-skills` once per project before
+Run `/makerkit-setup-matt-pocock-skills` once per project before
 using the rest. It writes `agents-docs/{issue-tracker,triage-labels,project-docs}.md`
 and an `## Agent skills` block in the project's root `AGENTS.md` (or
 `CLAUDE.md` if that's the real document), which the other skills read.
@@ -91,10 +91,13 @@ and an `## Agent skills` block in the project's root `AGENTS.md` (or
 `to-tickets`, `triage`, `wayfinder`
 
 **Model-invoked** (the agent may reach for them on its own):
-`code-review`, `codebase-design`, `diagnosing-bugs`, `domain-modeling`,
-`grilling`, `prototype`, `research`, `resolving-merge-conflicts`, `tdd`
+`adversarial-reviewer`, `code-review`, `codebase-design`, `diagnosing-bugs`,
+`domain-modeling`, `grilling`, `prototype`, `research`,
+`resolving-merge-conflicts`, `tdd`
 
-(all with the `makerkit-alvaro-matt-` / `makerkit-alvaro-` prefix)
+(all prefixed `makerkit-matt-`, except `adversarial-reviewer` and
+`setup-matt-pocock-skills`, which are `makerkit-adversarial-reviewer` and
+`makerkit-setup-matt-pocock-skills`)
 
 ## Updating
 
@@ -146,7 +149,7 @@ projects are meant to have only a subset, refresh those by hand instead.
 ### Removing
 
 ```bash
-npx skills remove makerkit-alvaro-matt-tdd          # one skill, both agents
+npx skills remove makerkit-matt-tdd          # one skill, both agents
 npx skills remove -s '*' -a claude-code codex -y    # all of them
 ```
 
@@ -159,7 +162,7 @@ npx skills remove -s '*' -a claude-code codex -y    # all of them
   `license`, `allowed-tools`, `metadata`. Stick to these unless you have a
   reason; unrecognised keys are at best ignored and at worst rejected.
 - Skill names share one namespace with bundled and third-party skills.
-  Keep the `makerkit-alvaro-` prefix.
+  Keep the `makerkit-` prefix.
 - Keep `SKILL.md` short; push detail into `references/` so it loads only
   when needed.
 
@@ -204,6 +207,6 @@ Skills that are fine to trigger automatically need neither.
 
 ## Attribution
 
-The `makerkit-alvaro-matt-*` skills and
-`makerkit-alvaro-setup-matt-pocock-skills` are adapted from
+The `makerkit-matt-*` skills and
+`makerkit-setup-matt-pocock-skills` are adapted from
 [mattpocock/skills](https://github.com/mattpocock/skills) (MIT).
