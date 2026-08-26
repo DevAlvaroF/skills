@@ -1,6 +1,6 @@
 # Issue tracker: Local Files
 
-Specs and maps for this repo live as markdown files in `.scratch/`; **tickets are JSON files**, so other software can read them without parsing prose.
+Specs for this repo live as markdown files in `.scratch/`; **tickets are JSON files**, so other software can read them without parsing prose.
 
 ## Conventions
 
@@ -36,33 +36,8 @@ Implementation tickets (written by `/mod-matt-to-tickets`):
 
 ## When a skill says "publish to the issue tracker"
 
-Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed): a `.json` ticket under `issues/`, or a markdown file for a spec or a map.
+Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed): a `.json` ticket under `issues/`, or a markdown file for a spec.
 
 ## When a skill says "fetch the relevant ticket"
 
 Read the file at the referenced path and parse it as JSON. The user will normally pass the path or the ticket number directly.
-
-## Wayfinding operations
-
-Used by `/mod-matt-wayfinder`. The **map** is a file with one **child** file per ticket.
-
-- **Map**: `.scratch/<effort>/map.md` (the Notes / Decisions-so-far / Fog body). Stays markdown: it is the narrative a human reads, not a ticket.
-- **Child ticket**: `.scratch/<effort>/issues/<NN>-<slug>.json`, numbered from `01`, with the question in `question`. `type` records the ticket type (`research`/`prototype`/`grilling`/`task`); `status` records `open`/`claimed`/`resolved`.
-
-```json
-{
-  "id": "<NN>",
-  "slug": "<slug>",
-  "title": "<Ticket title>",
-  "type": "research",
-  "status": "open",
-  "question": "The decision or investigation this ticket resolves.",
-  "blockedBy": ["<NN>-<slug>"],
-  "answer": null
-}
-```
-
-- **Blocking**: the `blockedBy` array. A ticket is unblocked when every ticket it lists has `"status": "resolved"`.
-- **Frontier**: scan `.scratch/<effort>/issues/*.json` for tickets that are unblocked and still `"status": "open"` (`claimed` means another session has it); lowest `id` wins.
-- **Claim**: set `"status": "claimed"` and save before any work.
-- **Resolve**: write the answer into `answer`, set `"status": "resolved"`, then append a context pointer (gist + link) to the map's Decisions-so-far in `map.md`.
