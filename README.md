@@ -19,7 +19,7 @@ group that sits happily alongside either.
 
 | Group in the picker | Directory | Prefix | Skills | For |
 |---|---|---|---|---|
-| **Makerkit Skills** | `skills/makerkit/` | `makerkit-*` | 19 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
+| **Makerkit Matt Skills** | `skills/makerkit-matt/` | `makerkit-*` | 19 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
 | **Modified Matt Skills** | `skills/modified-matt/` | `mod-matt-*` | 19 | Every other repo. Agent-written docs go in a flat `agents-docs/` directory |
 | **Alvaro Skills** | `skills/alvaro/` | `alvaro-*` | 1 | Standalone extras, not part of the Matt Pocock set; safe next to either flavour |
 
@@ -44,7 +44,7 @@ npx skills@latest add devalvarof/skills
 Four prompts, in order:
 
 1. **Select skills.** All three groups are drawn as collapsible headings —
-   move to **Makerkit Skills** or **Modified Matt Skills** and hit space to
+   move to **Makerkit Matt Skills** or **Modified Matt Skills** and hit space to
    take that whole flavour in one keystroke. Don't tick *Select All*: that's
    all 39 skills across all three groups.
 2. **Which agents.** `Claude Code` is preselected. Add `Codex` if you use it.
@@ -97,7 +97,7 @@ For scripts and CI, scope to one group with a `tree/main/skills/<group>` URL.
 
 ```bash
 # Makerkit repo
-npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/makerkit \
+npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/makerkit-matt \
   -a claude-code codex -s '*' --copy -y
 
 # any other repo
@@ -116,7 +116,7 @@ That walks into all three groups and installs all 39 skills. Either prompt (no
 Named subsets work too:
 
 ```bash
-npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/makerkit \
+npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/makerkit-matt \
   -a claude-code codex --copy -s makerkit-matt-tdd makerkit-matt-implement
 ```
 
@@ -174,7 +174,7 @@ skills-refresh() {
     # skills-lock.json records a skillPath per skill; the group is in it
     group=$(grep -o '"skillPath": "skills/[a-z-]*' "$d" | head -1 | sed 's|.*skills/||')
     case "$group" in
-      makerkit|modified-matt|alvaro) ;;
+      makerkit-matt|modified-matt|alvaro) ;;
       *) echo "-- skip ${d%/skills-lock.json} (not from this repo)"; continue ;;
     esac
     (cd "${d%/skills-lock.json}" && echo "-> $PWD ($group)" && \
@@ -224,7 +224,7 @@ A skill fires on its own unless `disable-model-invocation: true` (Claude Code)
 or `allow_implicit_invocation: false` (Codex).
 
 Run the setup skill once per project before using the rest —
-`/makerkit-setup-matt-pocock-skills` or `/mod-matt-setup-matt-pocock-skills`.
+`/makerkit-matt-setup-matt-pocock-skills` or `/mod-matt-setup-matt-pocock-skills`.
 It writes an `## Agent skills` block in the project's root `AGENTS.md` (or
 `CLAUDE.md` if that's the real document) plus, under `agents-docs/`:
 
@@ -245,9 +245,7 @@ The other skills read those files.
 `grilling`, `prototype`, `research`, `resolving-merge-conflicts`, `tdd`
 
 Those names are unprefixed above; in the picker each carries its group's
-prefix (`makerkit-matt-tdd`, `mod-matt-tdd`). Two exceptions:
-`setup-matt-pocock-skills` is `makerkit-setup-matt-pocock-skills` in the
-Makerkit group but `mod-matt-setup-matt-pocock-skills` in Modified Matt; and
+prefix (`makerkit-matt-tdd`, `mod-matt-tdd`). One exception:
 `alvaro-adversarial-reviewer`, the sole **Alvaro Skills** entry, is
 model-invoked and belongs to neither flavour's list.
 
@@ -259,7 +257,7 @@ model-invoked and belongs to neither flavour's list.
 scripts/
   gen-marketplace.mjs     # regenerates it from what's on disk
 skills/
-  <group>/                # makerkit | modified-matt | alvaro
+  <group>/                # makerkit-matt | modified-matt | alvaro
     <prefixed-skill-name>/
       SKILL.md            # required
       references/         # optional, loaded on demand
@@ -286,7 +284,7 @@ the manifest still installs, but shows up under "Other" instead of its group.
 - Skill names share one namespace with bundled and third-party skills.
   Keep the group prefix (`makerkit-`, `mod-matt-`, or `alvaro-`).
 - Edit both flavours, or neither. They are independent copies; a fix applied
-  to `skills/makerkit/` does not reach `skills/modified-matt/`.
+  to `skills/makerkit-matt/` does not reach `skills/modified-matt/`.
 - Keep `SKILL.md` short; push detail into `references/` so it loads only
   when needed.
 

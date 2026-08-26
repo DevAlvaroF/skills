@@ -7,8 +7,8 @@
   "description": "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic, plus standalone extras.",
   "plugins": [
     {
-      "name": "makerkit-skills",
-      "source": "./skills/makerkit",
+      "name": "makerkit-matt-skills",
+      "source": "./skills/makerkit-matt",
       "description": "Makerkit-aware engineering skills: they know about docs/ .mdoc product docs, the fork/upstream remote pair, and the monorepo AGENTS.md layout.",
       "category": "engineering",
       "keywords": [
@@ -32,12 +32,12 @@
         "./makerkit-matt-prototype",
         "./makerkit-matt-research",
         "./makerkit-matt-resolving-merge-conflicts",
+        "./makerkit-matt-setup-matt-pocock-skills",
         "./makerkit-matt-tdd",
         "./makerkit-matt-to-spec",
         "./makerkit-matt-to-tickets",
         "./makerkit-matt-triage",
-        "./makerkit-matt-wayfinder",
-        "./makerkit-setup-matt-pocock-skills"
+        "./makerkit-matt-wayfinder"
       ]
     },
     {

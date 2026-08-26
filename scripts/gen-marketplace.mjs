@@ -2,7 +2,7 @@
 // Regenerates .claude-plugin/marketplace.json from whatever is on disk.
 //
 // The manifest is what makes `npx skills add DevAlvaroF/skills`
-// show "Makerkit Skills", "Modified Matt Skills" and "Alvaro Skills" as
+// show "Makerkit Matt Skills", "Modified Matt Skills" and "Alvaro Skills" as
 // toggleable groups in its picker: the CLI reads plugins[].skills and tags
 // each skill with the owning
 // plugin name. A skill missing from the manifest still installs, but lands in
@@ -18,8 +18,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const GROUPS = [
   {
-    dir: "makerkit",
-    name: "makerkit-skills",
+    dir: "makerkit-matt",
+    name: "makerkit-matt-skills",
     description:
       "Makerkit-aware engineering skills: they know about docs/ .mdoc product docs, the fork/upstream remote pair, and the monorepo AGENTS.md layout.",
     keywords: ["makerkit", "engineering", "tdd", "code-review", "grilling"],
