@@ -59,8 +59,11 @@ Anything in the repo that documents how code should be written, such as `CODING_
 On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below: a fixed set of
 Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
 
-- **The repo overrides.** A documented repo standard always wins; where it endorses something the baseline would flag,
-  suppress the smell.
+- **The repo overrides — check before reporting, not after.** Before naming a baseline smell, check it against the
+  standards-source files from step 3: if a documented rule endorses the exact pattern the smell would flag (an adapter
+  that's supposed to just delegate, an abstraction the docs call load-bearing), suppress it — don't report it and rely
+  on a later pass to catch the conflict. If a match is ambiguous, say so in the finding instead of silently including
+  or dropping it.
 - **Always a judgement call.** Each smell is a labelled heuristic ("possible Feature Envy"), never a hard violation.
   Like any standard here, skip anything tooling already enforces.
 
@@ -98,9 +101,10 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 - The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full (the
   sub-agent has no other access to it).
 - The brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the
-  standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard
-  violations from judgement calls: documented-standard breaches can be hard, but baseline smells are always judgement
-  calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
+  standard (file + the rule); and (b) any baseline smell you spot — but check it against the standards-source files
+  first: if a documented rule endorses the exact pattern, drop it, don't report it. For anything you do report, name
+  the smell and quote the hunk. Distinguish hard violations from judgement calls: documented-standard breaches can be
+  hard, but baseline smells are always judgement calls. Skip anything tooling enforces. Under 400 words."
 
 **Spec sub-agent prompt** should include:
 
