@@ -19,7 +19,6 @@
         "grilling"
       ],
       "skills": [
-        "./makerkit-matt-diagnosing-bugs",
         "./makerkit-matt-domain-modeling",
         "./makerkit-matt-grill-with-docs",
         "./makerkit-matt-grilling",
@@ -44,7 +43,6 @@
       "skills": [
         "./mod-matt-code-review",
         "./mod-matt-codebase-design",
-        "./mod-matt-diagnosing-bugs",
         "./mod-matt-domain-modeling",
         "./mod-matt-grill-with-docs",
         "./mod-matt-grilling",
