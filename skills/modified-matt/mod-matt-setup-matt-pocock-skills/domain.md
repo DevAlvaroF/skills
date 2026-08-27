@@ -6,7 +6,7 @@ How the engineering skills should consume this repo's domain documentation when 
 
 - **`CONTEXT.md`** at the repo root, or
 - **`CONTEXT-MAP.md`** at the repo root if it exists: it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
-- **`agents-docs/adr/`**: read ADRs that touch the area you're about to work in. In multi-context repos, also check `src/<context>/agents-docs/adr/` for context-scoped decisions.
+- **`docs/adr/`**: read ADRs that touch the area you're about to work in. In multi-context repos, also check `src/<context>/docs/adr/` for context-scoped decisions.
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/mod-matt-domain-modeling` skill (reached via `/mod-matt-grill-with-docs` and `/mod-matt-improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
 
@@ -17,9 +17,10 @@ Single-context repo (most repos):
 ```
 /
 ├── CONTEXT.md
-├── agents-docs/adr/
-│   ├── 0001-event-sourced-orders.md
-│   └── 0002-postgres-for-write-model.md
+├── docs/
+│   └── adr/
+│       ├── 0001-event-sourced-orders.md
+│       └── 0002-postgres-for-write-model.md
 └── src/
 ```
 
@@ -28,14 +29,15 @@ Multi-context repo (presence of `CONTEXT-MAP.md` at the root):
 ```
 /
 ├── CONTEXT-MAP.md
-├── agents-docs/adr/         ← system-wide decisions
+├── docs/
+│   └── adr/            ← system-wide decisions
 └── src/
     ├── ordering/
     │   ├── CONTEXT.md
-    │   └── agents-docs/adr/ ← context-specific decisions
+    │   └── docs/adr/   ← context-specific decisions
     └── billing/
         ├── CONTEXT.md
-        └── agents-docs/adr/
+        └── docs/adr/
 ```
 
 ## Use the glossary's vocabulary

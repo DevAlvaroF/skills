@@ -16,40 +16,13 @@ implementation time, not something the review steps below can retrofit.
 
 Use /makerkit-custom-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
 
-Run `pnpm typecheck` regularly, and run the tests covering what you just touched as you go.
-
-**Testing here is Makerkit-shaped: take the *how* from the repo.** The nearest `AGENTS.md` § Skills names the skill
-that owns each surface — `/service-builder` for services, `/playwright-e2e` for E2E, `/postgres-expert` and
-`/rls-review` for the database — and `docs/development/application-tests.mdoc` (Playwright) and `database-tests.mdoc`
-(pgTAP) hold the long-form guidance. /makerkit-custom-tdd carries the seam rules and the caveats below in full.
-
-**There is no full-suite command here**, so don't reach for one. Root `pnpm test` is `turbo test`, which reaches only
-packages whose script is literally `test` — dragging in the whole Playwright run — while most unit suites are named
-`test:unit`, and `turbo test:unit` is not a configured task (`Could not find task 'test:unit' in project`).
-`apps/e2e/AGENTS.md` calls `pnpm test` "All tests"; it isn't. Derive the real list rather than trusting a snapshot, then
-run each package's own script (`pnpm --filter @kit/ui test:unit`):
-
-```bash
-grep -rn --include=package.json -E '"test(:unit)?":' apps packages | grep -v node_modules
-```
-
-`apps/web` will not appear in that list — it has no vitest config and no test script, so app code (routes, pages, server
-actions, `_lib/server/` loaders) has **no unit seam** and is covered by Playwright plus pgTAP instead. If the work
-wanted a unit test and landed somewhere with no runner, say so rather than reporting the change as untested.
-
-Playwright is opt-in, not part of "the full suite": run the specs covering the flow you touched
-(`pnpm --filter web-e2e exec playwright test <name> --workers=1`). A whole-suite Playwright run needs `pnpm dev` and
-Supabase up, so only do it when the change is visible in a user flow. Run pgTAP (`pnpm supabase:web:test`) only when the
-change touches the database. If any of this differs from the repo, **follow the repo** and say which command you ran.
-
 Once the implementation is done, run the following in order:
 
 1. **Review the work against the spec** — detailed below. This step belongs to this skill and sits *outside* the repo's
    verification list; run it whether or not the repo mentions anything like it.
-2. **The repo's verification steps**, from the root `AGENTS.md` § Verification, in the order given there. Expect roughly:
-   typecheck, lint, format, `/reviewer`, plus `/rls-review` for anything touching RLS, the database schema, or
-   `apps/web/supabase/`. If that section is renamed, missing, or differs from this description, **follow the repo** —
-   and say out loud which list you actually ran.
+2. **The repo's verification steps**, from the root `AGENTS.md` § Verification, in the order given there. If that
+   section is renamed, missing, or differs from this description, **follow the repo** — and say out loud which list you
+   actually ran.
 
 ## Step 1 in detail: review the work
 
@@ -79,8 +52,8 @@ git show HEAD
 
 Look for the originating spec, in this order:
 
-1. A `.myprds/<NN>-<feature-slug>/` path referenced in the commit messages (per this skill's convention of including
-   the issue and `spec.md` paths in its suggested commit message).
+1. A `.myprds/<NN>-<feature-slug>/` path referenced in the commit messages (per this skill's convention of including the
+   issue and `spec.md` paths in its suggested commit message).
 2. A path the user passed as an argument.
 3. A spec file under `.myprds/` or `specs/` matching the branch name or feature. Do **not** treat `docs/` as a spec
    location: in this repo it holds upstream Makerkit product documentation (`.mdoc` files), not agent-authored specs.
@@ -113,26 +86,26 @@ done and the tests you ran are green, advance every issue whose work landed
 satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done-coding-awaiting-final-review"`. This
 state means the implementation and this skill's own review are complete, but independent final review is still pending;
 this skill must never set `done-final-review`. Rewrite the whole file as strict JSON, keeping every other field (`id`,
-`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `testSeams`, `covers`, `comments`) intact — `comments` holds review history
-that exists nowhere else, so dropping or emptying it loses it permanently. Re-read each file after writing to confirm it
-still parses.
+`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `testSeams`, `covers`, `comments`) intact — `comments` holds review
+history that exists nowhere else, so dropping or emptying it loses it permanently. Re-read each file after writing to
+confirm it still parses.
 
 If an issue is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
 outstanding. Never tick a criterion you did not verify.
 
-Then report which issues you advanced or closed and which you left open, with a one-line reason for each one still
-open.
+Then report which issues you advanced or closed and which you left open, with a one-line reason for each one still open.
 
 Do not commit, stage, or push anything — the user commits manually.
 
 Instead, finish by returning a suggested commit message for the work: a concise imperative subject line (≤72 chars) plus
 a short body explaining the *why* when the change isn't self-evident. Match the repo's existing commit style (check
 `git log`). Include the path of each implemented issue JSON file, relative to the repository and beginning with
-`.myprds/`. Also include the spec path from each issue's `spec` field, if set and not `null` (dedupe if several
-issues share one). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no
-emoji badge.
+`.myprds/`. Also include the spec path from each issue's `spec` field, if set and not `null` (dedupe if several issues
+share one). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no emoji
+badge.
 
-Before suggesting a commit message that references a spec path, **read that spec and scan it for secret-shaped strings**:
+Before suggesting a commit message that references a spec path, **read that spec and scan it for secret-shaped
+strings**:
 API keys and tokens, `sk-`/`ghp_`/`AKIA`-style prefixes, private key blocks, connection strings or URLs with embedded
 credentials, `.env`-style assignments of a secret-looking name, and pasted customer data or PII. If you find any, stop:
 do not suggest the commit, tell the user exactly what you found and where, and let them redact the spec first.

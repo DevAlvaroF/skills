@@ -31,7 +31,7 @@ Don't assume parity between them; check what each actually contains.
 | Group in the picker | Directory | Prefix | Skills | For |
 |---|---|---|---|---|
 | **Makerkit Custom Skills** | `skills/makerkit-custom/` | `makerkit-custom-*` | 7 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
-| **Modified Matt Skills** | `skills/modified-matt/` | `mod-matt-*` | 11 | Every other repo. Agent-written docs go in a flat `agents-docs/` directory |
+| **Modified Matt Skills** | `skills/modified-matt/` | `mod-matt-*` | 11 | Every other repo. Agent-written config goes in `docs/agents/`, with ADRs in `docs/adr/` |
 | **Alvaro Skills** | `skills/alvaro/` | `alvaro-*` | 1 | Standalone extras, not part of the Matt Pocock set; safe next to either flavour |
 
 Note the one place directory and prefix disagree: the **Modified Matt Skills**
@@ -241,7 +241,7 @@ It writes an `## Agent skills` block in the project's root `AGENTS.md` (or
 | Flavour | Files written |
 |---|---|
 | Makerkit | `.myprds/issue-tracker.md` |
-| Modified Matt | `agents-docs/issue-tracker.md`, `agents-docs/domain.md` |
+| Modified Matt | `docs/agents/issue-tracker.md`, `docs/agents/domain.md` |
 
 The other skills read those files. Makerkit has no generated project-docs file:
 that flavour reads the repo's own `AGENTS.md` distribution — the root file, then
