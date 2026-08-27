@@ -12,10 +12,21 @@ That's the whole install. The CLI clones the repo, shows a picker, and writes
 the skills you tick into the project.
 
 The repo ships **three groups**. Two of them are full flavours of the same
-engineering skill set — **install one or the other, never both**: they are the
-same skills under different names, and a project that installed both would
-offer the agent two copies of every skill. The third is a small standalone
-group that sits happily alongside either.
+engineering skill set — **install one or the other, never both**: a project
+that installed both would offer the agent two copies of every skill. The third
+is a small standalone group that sits happily alongside either.
+
+**The two flavours are siblings, not mirrors.** `makerkit-matt` is adapted for
+the specific architecture of the [makerkit.dev](https://makerkit.dev) SaaS
+boilerplate — a highly opinionated stack (multi-tenant account model,
+RLS-as-authorization, a distribution of `AGENTS.md` files instead of one doc,
+Next.js Cache Components, adapter-pattern packages). `modified-matt` is
+adapted for the same author's style but for repos that aren't Makerkit-based,
+with no equivalent architecture assumed. Because they encode different
+opinions about the underlying codebase, their content is expected to diverge,
+not just their names — a fix, heuristic, or piece of embedded knowledge that's
+correct for one flavour may not apply, or even make sense, for the other.
+Don't assume parity between them; check what each actually contains.
 
 | Group in the picker | Directory | Prefix | Skills | For |
 |---|---|---|---|---|
@@ -289,8 +300,12 @@ the manifest still installs, but shows up under "Other" instead of its group.
   reason; unrecognised keys are at best ignored and at worst rejected.
 - Skill names share one namespace with bundled and third-party skills.
   Keep the group prefix (`makerkit-`, `mod-matt-`, or `alvaro-`).
-- Edit both flavours, or neither. They are independent copies; a fix applied
-  to `skills/makerkit-matt/` does not reach `skills/modified-matt/`.
+- They are independent copies; a fix applied to `skills/makerkit-matt/` does
+  not reach `skills/modified-matt/`. Mirror a fix in both only when it's about
+  generic skill mechanics (frontmatter, tool usage, process bugs). A fix
+  rooted in Makerkit-specific opinions (RLS, the `AGENTS.md` distribution,
+  Cache Components, and the like) usually has no equivalent to apply to in
+  `modified-matt`, and vice versa — don't reflexively port it over.
 - Keep `SKILL.md` short; push detail into `references/` so it loads only
   when needed.
 
