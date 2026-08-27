@@ -233,6 +233,15 @@ It writes an `## Agent skills` block in the project's root `AGENTS.md` (or
 
 The other skills read those files.
 
+`issue-tracker.md` documents the ticket lifecycle
+(`ready-for-agent -> done-coding-awaiting-final-review -> done-final-review`).
+No skill in this repo sets `done-final-review` — that's intentional, not a gap:
+`implement` is explicitly forbidden from setting it, and the final-review step
+is meant to be triggered by an external actor (a human, or a review process
+outside these skills) so a ticket can't reach "done" without a human actually
+looking at it. A ticket parked at `done-coding-awaiting-final-review` is
+correctly waiting on that human, not stuck.
+
 **User-invoked only** (you have to ask for them by name):
 `grill-with-docs`, `handoff`, `implement`, `improve-codebase-architecture`,
 `setup-matt-pocock-skills`, `to-spec`, `to-tickets`, `triage`
