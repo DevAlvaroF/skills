@@ -48,8 +48,8 @@
         "./mod-matt-improve-codebase-architecture",
         "./mod-matt-setup-matt-pocock-skills",
         "./mod-matt-tdd",
-        "./mod-matt-to-spec",
-        "./mod-matt-to-tickets"
+        "./mod-matt-to-issues",
+        "./mod-matt-to-spec"
       ]
     },
     {

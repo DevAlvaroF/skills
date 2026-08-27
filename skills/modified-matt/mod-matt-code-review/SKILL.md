@@ -35,7 +35,7 @@ The issue tracker should have been provided to you. If `docs/agents/issue-tracke
 Look for the originating spec, in this order:
 
 1. A `.myprds/<NN>-<feature-slug>/` path referenced in the commit messages (per `/mod-matt-implement`'s convention of
-   including the ticket and `spec.md` paths in its suggested commit message).
+   including the issue and `spec.md` paths in its suggested commit message).
 2. A path the user passed as an argument.
 3. A spec file under `docs/`, `specs/`, or `.myprds/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip

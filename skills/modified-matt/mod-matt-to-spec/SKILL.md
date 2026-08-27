@@ -22,8 +22,8 @@ The issue tracker conventions should have been provided to you. If not, tell the
 Check with the user that these seams match their expectations.
 
 3. Write the spec using the template below, then publish it as `spec.md` under the feature's
-   `.myprds/<NN>-<feature-slug>/` directory. A spec is prose, not a ticket, so it carries no status; the
-   `/mod-matt-to-tickets` skill is what turns it into `ready-for-agent` tickets.
+   `.myprds/<NN>-<feature-slug>/` directory. A spec is prose, not an issue, so it carries no status; the
+   `/mod-matt-to-issues` skill is what turns it into `ready-for-agent` issues.
 
 <spec-template>
 
@@ -48,7 +48,7 @@ A LONG list of user stories, each carrying a stable ID. Each user story should b
 This list of user stories should be extremely extensive and cover all aspects of the feature.
 
 Each story's `US-NNN` is **immutable once written**. Never renumber a story and never reuse a retired ID:
-downstream tickets reference these IDs in their `covers` field, so an ID is an address, not a position in the
+downstream issues reference these IDs in their `covers` field, so an ID is an address, not a position in the
 running order. On a later revision a new story takes the highest existing ID + 1, wherever it sits in the list,
 and a dropped story leaves its ID retired, not recycled.
 
