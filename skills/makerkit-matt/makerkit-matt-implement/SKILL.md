@@ -29,18 +29,12 @@ Then use /makerkit-matt-code-review to review the work.
 ## Advance or close the tickets
 
 Updating the tickets you implemented is part of the job, not an optional extra. Once the implementing agent's review is
-done and the suite is green, advance or close every ticket whose work landed. **How** depends on the tracker
-`/makerkit-matt-setup-matt-pocock-skills` configured:
-
-- **Local files** (`.scratch/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and ticket numbers are independent) → for each implemented ticket, flip every
-  satisfied entry in `acceptanceCriteria` to `"done": true` and set
-  `"status": "done-coding-awaiting-final-review"`. This state means the implementation and this skill's own review are
-  complete, but independent final review is still pending; this skill must never set `done-final-review`. Rewrite the
-  whole file as strict JSON, keeping every other field (`id`, `slug`, `title`, `whatToBuild`, `blockedBy`) intact. Re-read
-  each file after writing to confirm it still parses.
-- **A real issue tracker (GitHub, Linear, …)** → close each implemented issue (`gh issue close <N>` or the tracker's
-  equivalent), tick the acceptance-criteria checkboxes in the body, and leave a one-paragraph comment saying what
-  landed. Do NOT close or modify the parent issue.
+done and the suite is green, advance every ticket whose work landed
+(`.scratch/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and ticket numbers are independent): flip every
+satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done-coding-awaiting-final-review"`. This
+state means the implementation and this skill's own review are complete, but independent final review is still pending;
+this skill must never set `done-final-review`. Rewrite the whole file as strict JSON, keeping every other field (`id`,
+`slug`, `title`, `whatToBuild`, `blockedBy`) intact. Re-read each file after writing to confirm it still parses.
 
 If a ticket is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
 outstanding. Never tick a criterion you did not verify.

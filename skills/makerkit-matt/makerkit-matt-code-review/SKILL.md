@@ -45,8 +45,8 @@ ref or empty diff should fail here, not inside two parallel sub-agents.
 
 Look for the originating spec, in this order:
 
-1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), fetched via the workflow in
-   `agents-docs/issue-tracker.md`.
+1. A `.scratch/<NN>-<feature-slug>/` path referenced in the commit messages (per `/makerkit-matt-implement`'s convention
+   of including the ticket and `spec.md` paths in its suggested commit message).
 2. A path the user passed as an argument.
 3. A spec file under `.scratch/` or `specs/` matching the branch name or feature. Do **not** treat `docs/` as a spec
    location: in this repo it holds upstream Makerkit product documentation (`.mdoc` files), not agent-authored specs.
