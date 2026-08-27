@@ -11,23 +11,11 @@ Actively build and sharpen the project's domain model as you design. This is the
 
 This repo has no `CONTEXT.md` and no ADR directory. The domain model lives in the repo's **`AGENTS.md` distribution**: a root file that maps the monorepo and holds cross-cutting rules, plus one per app and per package that owns its subtree.
 
-```
-/
-├── AGENTS.md                            ← cross-cutting terms and decisions
-├── apps/
-│   ├── web/AGENTS.md
-│   │   ├── app/[locale]/admin/AGENTS.md
-│   │   └── supabase/AGENTS.md
-│   └── e2e/AGENTS.md
-└── packages/
-    ├── features/AGENTS.md
-    ├── next/AGENTS.md
-    ├── supabase/AGENTS.md
-    ├── ui/AGENTS.md
-    └── …
-```
+Derive the current set before writing — never work from a remembered list:
 
-Confirm the current set before writing: `find . -name AGENTS.md -not -path '*/node_modules/*' | sort`.
+```sh
+find . -name AGENTS.md -not -path '*/node_modules/*' | sort
+```
 
 **Pick the file that owns the concept.** A term or decision scoped to one package goes in that package's `AGENTS.md`. Only genuinely cross-cutting ones — the account model, the TypeScript and React rules, the verification steps — go in the root file. When a path has no `AGENTS.md` of its own, write to the nearest ancestor that does rather than creating a new file; create one only when the subtree has accumulated enough of its own conventions to justify it, and add it to the root file's monorepo table when you do.
 

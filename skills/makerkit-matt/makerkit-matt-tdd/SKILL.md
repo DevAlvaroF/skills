@@ -7,7 +7,23 @@ description: Test-driven development. Use when the user wants to build features 
 
 TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult them before and during the loop, not after.
 
-When exploring the codebase, read the root `AGENTS.md` and the nearest `AGENTS.md` to the code under test, so test names and interface vocabulary match the project's language and so you respect the conventions and decisions recorded for that subtree.
+When exploring the codebase, read `agents-docs/project-docs.md` and follow the doc-consumption rules it sets out, so test names and interface vocabulary match the project's language. Expect roughly: the root `AGENTS.md`, then the nearest `AGENTS.md` to the code under test. Where that file and this description differ, **follow the repo**; if it doesn't exist, read the root and nearest `AGENTS.md` directly.
+
+The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, seams over internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A thin `AGENTS.md` is not permission to skip the loop.
+
+## Which runner, and which skill
+
+"A test" in this repo is one of three different things, with three different runners and two specialist skills. Route before you write, because the seam you picked determines the runner:
+
+| Seam under test | Runner | Reach for |
+|---|---|---|
+| A module's public interface, a service, a pure function | vitest, run from the repo root | this skill alone |
+| A user-visible flow through the running app | Playwright, in `apps/e2e` | `/playwright-e2e` |
+| A policy, grant, `SECURITY DEFINER` function, or view | pgTAP, against the local database | `/postgres-expert` |
+
+The repo owns the commands: `apps/e2e/AGENTS.md` § Running Tests and `apps/web/supabase/AGENTS.md` § Commands. Expect roughly `pnpm test` for the full suite, `pnpm --filter web-e2e exec playwright test <name> --workers=1` for a single E2E file, and `pnpm supabase:web:test` for pgTAP. If a section is renamed, missing, or differs, **follow the repo** and say which command you ran.
+
+Prefer the cheapest runner that can observe the behaviour at the agreed seam. Don't reach for Playwright to test something a vitest test at a service boundary already pins down.
 
 ## What a good test is
 

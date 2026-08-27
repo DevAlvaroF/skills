@@ -12,9 +12,11 @@ The issue tracker conventions should have been provided to you. If not, tell the
 
 ## Process
 
-1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the vocabulary of the
-   root `AGENTS.md` and of the nearest `AGENTS.md` to the code involved throughout the spec, and respect the conventions
-   and decisions recorded there.
+1. Explore the repo to understand the current state of the codebase, if you haven't already. Read
+   `agents-docs/project-docs.md` and follow the doc-consumption and vocabulary rules it sets out, so the spec speaks the
+   project's language. Expect roughly: the root `AGENTS.md`, then the nearest `AGENTS.md` to the code involved. Where
+   that file and this description differ, **follow the repo**; if it doesn't exist, read the root and nearest
+   `AGENTS.md` directly.
 
 2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use
    the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across
@@ -82,8 +84,15 @@ A description of the things that are out of scope for this spec.
 
 Any further notes about the feature.
 
-## Original Conversation that triggered this spec
+## Decision log
 
-The conversation that triggered this spec.
+A **redacted summary**, in your own words, of the decisions, constraints, and rejected alternatives that shaped this
+spec: what was chosen, what was ruled out, and why. This is a summary, not a transcript — never paste the raw
+conversation.
+
+**Redact before you write.** This file is committed to the repository and `/makerkit-matt-implement` puts its path in the suggested
+commit message, so anything here reaches git history permanently. Exclude secrets, credentials, tokens, API keys,
+connection strings, customer data, PII, internal URLs carrying auth, and any conversation unrelated to the decisions
+above. When a decision genuinely turns on a sensitive value, describe the value's role without reproducing it.
 
 </spec-template>

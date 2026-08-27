@@ -81,8 +81,15 @@ A description of the things that are out of scope for this spec.
 
 Any further notes about the feature.
 
-## Original Conversation that triggered this spec
+## Decision log
 
-The conversation that triggered this spec.
+A **redacted summary**, in your own words, of the decisions, constraints, and rejected alternatives that shaped this
+spec: what was chosen, what was ruled out, and why. This is a summary, not a transcript — never paste the raw
+conversation.
+
+**Redact before you write.** This file is committed to the repository and `/mod-matt-implement` puts its path in the
+suggested commit message, so anything here reaches git history permanently. Exclude secrets, credentials, tokens, API keys,
+connection strings, customer data, PII, internal URLs carrying auth, and any conversation unrelated to the decisions
+above. When a decision genuinely turns on a sensitive value, describe the value's role without reproducing it.
 
 </spec-template>

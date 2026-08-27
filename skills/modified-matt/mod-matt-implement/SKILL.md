@@ -20,7 +20,8 @@ done and the suite is green, advance every ticket whose work landed
 satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done-coding-awaiting-final-review"`. This
 state means the implementation and this skill's own review are complete, but independent final review is still pending;
 this skill must never set `done-final-review`. Rewrite the whole file as strict JSON, keeping every other field (`id`,
-`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `testSeams`) intact. Re-read each file after writing to confirm it
+`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `testSeams`, `comments`) intact — `comments` holds review history
+that exists nowhere else, so dropping or emptying it loses it permanently. Re-read each file after writing to confirm it
 still parses.
 
 If a ticket is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
@@ -37,3 +38,8 @@ a short body explaining the *why* when the change isn't self-evident. Match the 
 `.scratch/`. Also include the spec path from each ticket's `spec` field, if set and not `null` (dedupe if several
 tickets share one). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no
 emoji badge.
+
+Before suggesting a commit message that references a spec path, **read that spec and scan it for secret-shaped strings**:
+API keys and tokens, `sk-`/`ghp_`/`AKIA`-style prefixes, private key blocks, connection strings or URLs with embedded
+credentials, `.env`-style assignments of a secret-looking name, and pasted customer data or PII. If you find any, stop:
+do not suggest the commit, tell the user exactly what you found and where, and let them redact the spec first.

@@ -30,12 +30,13 @@ Don't assume parity between them; check what each actually contains.
 
 | Group in the picker | Directory | Prefix | Skills | For |
 |---|---|---|---|---|
-| **Makerkit Matt Skills** | `skills/makerkit-matt/` | `makerkit-*` | 15 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
-| **Modified Matt Skills** | `skills/modified-matt/` | `mod-matt-*` | 15 | Every other repo. Agent-written docs go in a flat `agents-docs/` directory |
+| **Makerkit Matt Skills** | `skills/makerkit-matt/` | `makerkit-matt-*` | 8 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
+| **Modified Matt Skills** | `skills/modified-matt/` | `mod-matt-*` | 11 | Every other repo. Agent-written docs go in a flat `agents-docs/` directory |
 | **Alvaro Skills** | `skills/alvaro/` | `alvaro-*` | 1 | Standalone extras, not part of the Matt Pocock set; safe next to either flavour |
 
 Note the one place directory and prefix disagree: the **Modified Matt Skills**
 directory is `skills/modified-matt/`, but its skills are prefixed `mod-matt-`.
+The other two match: `skills/makerkit-matt/` → `makerkit-matt-`, `skills/alvaro/` → `alvaro-`.
 The directory name is what the scoped install URL wants; the prefix is what you
 type to invoke a skill.
 
@@ -57,7 +58,7 @@ Four prompts, in order:
 1. **Select skills.** All three groups are drawn as collapsible headings —
    move to **Makerkit Matt Skills** or **Modified Matt Skills** and hit space to
    take that whole flavour in one keystroke. Don't tick *Select All*: that's
-   all 31 skills across all three groups.
+   all 20 skills across all three groups, including both flavours at once.
 2. **Which agents.** `Claude Code` is preselected. Add `Codex` if you use it.
    The Universal target (`.agents/skills`) is always included.
 3. **Installation method.** Pick `Symlink` (Recommended). `Copy to all agents`
@@ -69,7 +70,7 @@ Two things silently skip the menu, so run this in a plain terminal:
 
 - Running it from inside a Claude Code or Codex session. The CLI detects the
   agent and installs everything non-interactively.
-- Passing `-s`/`--skill`, `-y`/`--yes`, or `--all`. Any of them takes all 31
+- Passing `-s`/`--skill`, `-y`/`--yes`, or `--all`. Any of them takes all 20
   skills across all three groups with no prompt.
 
 ### Symlink or copy
@@ -119,7 +120,7 @@ npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/alva
 ```
 
 **Never combine the bare `devalvarof/skills` name with `-s '*'` or `-y`.**
-That walks into all three groups and installs all 31 skills. Either prompt (no
+That walks into all three groups and installs all 20 skills. Either prompt (no
 `-s`, no `-y`) or scope with the `tree/main/skills/<group>` URL.
 
 Named subsets work too:
@@ -253,18 +254,25 @@ outside these skills) so a ticket can't reach "done" without a human actually
 looking at it. A ticket parked at `done-coding-awaiting-final-review` is
 correctly waiting on that human, not stuck.
 
-**User-invoked only** (you have to ask for them by name):
-`grill-with-docs`, `handoff`, `implement`, `improve-codebase-architecture`,
-`setup-matt-pocock-skills`, `to-spec`, `to-tickets`
+The two flavours no longer hold the same skill set, so they're listed
+separately. Names are unprefixed below; in the picker each carries its group's
+prefix (`makerkit-matt-tdd`, `mod-matt-tdd`).
 
-**Model-invoked** (the agent may reach for them on its own):
-`code-review`, `codebase-design`, `diagnosing-bugs`, `domain-modeling`,
-`grilling`, `resolving-merge-conflicts`, `tdd`
+**Makerkit Matt** (8) — user-invoked only: `grill-with-docs`, `implement`,
+`setup-matt-pocock-skills`, `to-spec`, `to-tickets`. Model-invoked:
+`domain-modeling`, `grilling`, `tdd`.
 
-Those names are unprefixed above; in the picker each carries its group's
-prefix (`makerkit-matt-tdd`, `mod-matt-tdd`). One exception:
-`alvaro-adversarial-reviewer`, the sole **Alvaro Skills** entry, is
-model-invoked and belongs to neither flavour's list.
+**Modified Matt** (11) — user-invoked only: `grill-with-docs`, `implement`,
+`improve-codebase-architecture`, `setup-matt-pocock-skills`, `to-spec`,
+`to-tickets`. Model-invoked: `code-review`, `codebase-design`,
+`domain-modeling`, `grilling`, `tdd`.
+
+`code-review`, `codebase-design` and `improve-codebase-architecture` exist only
+in **Modified Matt**: the Makerkit flavour defers review to the repo's own
+`/reviewer` and `/rls-review` skills instead.
+
+**Alvaro Skills** (1) — `alvaro-adversarial-reviewer`, model-invoked, belongs
+to neither flavour's list.
 
 ## Layout
 

@@ -36,7 +36,11 @@ Lead each section with the recommended answer so the user can accept it in a wor
 
 **Section B: Project docs.** This repo documents itself through a **distribution of `AGENTS.md` files**: a root file that maps the monorepo, plus one per app and per package that owns the conventions for that subtree. There is no separate glossary file and no ADR directory; vocabulary and decisions live in whichever `AGENTS.md` owns the code they describe.
 
-Write this without asking. Use the `AGENTS.md` inventory from exploration to fill in the layout section of the generated file — list the real paths you found, not a generic example. If exploration found **no** `AGENTS.md` files at all, say so and ask whether to seed a root one before continuing.
+Write this without asking, with one hard requirement: **run `find . -name AGENTS.md -not -path '*/node_modules/*' | sort` in this repo and write its actual output into the generated file's Layout section.** The seed's Layout block is a `<>`-placeholder, and copying it through verbatim is a failure of this step — a generated `project-docs.md` still containing `<app-dir>` or `<package-dir>` means you skipped the `find`. Annotate each real path with a one-line note on what that subtree owns, taken from that file's own opening lines rather than guessed.
+
+Before moving on, diff what you are about to write against the seed: if the Layout sections are identical, you have not done this step. If `find` returned **no** `AGENTS.md` files at all, say so and ask whether to seed a root one before continuing.
+
+Carry the seed's `## Skills` section through as-is: it documents the rule that agents invoke the skills named by the nearest `AGENTS.md`, which is repo-shape-independent.
 
 ### 3. Confirm and edit
 

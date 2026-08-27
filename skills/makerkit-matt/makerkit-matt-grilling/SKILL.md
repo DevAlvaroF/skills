@@ -31,9 +31,8 @@ The session is done when the frontier is empty: every branch of the design tree 
 
 **Before the first round**, read the project's own documentation so you never spend a question on something the repo already answers:
 
-- the root `AGENTS.md`, plus the nearest `AGENTS.md` to the area in question — the monorepo map, conventions, and recorded decisions;
+- `agents-docs/project-docs.md`, and follow the doc-consumption rules it sets out. Expect roughly: the root `AGENTS.md`, then the nearest `AGENTS.md` to the area in question, plus the vendored Next.js docs for anything Next.js. Where that file and this description differ, **follow the repo**; if it doesn't exist, read the root and nearest `AGENTS.md` directly.
 - the `README.md` of each app or package involved (`apps/*/README.md`, `packages/*/README.md`) — what that piece is and how it fits;
-- the Makerkit docs under `docs/` (`.mdoc` files by topic: `billing`, `security`, `data-fetching`, …) — how a feature is *meant* to work;
-- `apps/web/node_modules/next/dist/docs/` for anything Next.js.
+- the Makerkit docs under `docs/` (`.mdoc` files by topic: `billing`, `security`, `data-fetching`, …) — how a feature is *meant* to work.
 
 Understanding the architecture is a first step, not a question. Ask the user only what the docs genuinely don't answer — and when a question survives that reading, say what you checked, so they can see it's a real gap rather than a shortcut.
