@@ -18,7 +18,7 @@ Updating the tickets you implemented is part of the job, not an optional extra. 
 done and the suite is green, advance or close every ticket whose work landed. **How** depends on the tracker
 `/mod-matt-setup-matt-pocock-skills` configured:
 
-- **Local files** (`.scratch/<NN>-<feature-slug>/tickets/<NN>-<slug>.json`; the directory and ticket numbers are independent) → for each implemented ticket, flip every
+- **Local files** (`.scratch/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and ticket numbers are independent) → for each implemented ticket, flip every
   satisfied entry in `acceptanceCriteria` to `"done": true` and set
   `"status": "done-coding-awaiting-final-review"`. This state means the implementation and this skill's own review are
   complete, but independent final review is still pending; this skill must never set `done-final-review`. Rewrite the
