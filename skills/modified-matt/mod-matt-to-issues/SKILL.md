@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Break a plan, spec, or conversation into a set of **issues**: tracer-bullet vertical slices, each declaring the issues that **block** it.
 
-The issue tracker conventions should have been provided to you. If not, tell the user to run `/mod-matt-setup-matt-pocock-skills`.
+The issue tracker conventions should have been provided to you. If not, tell the user to run `/mod-matt-setup-skills`.
 
 ## Process
 

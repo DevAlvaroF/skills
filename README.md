@@ -234,7 +234,7 @@ A skill fires on its own unless `disable-model-invocation: true` (Claude Code)
 or `allow_implicit_invocation: false` (Codex).
 
 Run the setup skill once per project before using the rest —
-`/makerkit-custom-setup-skills` or `/mod-matt-setup-matt-pocock-skills`.
+`/makerkit-custom-setup-skills` or `/mod-matt-setup-skills`.
 It writes an `## Agent skills` block in the project's root `AGENTS.md` (or
 `CLAUDE.md` if that's the real document) plus:
 
@@ -265,7 +265,7 @@ prefix (`makerkit-custom-tdd`, `mod-matt-tdd`).
 `domain-modeling`, `tdd`.
 
 **Modified Matt** (10) — user-invoked only: `grill-with-docs`, `implement`,
-`improve-codebase-architecture`, `setup-matt-pocock-skills`, `to-spec`,
+`improve-codebase-architecture`, `setup-skills`, `to-spec`,
 `to-issues`. Model-invoked: `code-review`, `codebase-design`,
 `domain-modeling`, `tdd`.
 
@@ -375,5 +375,5 @@ Skills that are fine to trigger automatically need neither.
 ## Attribution
 
 The `*-matt-*` skills, plus `makerkit-custom-setup-skills` and
-`mod-matt-setup-matt-pocock-skills`, are adapted from
+`mod-matt-setup-skills`, are adapted from
 [mattpocock/skills](https://github.com/mattpocock/skills) (MIT).

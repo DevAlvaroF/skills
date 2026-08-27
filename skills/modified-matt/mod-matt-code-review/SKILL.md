@@ -26,7 +26,7 @@ Both axes run as **parallel sub-agents** so they don't pollute each other's cont
 findings.
 
 The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run
-`/mod-matt-setup-matt-pocock-skills`.
+`/mod-matt-setup-skills`.
 
 ## Process
 
