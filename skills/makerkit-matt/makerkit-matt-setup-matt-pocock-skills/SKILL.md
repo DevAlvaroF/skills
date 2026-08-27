@@ -1,6 +1,6 @@
 ---
 name: makerkit-matt-setup-matt-pocock-skills
-description: "Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, and project doc layout. Run once before first use of the other engineering skills."
+description: "Configure this repo for the engineering skills: set up its issue tracker and project doc layout. Run once before first use of the other engineering skills."
 disable-model-invocation: true
 ---
 
@@ -9,7 +9,6 @@ disable-model-invocation: true
 Scaffold the per-repo configuration that the engineering skills assume:
 
 - **Issue tracker**: local JSON ticket files under `.scratch/`
-- **Triage labels**: the strings used for the seven canonical workflow state roles
 - **Project docs**: which `AGENTS.md` files exist and the consumer rules for reading them
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
@@ -26,25 +25,16 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - The full `AGENTS.md` distribution: `find . -name AGENTS.md -not -path '*/node_modules/*'`. In a Makerkit monorepo this returns the root file plus one per app and per package. Note which paths have their own and which don't.
 - `agents-docs/`: does this skill's prior output already exist?
 - `.scratch/`: a sign that a local file-based issue tracker convention is already in use
-- Is the `makerkit-matt-triage` skill installed? (a `makerkit-matt-triage` skill folder alongside this one, or `makerkit-matt-triage` in your available skills.) This decides whether Section B runs at all.
 
 ### 2. Present findings and ask
 
 Summarise what's present and what's missing. Then take the sections in order. One section, one answer, then the next.
 
-Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `makerkit-matt-triage` isn't installed).
+Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches.
 
 **Section A: Issue tracker.** These skills track work as local JSON ticket files under `.scratch/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown alongside them. This is fixed — there's no tracker choice to make, so skip straight to writing `agents-docs/issue-tracker.md` from the local template without asking.
 
-**Section B: Triage label vocabulary.** Skip this section entirely if the `makerkit-matt-triage` skill isn't installed (exploration told you), since an uninstalled skill needs no labels.
-
-If it is installed, ask exactly one question:
-
-> Do you want to keep the default triage labels? (recommended: **yes**)
-
-The defaults are the seven canonical workflow state roles, each tracker string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done-coding-awaiting-final-review`, `done-final-review`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`), collect the overrides so `makerkit-matt-triage` applies existing labels instead of creating duplicates.
-
-**Section C: Project docs.** This repo documents itself through a **distribution of `AGENTS.md` files**: a root file that maps the monorepo, plus one per app and per package that owns the conventions for that subtree. There is no separate glossary file and no ADR directory; vocabulary and decisions live in whichever `AGENTS.md` owns the code they describe.
+**Section B: Project docs.** This repo documents itself through a **distribution of `AGENTS.md` files**: a root file that maps the monorepo, plus one per app and per package that owns the conventions for that subtree. There is no separate glossary file and no ADR directory; vocabulary and decisions live in whichever `AGENTS.md` owns the code they describe.
 
 Write this without asking. Use the `AGENTS.md` inventory from exploration to fill in the layout section of the generated file — list the real paths you found, not a generic example. If exploration found **no** `AGENTS.md` files at all, say so and ask whether to seed a root one before continuing.
 
@@ -53,7 +43,7 @@ Write this without asking. Use the `AGENTS.md` inventory from exploration to fil
 Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `AGENTS.md` / `CLAUDE.md` is being edited (see step 4 for selection rules)
-- The contents of `agents-docs/issue-tracker.md`, `agents-docs/project-docs.md`, and `agents-docs/triage-labels.md` (the last only when `makerkit-matt-triage` is installed)
+- The contents of `agents-docs/issue-tracker.md` and `agents-docs/project-docs.md`
 
 Let them edit before writing.
 
@@ -78,21 +68,14 @@ The block:
 
 [one-line summary of where issues are tracked]. See `agents-docs/issue-tracker.md`.
 
-### Triage labels
-
-[one-line summary of the label vocabulary]. See `agents-docs/triage-labels.md`.
-
 ### Project docs
 
 Conventions live in a distribution of `AGENTS.md` files (root + per app/package). See `agents-docs/project-docs.md`.
 ```
 
-Include the `### Triage labels` sub-block, and write `agents-docs/triage-labels.md`, only when `makerkit-matt-triage` is installed and Section B ran. When it isn't, both are omitted.
-
 Then write the files under `agents-docs/`, using the seed templates in this skill folder as a starting point:
 
 - [issue-tracker-local.md](./issue-tracker-local.md): local file-based issue tracker (JSON tickets)
-- [triage-labels.md](./triage-labels.md): label mapping (only if `makerkit-matt-triage` is installed)
 - [project-docs.md](./project-docs.md): `AGENTS.md` consumer rules + the repo's actual layout
 
 ### 5. Done

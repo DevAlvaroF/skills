@@ -27,8 +27,7 @@
         "./makerkit-matt-setup-matt-pocock-skills",
         "./makerkit-matt-tdd",
         "./makerkit-matt-to-spec",
-        "./makerkit-matt-to-tickets",
-        "./makerkit-matt-triage"
+        "./makerkit-matt-to-tickets"
       ]
     },
     {
@@ -54,8 +53,7 @@
         "./mod-matt-setup-matt-pocock-skills",
         "./mod-matt-tdd",
         "./mod-matt-to-spec",
-        "./mod-matt-to-tickets",
-        "./mod-matt-triage"
+        "./mod-matt-to-tickets"
       ]
     },
     {

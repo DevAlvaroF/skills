@@ -29,7 +29,7 @@ The directory name is what the scoped install URL wants; the prefix is what you
 type to invoke a skill.
 
 Names are prefixed either way so they can coexist with bundled and
-third-party skills of the same origin (`triage`, `implement`, `tdd` and
+third-party skills of the same origin (`implement`, `tdd` and
 friends all exist upstream under bare names).
 
 ## Installing
@@ -228,8 +228,8 @@ It writes an `## Agent skills` block in the project's root `AGENTS.md` (or
 
 | Flavour | Files written |
 |---|---|
-| Makerkit | `issue-tracker.md`, `triage-labels.md`, `project-docs.md` |
-| Modified Matt | `issue-tracker.md`, `triage-labels.md`, `domain.md` |
+| Makerkit | `issue-tracker.md`, `project-docs.md` |
+| Modified Matt | `issue-tracker.md`, `domain.md` |
 
 The other skills read those files.
 
@@ -244,7 +244,7 @@ correctly waiting on that human, not stuck.
 
 **User-invoked only** (you have to ask for them by name):
 `grill-with-docs`, `handoff`, `implement`, `improve-codebase-architecture`,
-`setup-matt-pocock-skills`, `to-spec`, `to-tickets`, `triage`
+`setup-matt-pocock-skills`, `to-spec`, `to-tickets`
 
 **Model-invoked** (the agent may reach for them on its own):
 `code-review`, `codebase-design`, `diagnosing-bugs`, `domain-modeling`,

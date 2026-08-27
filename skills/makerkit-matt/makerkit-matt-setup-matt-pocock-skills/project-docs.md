@@ -18,7 +18,7 @@ If a path you're working in has no `AGENTS.md` of its own, fall back to the near
 /
 ├── AGENTS.md                            ← monorepo map + cross-cutting rules
 ├── CLAUDE.md                            ← imports the root AGENTS.md; not a separate document
-├── agents-docs/                         ← generated agent config (this file, issue-tracker.md, triage-labels.md)
+├── agents-docs/                         ← generated agent config (this file, issue-tracker.md)
 ├── apps/
 │   ├── web/AGENTS.md                    ← main Next.js app
 │   │   ├── app/[locale]/admin/AGENTS.md ← admin surface

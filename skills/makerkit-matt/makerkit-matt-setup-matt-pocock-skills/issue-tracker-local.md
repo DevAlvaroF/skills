@@ -7,7 +7,7 @@ Specs for this repo live as markdown files in `.scratch/`; **tickets are JSON fi
 - One feature per directory: `.scratch/<NN>-<feature-slug>/`, where `NN` is a two-digit feature sequence number; start at `01` and increment the highest existing number for each new feature
 - The spec is `.scratch/<NN>-<feature-slug>/spec.md` (markdown: it is prose, not a ticket)
 - Implementation issues are one JSON file per ticket at `.scratch/<NN>-<feature-slug>/issues/<NN>-<slug>.json`, numbered from `01`, never a single combined tickets file. The feature directory and ticket filenames use independent `NN` sequences.
-- Workflow state is the ticket's `status` field (see `triage-labels.md` for the canonical state strings)
+- Workflow state is the ticket's `status` field (see the lifecycle below for the canonical state strings)
 - Comments and conversation history append to the ticket's `comments` array, oldest first
 - Every file under `issues/` is strict JSON: no comments, no trailing commas, every field present. Parse it, mutate the object, write the whole file back; never append loose text to a ticket file
 

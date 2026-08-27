@@ -7,7 +7,7 @@ disable-model-invocation: true
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the
 user; just synthesize what you already know.
 
-The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run
+The issue tracker conventions should have been provided to you. If not, tell the user to run
 `/mod-matt-setup-matt-pocock-skills`.
 
 ## Process
@@ -22,7 +22,7 @@ The issue tracker and triage label vocabulary should have been provided to you. 
 Check with the user that these seams match their expectations.
 
 3. Write the spec using the template below, then publish it as `spec.md` under the feature's
-   `.scratch/<NN>-<feature-slug>/` directory. A spec is prose, not a ticket, so it carries no triage label; the
+   `.scratch/<NN>-<feature-slug>/` directory. A spec is prose, not a ticket, so it carries no status; the
    `/mod-matt-to-tickets` skill is what turns it into `ready-for-agent` tickets.
 
 <spec-template>
