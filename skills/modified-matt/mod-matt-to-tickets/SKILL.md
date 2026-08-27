@@ -77,16 +77,17 @@ Do NOT modify the feature's `spec.md`.
   "status": "ready-for-agent",
   "spec": ".scratch/<NN>-<feature-slug>/spec.md",
   "whatToBuild": "The end-to-end behaviour this ticket makes work, from the user's perspective, not a layer-by-layer implementation list.",
-  "blockedBy": ["<NN>-<slug>", "<NN>-<slug>"],
+  "blockedBy": ["<NN>", "<NN>"],
   "testSeams": ["<seam description>", "<seam description>"],
   "acceptanceCriteria": [
     { "text": "Acceptance criterion 1", "done": false },
     { "text": "Acceptance criterion 2", "done": false }
-  ]
+  ],
+  "comments": []
 }
 ```
 
-Write strict JSON: no comments, no trailing commas, and every field present on every ticket. `spec` is the path to the spec this ticket was broken out of, relative to the repository root and beginning with `.scratch/`; set it to `null` when there is no spec (tickets drafted straight from a plan or conversation). `blockedBy` holds the `<NN>-<slug>` id of each ticket that gates this one, and is an empty array `[]` when the ticket can start immediately. `testSeams` lists the public boundaries this ticket's tests hit, as confirmed with the user in step 4; `[]` when the ticket has no dedicated tests. `acceptanceCriteria` entries start with `"done": false`; ticking a criterion means flipping it to `true`.
+Write strict JSON: no comments, no trailing commas, and every field present on every ticket. `spec` is the path to the spec this ticket was broken out of, relative to the repository root and beginning with `.scratch/`; set it to `null` when there is no spec (tickets drafted straight from a plan or conversation). `blockedBy` holds the `id` of each ticket that gates this one, and is an empty array `[]` when the ticket can start immediately. `testSeams` lists the public boundaries this ticket's tests hit, as confirmed with the user in step 4; `[]` when the ticket has no dedicated tests. `acceptanceCriteria` entries start with `"done": false`; ticking a criterion means flipping it to `true`. `comments` starts as `[]`.
 
 </local-ticket-template>
 
