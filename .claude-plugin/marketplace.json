@@ -19,7 +19,6 @@
         "grilling"
       ],
       "skills": [
-        "./makerkit-matt-code-review",
         "./makerkit-matt-codebase-design",
         "./makerkit-matt-diagnosing-bugs",
         "./makerkit-matt-domain-modeling",
