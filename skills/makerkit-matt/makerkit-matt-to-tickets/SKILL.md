@@ -37,6 +37,8 @@ Break the work into **tracer bullet** tickets.
 
 Give each ticket its **blocking edges**: the other tickets that must complete before it can start. A ticket with no blockers can start immediately.
 
+Identify each ticket's **test seam(s)**: the public boundary its tests will hit. When the ticket set descends from a spec with a Testing Decisions section, draw seams from what was agreed there; propose a new one only when a slice needs a boundary the spec didn't cover. A ticket with no dedicated tests (e.g. a pure prefactor, or one leg of a wide-refactor batch) can carry no seams.
+
 **Wide refactors are the exception to vertical slicing.** A **wide refactor** is one mechanical change (rename a column, retype a shared symbol) whose **blast radius** fans across the whole codebase, so a single edit breaks thousands of call sites at once and no vertical slice can land green. Don't force it into a tracer bullet; sequence it as **expand–contract**. First expand: add the new form beside the old so nothing breaks. Then migrate the call sites over in batches sized by blast radius (per package, per directory), each batch its own ticket blocked by the expand, keeping CI green batch to batch because the old form still exists. Finally contract: delete the old form once no caller remains, in a ticket blocked by every migrate batch. When even the batches can't stay green alone, keep the sequence but let them share an integration branch that all block a final integrate-and-verify ticket; green is promised only there.
 
 ### 4. Quiz the user
@@ -46,18 +48,20 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 - **Title**: short descriptive name
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
+- **Test seams**: which seam(s) this ticket's tests will hit
 
 Ask the user:
 
 - Does the granularity feel right? (too coarse / too fine)
 - Are the blocking edges correct: does each ticket only depend on tickets that genuinely gate it?
 - Should any tickets be merged or split further?
+- Are the test seams right: does each ticket test at the right boundary, and are any missing or superfluous?
 
 Iterate until the user approves the breakdown.
 
 ### 5. Publish the tickets
 
-Publish the approved tickets: write one file per ticket under `.scratch/<NN>-<feature-slug>/issues/<NN>-<slug>.json`, numbered from `01` in dependency order (blockers first). The feature directory's `NN` is its two-digit sequence number; the ticket filename's `NN` is a separate sequence within that feature. Each file's `blockedBy` lists the tickets it depends on. Use the per-ticket JSON template below: one ticket per file, never a single combined file.
+Publish the approved tickets: write one file per ticket under `.scratch/<NN>-<feature-slug>/issues/<NN>-<slug>.json`, numbered from `01` in dependency order (blockers first). The feature directory's `NN` is its two-digit sequence number; the ticket filename's `NN` is a separate sequence within that feature. Each file's `blockedBy` lists the tickets it depends on. Set each ticket's `spec` field to that feature's `spec.md` path if this run started from a spec (a spec path was passed in, or one exists at `.scratch/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that ticket in step 4. Use the per-ticket JSON template below: one ticket per file, never a single combined file.
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
 
@@ -71,8 +75,10 @@ Do NOT modify the feature's `spec.md`.
   "slug": "<slug>",
   "title": "<Ticket title>",
   "status": "ready-for-agent",
+  "spec": ".scratch/<NN>-<feature-slug>/spec.md",
   "whatToBuild": "The end-to-end behaviour this ticket makes work, from the user's perspective, not a layer-by-layer implementation list.",
   "blockedBy": ["<NN>-<slug>", "<NN>-<slug>"],
+  "testSeams": ["<seam description>", "<seam description>"],
   "acceptanceCriteria": [
     { "text": "Acceptance criterion 1", "done": false },
     { "text": "Acceptance criterion 2", "done": false }
@@ -80,7 +86,7 @@ Do NOT modify the feature's `spec.md`.
 }
 ```
 
-Write strict JSON: no comments, no trailing commas, and every field present on every ticket. `blockedBy` holds the `<NN>-<slug>` id of each ticket that gates this one, and is an empty array `[]` when the ticket can start immediately. `acceptanceCriteria` entries start with `"done": false`; ticking a criterion means flipping it to `true`.
+Write strict JSON: no comments, no trailing commas, and every field present on every ticket. `spec` is the path to the spec this ticket was broken out of, relative to the repository root and beginning with `.scratch/`; set it to `null` when there is no spec (tickets drafted straight from a plan or conversation). `blockedBy` holds the `<NN>-<slug>` id of each ticket that gates this one, and is an empty array `[]` when the ticket can start immediately. `testSeams` lists the public boundaries this ticket's tests hit, as confirmed with the user in step 4; `[]` when the ticket has no dedicated tests. `acceptanceCriteria` entries start with `"done": false`; ticking a criterion means flipping it to `true`.
 
 </local-ticket-template>
 

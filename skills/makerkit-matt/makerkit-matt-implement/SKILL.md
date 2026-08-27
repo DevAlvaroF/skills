@@ -11,7 +11,7 @@ the vocabulary, conventions, and recorded decisions for that subtree. For anythi
 doc under `apps/web/node_modules/next/dist/docs/` first: the vendored docs are the source of truth, not your training
 data.
 
-Use /makerkit-matt-tdd where possible, at pre-agreed seams.
+Use /makerkit-matt-tdd where possible, at each ticket's pre-agreed seams (its `testSeams` field).
 
 Run `pnpm typecheck` regularly and single test files regularly; run the full test suite once at the end.
 
@@ -34,7 +34,8 @@ done and the suite is green, advance every ticket whose work landed
 satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done-coding-awaiting-final-review"`. This
 state means the implementation and this skill's own review are complete, but independent final review is still pending;
 this skill must never set `done-final-review`. Rewrite the whole file as strict JSON, keeping every other field (`id`,
-`slug`, `title`, `whatToBuild`, `blockedBy`) intact. Re-read each file after writing to confirm it still parses.
+`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `testSeams`) intact. Re-read each file after writing to confirm it
+still parses.
 
 If a ticket is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
 outstanding. Never tick a criterion you did not verify.
@@ -46,6 +47,7 @@ Do not commit, stage, or push anything — the user commits manually.
 
 Instead, finish by returning a suggested commit message for the work: a concise imperative subject line (≤72 chars) plus
 a short body explaining the *why* when the change isn't self-evident. Match the repo's existing commit style (check
-`git log`). Include the path of each implemented ticket JSON file and the feature's `spec.md` file path, each relative
-to the repository and beginning with `.scratch/`. Include no tool or model attribution — no `Co-Authored-By` trailer, no
-"generated with" footer, no emoji badge.
+`git log`). Include the path of each implemented ticket JSON file, relative to the repository and beginning with
+`.scratch/`. Also include the spec path from each ticket's `spec` field, if set and not `null` (dedupe if several
+tickets share one). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no
+emoji badge.
