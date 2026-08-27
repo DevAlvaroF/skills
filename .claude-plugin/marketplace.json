@@ -40,16 +40,16 @@
         "grilling"
       ],
       "skills": [
-        "./mod-matt-code-review",
-        "./mod-matt-codebase-design",
-        "./mod-matt-domain-modeling",
-        "./mod-matt-grill-with-docs",
-        "./mod-matt-implement",
-        "./mod-matt-improve-codebase-architecture",
-        "./mod-matt-setup-skills",
-        "./mod-matt-tdd",
-        "./mod-matt-to-issues",
-        "./mod-matt-to-spec"
+        "./modified-matt-code-review",
+        "./modified-matt-codebase-design",
+        "./modified-matt-domain-modeling",
+        "./modified-matt-grill-with-docs",
+        "./modified-matt-implement",
+        "./modified-matt-improve-codebase-architecture",
+        "./modified-matt-setup-skills",
+        "./modified-matt-tdd",
+        "./modified-matt-to-issues",
+        "./modified-matt-to-spec"
       ]
     },
     {

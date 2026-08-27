@@ -1,5 +1,5 @@
 ---
-name: mod-matt-setup-skills
+name: modified-matt-setup-skills
 description: "Configure this repo for the engineering skills: set up its issue tracker and domain doc layout. Run once before first use of the other engineering skills."
 disable-model-invocation: true
 ---
@@ -50,7 +50,7 @@ When they exist, the repo was set up against an older version of these conventio
 
 Present the drift as a per-file list and ask whether to migrate. Never migrate silently, and never touch live state while doing it: `status`, `acceptanceCriteria[].done`, and `comments` hold work that exists nowhere else. `.myprds/` is usually gitignored, so assume there is no undo and get the answer before writing.
 
-Backfilling real `covers` values is not this skill's job. Set them to `[]` and tell the user that re-running `/mod-matt-to-issues` against the spec maps stories to issues properly, reconciling against what is already on disk.
+Backfilling real `covers` values is not this skill's job. Set them to `[]` and tell the user that re-running `/modified-matt-to-issues` against the spec maps stories to issues properly, reconciling against what is already on disk.
 
 ### 3. Confirm and edit
 
@@ -107,4 +107,4 @@ Finally, apply whatever `.myprds` migration the user approved in Section C, one 
 
 Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later, and that re-running this skill upgrades what is there in place — it diffs against the current seeds, audits `.myprds/`, and asks before changing anything.
 
-If Section C found drift, close with the follow-ups it left open: issues whose `covers` is now `[]` and wants a `/mod-matt-to-issues` pass, and anything reported but deliberately not migrated.
+If Section C found drift, close with the follow-ups it left open: issues whose `covers` is now `[]` and wants a `/modified-matt-to-issues` pass, and anything reported but deliberately not migrated.

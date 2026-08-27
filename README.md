@@ -31,14 +31,12 @@ Don't assume parity between them; check what each actually contains.
 | Group in the picker | Directory | Prefix | Skills | For |
 |---|---|---|---|---|
 | **Makerkit Custom Skills** | `skills/makerkit-custom/` | `makerkit-custom-*` | 7 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
-| **Modified Matt Skills** | `skills/modified-matt/` | `mod-matt-*` | 10 | Every other repo. Agent-written config goes in `docs/agents/`, with ADRs in `docs/adr/` |
+| **Modified Matt Skills** | `skills/modified-matt/` | `modified-matt-*` | 10 | Every other repo. Agent-written config goes in `docs/agents/`, with ADRs in `docs/adr/` |
 | **Alvaro Skills** | `skills/alvaro/` | `alvaro-*` | 1 | Standalone extras, not part of the Matt Pocock set; safe next to either flavour |
 
-Note the one place directory and prefix disagree: the **Modified Matt Skills**
-directory is `skills/modified-matt/`, but its skills are prefixed `mod-matt-`.
-The other two match: `skills/makerkit-custom/` → `makerkit-custom-`, `skills/alvaro/` → `alvaro-`.
-The directory name is what the scoped install URL wants; the prefix is what you
-type to invoke a skill.
+Directory and prefix match in all three groups: `skills/<group>/` holds skills
+prefixed `<group>-`. The directory name is what the scoped install URL wants;
+the prefix is what you type to invoke a skill.
 
 Names are prefixed either way so they can coexist with bundled and
 third-party skills of the same origin (`implement`, `tdd` and
@@ -228,13 +226,13 @@ Same content in both agent trees, different invocation syntax per agent:
 | Flavour | Claude Code | Codex |
 |---|---|---|
 | Makerkit | `/makerkit-custom-tdd` | `$makerkit-custom-tdd` |
-| Modified Matt | `/mod-matt-tdd` | `$mod-matt-tdd` |
+| Modified Matt | `/modified-matt-tdd` | `$modified-matt-tdd` |
 
 A skill fires on its own unless `disable-model-invocation: true` (Claude Code)
 or `allow_implicit_invocation: false` (Codex).
 
 Run the setup skill once per project before using the rest —
-`/makerkit-custom-setup-skills` or `/mod-matt-setup-skills`.
+`/makerkit-custom-setup-skills` or `/modified-matt-setup-skills`.
 It writes an `## Agent skills` block in the project's root `AGENTS.md` (or
 `CLAUDE.md` if that's the real document) plus:
 
@@ -258,7 +256,7 @@ correctly waiting on that human, not stuck.
 
 The two flavours no longer hold the same skill set, so they're listed
 separately. Names are unprefixed below; in the picker each carries its group's
-prefix (`makerkit-custom-tdd`, `mod-matt-tdd`).
+prefix (`makerkit-custom-tdd`, `modified-matt-tdd`).
 
 **Makerkit Custom** (7) — user-invoked only: `grill-with-docs`, `implement`,
 `setup-skills`, `to-spec`, `to-issues`. Model-invoked:
@@ -314,7 +312,7 @@ the manifest still installs, but shows up under "Other" instead of its group.
   `license`, `allowed-tools`, `metadata`. Stick to these unless you have a
   reason; unrecognised keys are at best ignored and at worst rejected.
 - Skill names share one namespace with bundled and third-party skills.
-  Keep the group prefix (`makerkit-`, `mod-matt-`, or `alvaro-`).
+  Keep the group prefix (`makerkit-custom-`, `modified-matt-`, or `alvaro-`).
 - They are independent copies; a fix applied to `skills/makerkit-custom/` does
   not reach `skills/modified-matt/`. Mirror a fix in both only when it's about
   generic skill mechanics (frontmatter, tool usage, process bugs). A fix
@@ -375,5 +373,5 @@ Skills that are fine to trigger automatically need neither.
 ## Attribution
 
 The `*-matt-*` skills, plus `makerkit-custom-setup-skills` and
-`mod-matt-setup-skills`, are adapted from
+`modified-matt-setup-skills`, are adapted from
 [mattpocock/skills](https://github.com/mattpocock/skills) (MIT).

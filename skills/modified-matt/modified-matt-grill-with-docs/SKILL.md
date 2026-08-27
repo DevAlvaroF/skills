@@ -1,10 +1,10 @@
 ---
-name: mod-matt-grill-with-docs
+name: modified-matt-grill-with-docs
 description: A relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
 disable-model-invocation: true
 ---
 
-**Before the first round**, call the Skill tool with "mod-matt-domain-modeling" and run it alongside this interview: it
+**Before the first round**, call the Skill tool with "modified-matt-domain-modeling" and run it alongside this interview: it
 challenges the terms as they come up and records vocabulary and decisions the moment they crystallise, rather than at
 the end.
 

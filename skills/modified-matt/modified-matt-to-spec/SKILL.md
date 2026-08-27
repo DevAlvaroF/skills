@@ -1,5 +1,5 @@
 ---
-name: mod-matt-to-spec
+name: modified-matt-to-spec
 description: "Turn the current conversation into a spec and publish it to the project issue tracker: no interview, just synthesis of what you've already discussed."
 disable-model-invocation: true
 ---
@@ -8,7 +8,7 @@ This skill takes the current conversation context and codebase understanding and
 user; just synthesize what you already know.
 
 The issue tracker conventions should have been provided to you. If not, tell the user to run
-`/mod-matt-setup-skills`.
+`/modified-matt-setup-skills`.
 
 ## Process
 
@@ -23,7 +23,7 @@ Check with the user that these seams match their expectations.
 
 3. Write the spec using the template below, then publish it as `spec.md` under the feature's
    `.myprds/<NN>-<feature-slug>/` directory. A spec is prose, not an issue, so it carries no status; the
-   `/mod-matt-to-issues` skill is what turns it into `ready-for-agent` issues.
+   `/modified-matt-to-issues` skill is what turns it into `ready-for-agent` issues.
 
 <spec-template>
 
@@ -92,7 +92,7 @@ A **redacted summary**, in your own words, of the decisions, constraints, and re
 spec: what was chosen, what was ruled out, and why. This is a summary, not a transcript — never paste the raw
 conversation.
 
-**Redact before you write.** This file is committed to the repository and `/mod-matt-implement` puts its path in the
+**Redact before you write.** This file is committed to the repository and `/modified-matt-implement` puts its path in the
 suggested commit message, so anything here reaches git history permanently. Exclude secrets, credentials, tokens, API keys,
 connection strings, customer data, PII, internal URLs carrying auth, and any conversation unrelated to the decisions
 above. When a decision genuinely turns on a sensitive value, describe the value's role without reproducing it.

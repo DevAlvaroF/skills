@@ -13,7 +13,7 @@ Specs for this repo live as markdown files in `.myprds/`; **issues are JSON file
 
 ## Issue shape
 
-Implementation issues (written by `/mod-matt-to-issues`):
+Implementation issues (written by `/modified-matt-to-issues`):
 
 ```json
 {

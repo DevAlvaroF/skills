@@ -1,5 +1,5 @@
 ---
-name: mod-matt-tdd
+name: modified-matt-tdd
 description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
 ---
 
@@ -19,13 +19,13 @@ See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking g
 
 A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
 
-**Test only at pre-agreed seams.** If you're implementing from an issue, its `testSeams` field (set by `/mod-matt-to-issues` when the issue was drafted) is that agreement — use it, don't re-ask. Otherwise, before writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed seam. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
+**Test only at pre-agreed seams.** If you're implementing from an issue, its `testSeams` field (set by `/modified-matt-to-issues` when the issue was drafted) is that agreement — use it, don't re-ask. Otherwise, before writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed seam. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
 
 If implementation reveals a pre-agreed seam doesn't hold (the boundary doesn't exist, or testing there misses the behavior that matters), stop and confirm the change with the user rather than silently testing elsewhere.
 
 Ask: "What's the public interface, and which seams should we test?"
 
-When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), call the Skill tool with "mod-matt-codebase-design" for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
+When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), call the Skill tool with "modified-matt-codebase-design" for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
 
 ## Anti-patterns
 
@@ -37,4 +37,4 @@ When the shape of that interface is itself in question (how deep the module is, 
 
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
 - **One slice at a time.** One seam, one test, one minimal implementation per cycle.
-- **Refactoring is not part of the loop.** The review stage always assesses the diff for refactor-worthy smells and applies the safe ones (see the `mod-matt-code-review` skill's Assess step), not the red → green implementation cycle.
+- **Refactoring is not part of the loop.** The review stage always assesses the diff for refactor-worthy smells and applies the safe ones (see the `modified-matt-code-review` skill's Assess step), not the red → green implementation cycle.

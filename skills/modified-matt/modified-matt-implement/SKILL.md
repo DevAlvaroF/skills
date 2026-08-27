@@ -1,16 +1,16 @@
 ---
-name: mod-matt-implement
+name: modified-matt-implement
 description: "Implement a piece of work based on a spec or set of issues."
 disable-model-invocation: true
 ---
 
 Implement the work described by the user in the spec or issues.
 
-Use /mod-matt-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
+Use /modified-matt-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.
 
-Once done, use /mod-matt-code-review to review the work.
+Once done, use /modified-matt-code-review to review the work.
 
 ## Advance or close the issues
 

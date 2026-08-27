@@ -1,5 +1,5 @@
 ---
-name: mod-matt-code-review
+name: modified-matt-code-review
 description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side, then always assesses the Standards findings for refactor-worthiness and applies the safe ones. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
 ---
 
@@ -26,7 +26,7 @@ Both axes run as **parallel sub-agents** so they don't pollute each other's cont
 findings.
 
 The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run
-`/mod-matt-setup-skills`.
+`/modified-matt-setup-skills`.
 
 ## Process
 
@@ -34,7 +34,7 @@ The issue tracker should have been provided to you. If `docs/agents/issue-tracke
 
 Look for the originating spec, in this order:
 
-1. A `.myprds/<NN>-<feature-slug>/` path referenced in the commit messages (per `/mod-matt-implement`'s convention of
+1. A `.myprds/<NN>-<feature-slug>/` path referenced in the commit messages (per `/modified-matt-implement`'s convention of
    including the issue and `spec.md` paths in its suggested commit message).
 2. A path the user passed as an argument.
 3. A spec file under `docs/`, `specs/`, or `.myprds/` matching the branch name or feature.
