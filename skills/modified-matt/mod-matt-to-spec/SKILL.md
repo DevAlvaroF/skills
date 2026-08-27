@@ -37,15 +37,20 @@ The solution to the problem, from the user's perspective.
 
 ## User Stories
 
-A LONG, numbered list of user stories. Each user story should be in the format of:
+A LONG list of user stories, each carrying a stable ID. Each user story should be in the format of:
 
-1. As an <actor>, I want a <feature>, so that <benefit>
+- **US-NNN** — As an <actor>, I want a <feature>, so that <benefit>
 
 <user-story-example>
-1. As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
+- **US-001** — As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
 </user-story-example>
 
 This list of user stories should be extremely extensive and cover all aspects of the feature.
+
+Each story's `US-NNN` is **immutable once written**. Never renumber a story and never reuse a retired ID:
+downstream tickets reference these IDs in their `covers` field, so an ID is an address, not a position in the
+running order. On a later revision a new story takes the highest existing ID + 1, wherever it sits in the list,
+and a dropped story leaves its ID retired, not recycled.
 
 ## Implementation Decisions
 
@@ -93,3 +98,17 @@ connection strings, customer data, PII, internal URLs carrying auth, and any con
 above. When a decision genuinely turns on a sensitive value, describe the value's role without reproducing it.
 
 </spec-template>
+
+## Before you publish
+
+Confirm each of these. Any "no" is a fix, not a caveat: don't publish until it's a "yes".
+
+- Every user story carries a `US-NNN` ID, and no ID was renumbered or reused from an earlier revision
+- Every user story describes externally observable behaviour, not an implementation detail
+- The test seams in Testing Decisions are the ones the user confirmed in step 2
+- Out of Scope is non-empty: a spec that excludes nothing hasn't been scoped
+- Testing Decisions names prior art: actual similar tests in this codebase, not a description of what one would
+  look like
+- The decision log is a redacted summary in your own words, carrying no secrets, credentials, PII, or raw
+  transcript
+- No file paths or code snippets anywhere, except a prototype-derived snippet that encodes a decision prose can't

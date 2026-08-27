@@ -25,6 +25,7 @@ Implementation tickets (written by `/makerkit-matt-to-tickets`):
   "whatToBuild": "The end-to-end behaviour this ticket makes work, from the user's perspective, not a layer-by-layer implementation list.",
   "blockedBy": ["<NN>"],
   "testSeams": ["<seam description>"],
+  "covers": ["US-003"],
   "acceptanceCriteria": [
     { "text": "Acceptance criterion 1", "done": false }
   ],
@@ -34,7 +35,7 @@ Implementation tickets (written by `/makerkit-matt-to-tickets`):
 }
 ```
 
-`spec` is the path to the spec this ticket was broken out of, relative to the repository root and beginning with `.scratch/`; `null` when there is no spec (tickets drafted straight from a plan or conversation). `blockedBy` holds the `id` of each ticket that gates this one, and is `[]` when the ticket can start immediately. `testSeams` lists the public boundaries this ticket's tests hit, confirmed with the user when the ticket was drafted; `[]` when the ticket has no dedicated tests. `comments` starts as `[]`.
+`spec` is the path to the spec this ticket was broken out of, relative to the repository root and beginning with `.scratch/`; `null` when there is no spec (tickets drafted straight from a plan or conversation). `blockedBy` holds the `id` of each ticket that gates this one, and is `[]` when the ticket can start immediately. `testSeams` lists the public boundaries this ticket's tests hit, confirmed with the user when the ticket was drafted; `[]` when the ticket has no dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this ticket satisfies; `[]` when the ticket satisfies no story directly, and always `[]` when `spec` is `null`. `comments` starts as `[]`.
 
 The successful local implementation and review lifecycle is:
 

@@ -20,7 +20,7 @@ done and the suite is green, advance every ticket whose work landed
 satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done-coding-awaiting-final-review"`. This
 state means the implementation and this skill's own review are complete, but independent final review is still pending;
 this skill must never set `done-final-review`. Rewrite the whole file as strict JSON, keeping every other field (`id`,
-`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `testSeams`, `comments`) intact — `comments` holds review history
+`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `testSeams`, `covers`, `comments`) intact — `comments` holds review history
 that exists nowhere else, so dropping or emptying it loses it permanently. Re-read each file after writing to confirm it
 still parses.
 
