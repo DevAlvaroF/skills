@@ -1,12 +1,12 @@
 ---
-name: mod-matt-grill-with-docs
-description: A relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+name: makerkit-custom-grill-with-docs
+description: A relentless interview to sharpen a plan or design, which also records terms and decisions into the repo's AGENTS.md files as we go. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
 disable-model-invocation: true
 ---
 
-**Before the first round**, call the Skill tool with "mod-matt-domain-modeling" and run it alongside this interview: it
-challenges the terms as they come up and records vocabulary and decisions the moment they crystallise, rather than at
-the end.
+**Before the first round**, call the Skill tool with "makerkit-custom-domain-modeling" and run it alongside this
+interview: it challenges the terms as they come up and records vocabulary and decisions the moment they crystallise,
+rather than at the end.
 
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision
 branches into the decisions that hang off it.
@@ -40,3 +40,19 @@ to report; ask the rest of the frontier now. The _decisions_ are the user's: put
 
 The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed.
 Do not act on it until the user confirms you have reached a shared understanding.
+
+## Ground yourself first
+
+**Before the first round**, read the project's own documentation so you never spend a question on something the repo
+already answers:
+
+- the root `AGENTS.md`, then the nearest `AGENTS.md` to the area in question, following the doc-consumption rules they
+  set out, plus the vendored Next.js docs for anything Next.js. Where those files and this description differ, **follow
+  the repo**.
+- the `README.md` of each app or package involved (`apps/*/README.md`, `packages/*/README.md`) — what that piece is and
+  how it fits;
+- the Makerkit docs under `docs/` (`.mdoc` files by topic: `billing`, `security`, `data-fetching`, …) — how a feature is
+  *meant* to work.
+
+Understanding the architecture is a first step, not a question. Ask the user only what the docs genuinely don't answer —
+and when a question survives that reading, say what you checked, so they can see it's a real gap rather than a shortcut.

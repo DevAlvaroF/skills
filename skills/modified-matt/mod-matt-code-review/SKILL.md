@@ -45,10 +45,10 @@ ref or empty diff should fail here, not inside two parallel sub-agents.
 
 Look for the originating spec, in this order:
 
-1. A `.scratch/<NN>-<feature-slug>/` path referenced in the commit messages (per `/mod-matt-implement`'s convention
+1. A `.myprds/<NN>-<feature-slug>/` path referenced in the commit messages (per `/mod-matt-implement`'s convention
    of including the ticket and `spec.md` paths in its suggested commit message).
 2. A path the user passed as an argument.
-3. A spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
+3. A spec file under `docs/`, `specs/`, or `.myprds/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip
    and report "no spec available".
 

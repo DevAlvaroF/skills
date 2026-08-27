@@ -16,7 +16,7 @@ engineering skill set — **install one or the other, never both**: a project
 that installed both would offer the agent two copies of every skill. The third
 is a small standalone group that sits happily alongside either.
 
-**The two flavours are siblings, not mirrors.** `makerkit-matt` is adapted for
+**The two flavours are siblings, not mirrors.** `makerkit-custom` is adapted for
 the specific architecture of the [makerkit.dev](https://makerkit.dev) SaaS
 boilerplate — a highly opinionated stack (multi-tenant account model,
 RLS-as-authorization, a distribution of `AGENTS.md` files instead of one doc,
@@ -30,13 +30,13 @@ Don't assume parity between them; check what each actually contains.
 
 | Group in the picker | Directory | Prefix | Skills | For |
 |---|---|---|---|---|
-| **Makerkit Matt Skills** | `skills/makerkit-matt/` | `makerkit-matt-*` | 8 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
+| **Makerkit Custom Skills** | `skills/makerkit-custom/` | `makerkit-custom-*` | 7 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
 | **Modified Matt Skills** | `skills/modified-matt/` | `mod-matt-*` | 11 | Every other repo. Agent-written docs go in a flat `agents-docs/` directory |
 | **Alvaro Skills** | `skills/alvaro/` | `alvaro-*` | 1 | Standalone extras, not part of the Matt Pocock set; safe next to either flavour |
 
 Note the one place directory and prefix disagree: the **Modified Matt Skills**
 directory is `skills/modified-matt/`, but its skills are prefixed `mod-matt-`.
-The other two match: `skills/makerkit-matt/` → `makerkit-matt-`, `skills/alvaro/` → `alvaro-`.
+The other two match: `skills/makerkit-custom/` → `makerkit-custom-`, `skills/alvaro/` → `alvaro-`.
 The directory name is what the scoped install URL wants; the prefix is what you
 type to invoke a skill.
 
@@ -56,7 +56,7 @@ npx skills@latest add devalvarof/skills
 Four prompts, in order:
 
 1. **Select skills.** All three groups are drawn as collapsible headings —
-   move to **Makerkit Matt Skills** or **Modified Matt Skills** and hit space to
+   move to **Makerkit Custom Skills** or **Modified Matt Skills** and hit space to
    take that whole flavour in one keystroke. Don't tick *Select All*: that's
    all 20 skills across all three groups, including both flavours at once.
 2. **Which agents.** `Claude Code` is preselected. Add `Codex` if you use it.
@@ -107,7 +107,7 @@ and `-y` skips the prompts. Without `--copy`, the CLI uses symlinks:
 
 ```bash
 # Makerkit repo
-npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/makerkit-matt \
+npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/makerkit-custom \
   -a claude-code codex -s '*' -y
 
 # any other repo
@@ -126,8 +126,8 @@ That walks into all three groups and installs all 20 skills. Either prompt (no
 Named subsets work too:
 
 ```bash
-npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/makerkit-matt \
-  -a claude-code codex -s makerkit-matt-tdd makerkit-matt-implement
+npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/makerkit-custom \
+  -a claude-code codex -s makerkit-custom-tdd makerkit-custom-implement
 ```
 
 ### Check what landed
@@ -183,7 +183,7 @@ skills-refresh() {
     # skills-lock.json records a skillPath per skill; the group is in it
     group=$(grep -o '"skillPath": "skills/[a-z-]*' "$d" | head -1 | sed 's|.*skills/||')
     case "$group" in
-      makerkit-matt|modified-matt|alvaro) ;;
+      makerkit-custom|modified-matt|alvaro) ;;
       *) echo "-- skip ${d%/skills-lock.json} (not from this repo)"; continue ;;
     esac
     (cd "${d%/skills-lock.json}" && echo "-> $PWD ($group)" && \
@@ -213,7 +213,7 @@ agent directory plus the `skills-lock.json` entries.
 By name or in bulk, when you already know what you want:
 
 ```bash
-npx skills remove makerkit-matt-tdd                 # one skill, all agents
+npx skills remove makerkit-custom-tdd                 # one skill, all agents
 npx skills remove -s '*' -a claude-code codex -y    # every skill, those agents
 npx skills remove --all                             # every skill, everywhere (-y implied)
 ```
@@ -227,39 +227,41 @@ Same content in both agent trees, different invocation syntax per agent:
 
 | Flavour | Claude Code | Codex |
 |---|---|---|
-| Makerkit | `/makerkit-matt-tdd` | `$makerkit-matt-tdd` |
+| Makerkit | `/makerkit-custom-tdd` | `$makerkit-custom-tdd` |
 | Modified Matt | `/mod-matt-tdd` | `$mod-matt-tdd` |
 
 A skill fires on its own unless `disable-model-invocation: true` (Claude Code)
 or `allow_implicit_invocation: false` (Codex).
 
 Run the setup skill once per project before using the rest —
-`/makerkit-matt-setup-matt-pocock-skills` or `/mod-matt-setup-matt-pocock-skills`.
+`/makerkit-custom-setup-skills` or `/mod-matt-setup-matt-pocock-skills`.
 It writes an `## Agent skills` block in the project's root `AGENTS.md` (or
-`CLAUDE.md` if that's the real document) plus, under `agents-docs/`:
+`CLAUDE.md` if that's the real document) plus:
 
 | Flavour | Files written |
 |---|---|
-| Makerkit | `issue-tracker.md`, `project-docs.md` |
-| Modified Matt | `issue-tracker.md`, `domain.md` |
+| Makerkit | `.myprds/issue-tracker.md` |
+| Modified Matt | `agents-docs/issue-tracker.md`, `agents-docs/domain.md` |
 
-The other skills read those files.
+The other skills read those files. Makerkit has no generated project-docs file:
+that flavour reads the repo's own `AGENTS.md` distribution — the root file, then
+the nearest one to the code in hand — directly.
 
-`issue-tracker.md` documents the ticket lifecycle
+`issue-tracker.md` documents the issue lifecycle
 (`ready-for-agent -> done-coding-awaiting-final-review -> done-final-review`).
 No skill in this repo sets `done-final-review` — that's intentional, not a gap:
 `implement` is explicitly forbidden from setting it, and the final-review step
 is meant to be triggered by an external actor (a human, or a review process
-outside these skills) so a ticket can't reach "done" without a human actually
-looking at it. A ticket parked at `done-coding-awaiting-final-review` is
+outside these skills) so an issue can't reach "done" without a human actually
+looking at it. An issue parked at `done-coding-awaiting-final-review` is
 correctly waiting on that human, not stuck.
 
 The two flavours no longer hold the same skill set, so they're listed
 separately. Names are unprefixed below; in the picker each carries its group's
-prefix (`makerkit-matt-tdd`, `mod-matt-tdd`).
+prefix (`makerkit-custom-tdd`, `mod-matt-tdd`).
 
-**Makerkit Matt** (7) — user-invoked only: `grill-with-docs`, `implement`,
-`setup-matt-pocock-skills`, `to-spec`, `to-tickets`. Model-invoked:
+**Makerkit Custom** (7) — user-invoked only: `grill-with-docs`, `implement`,
+`setup-skills`, `to-spec`, `to-issues`. Model-invoked:
 `domain-modeling`, `tdd`.
 
 **Modified Matt** (10) — user-invoked only: `grill-with-docs`, `implement`,
@@ -287,7 +289,7 @@ to neither flavour's list.
 scripts/
   gen-marketplace.mjs     # regenerates it from what's on disk
 skills/
-  <group>/                # makerkit-matt | modified-matt | alvaro
+  <group>/                # makerkit-custom | modified-matt | alvaro
     <prefixed-skill-name>/
       SKILL.md            # required
       references/         # optional, loaded on demand
@@ -313,7 +315,7 @@ the manifest still installs, but shows up under "Other" instead of its group.
   reason; unrecognised keys are at best ignored and at worst rejected.
 - Skill names share one namespace with bundled and third-party skills.
   Keep the group prefix (`makerkit-`, `mod-matt-`, or `alvaro-`).
-- They are independent copies; a fix applied to `skills/makerkit-matt/` does
+- They are independent copies; a fix applied to `skills/makerkit-custom/` does
   not reach `skills/modified-matt/`. Mirror a fix in both only when it's about
   generic skill mechanics (frontmatter, tool usage, process bugs). A fix
   rooted in Makerkit-specific opinions (RLS, the `AGENTS.md` distribution,
@@ -372,6 +374,6 @@ Skills that are fine to trigger automatically need neither.
 
 ## Attribution
 
-The `*-matt-*` skills and `*-setup-matt-pocock-skills`, in both the Makerkit
-and Modified Matt groups, are adapted from
+The `*-matt-*` skills, plus `makerkit-custom-setup-skills` and
+`mod-matt-setup-matt-pocock-skills`, are adapted from
 [mattpocock/skills](https://github.com/mattpocock/skills) (MIT).

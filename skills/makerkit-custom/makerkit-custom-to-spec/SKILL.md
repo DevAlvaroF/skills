@@ -1,5 +1,5 @@
 ---
-name: mod-matt-to-spec
+name: makerkit-custom-to-spec
 description: "Turn the current conversation into a spec and publish it to the project issue tracker: no interview, just synthesis of what you've already discussed."
 disable-model-invocation: true
 ---
@@ -8,12 +8,14 @@ This skill takes the current conversation context and codebase understanding and
 user; just synthesize what you already know.
 
 The issue tracker conventions should have been provided to you. If not, tell the user to run
-`/mod-matt-setup-matt-pocock-skills`.
+`/makerkit-custom-setup-skills`.
 
 ## Process
 
-1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain
-   glossary vocabulary throughout the spec, and respect any ADRs in the area you're touching.
+1. Explore the repo to understand the current state of the codebase, if you haven't already. Read the root
+   `AGENTS.md`, then the nearest `AGENTS.md` to the code involved, and follow the doc-consumption and vocabulary rules
+   they set out, so the spec speaks the project's language. Where those files and this description differ, **follow the
+   repo**.
 
 2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use
    the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across
@@ -22,8 +24,8 @@ The issue tracker conventions should have been provided to you. If not, tell the
 Check with the user that these seams match their expectations.
 
 3. Write the spec using the template below, then publish it as `spec.md` under the feature's
-   `.myprds/<NN>-<feature-slug>/` directory. A spec is prose, not a ticket, so it carries no status; the
-   `/mod-matt-to-tickets` skill is what turns it into `ready-for-agent` tickets.
+   `.myprds/<NN>-<feature-slug>/` directory. A spec is prose, not an issue, so it carries no status; the
+   `/makerkit-custom-to-issues` skill is what turns it into `ready-for-agent` issues.
 
 <spec-template>
 
@@ -48,7 +50,7 @@ A LONG list of user stories, each carrying a stable ID. Each user story should b
 This list of user stories should be extremely extensive and cover all aspects of the feature.
 
 Each story's `US-NNN` is **immutable once written**. Never renumber a story and never reuse a retired ID:
-downstream tickets reference these IDs in their `covers` field, so an ID is an address, not a position in the
+downstream issues reference these IDs in their `covers` field, so an ID is an address, not a position in the
 running order. On a later revision a new story takes the highest existing ID + 1, wherever it sits in the list,
 and a dropped story leaves its ID retired, not recycled.
 
@@ -92,8 +94,8 @@ A **redacted summary**, in your own words, of the decisions, constraints, and re
 spec: what was chosen, what was ruled out, and why. This is a summary, not a transcript — never paste the raw
 conversation.
 
-**Redact before you write.** This file is committed to the repository and `/mod-matt-implement` puts its path in the
-suggested commit message, so anything here reaches git history permanently. Exclude secrets, credentials, tokens, API keys,
+**Redact before you write.** This file is committed to the repository and `/makerkit-custom-implement` puts its path in the suggested
+commit message, so anything here reaches git history permanently. Exclude secrets, credentials, tokens, API keys,
 connection strings, customer data, PII, internal URLs carrying auth, and any conversation unrelated to the decisions
 above. When a decision genuinely turns on a sensitive value, describe the value's role without reproducing it.
 

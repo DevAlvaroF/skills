@@ -1,6 +1,6 @@
 ---
 name: mod-matt-to-tickets
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges as data, published as one JSON file per ticket under .scratch/.
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges as data, published as one JSON file per ticket under .myprds/.
 disable-model-invocation: true
 ---
 
@@ -70,7 +70,7 @@ Iterate until the user approves the breakdown.
 - **Absent or empty** → first publish. Create the tickets as described below, numbering from `01` in dependency order (blockers first).
 - **Non-empty** → **reconciliation mode**. Write nothing until the whole reconciliation is resolved and shown to the user; see *Reconciling with existing tickets* below.
 
-Write one file per ticket under `.scratch/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is its two-digit sequence number; the ticket filename's `NN` is a separate sequence within that feature and is that ticket's `id`. Each file's `blockedBy` lists the tickets it depends on. Set each ticket's `spec` field to that feature's `spec.md` path if this run started from a spec (a spec path was passed in, or one exists at `.scratch/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that ticket in step 4, and `covers` to the `US-NNN` IDs agreed there. Use the per-ticket JSON template below: one ticket per file, never a single combined file.
+Write one file per ticket under `.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is its two-digit sequence number; the ticket filename's `NN` is a separate sequence within that feature and is that ticket's `id`. Each file's `blockedBy` lists the tickets it depends on. Set each ticket's `spec` field to that feature's `spec.md` path if this run started from a spec (a spec path was passed in, or one exists at `.myprds/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that ticket in step 4, and `covers` to the `US-NNN` IDs agreed there. Use the per-ticket JSON template below: one ticket per file, never a single combined file.
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
 
@@ -96,7 +96,7 @@ A ticket already on disk may carry live state that exists nowhere else: a `statu
   "slug": "<slug>",
   "title": "<Ticket title>",
   "status": "ready-for-agent",
-  "spec": ".scratch/<NN>-<feature-slug>/spec.md",
+  "spec": ".myprds/<NN>-<feature-slug>/spec.md",
   "whatToBuild": "The end-to-end behaviour this ticket makes work, from the user's perspective, not a layer-by-layer implementation list.",
   "blockedBy": ["<NN>", "<NN>"],
   "testSeams": ["<seam description>", "<seam description>"],
@@ -109,7 +109,7 @@ A ticket already on disk may carry live state that exists nowhere else: a `statu
 }
 ```
 
-Write strict JSON: no comments, no trailing commas, and every field present on every ticket. `spec` is the path to the spec this ticket was broken out of, relative to the repository root and beginning with `.scratch/`; set it to `null` when there is no spec (tickets drafted straight from a plan or conversation). `blockedBy` holds the `id` of each ticket that gates this one, and is an empty array `[]` when the ticket can start immediately. `testSeams` lists the public boundaries this ticket's tests hit, as confirmed with the user in step 4; `[]` when the ticket has no dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this ticket satisfies; `[]` when the ticket satisfies no story directly, and always `[]` when `spec` is `null`.
+Write strict JSON: no comments, no trailing commas, and every field present on every ticket. `spec` is the path to the spec this ticket was broken out of, relative to the repository root and beginning with `.myprds/`; set it to `null` when there is no spec (tickets drafted straight from a plan or conversation). `blockedBy` holds the `id` of each ticket that gates this one, and is an empty array `[]` when the ticket can start immediately. `testSeams` lists the public boundaries this ticket's tests hit, as confirmed with the user in step 4; `[]` when the ticket has no dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this ticket satisfies; `[]` when the ticket satisfies no story directly, and always `[]` when `spec` is `null`.
 
 The `status`, `acceptanceCriteria[].done`, and `comments` values in the template are **seed values for a newly created ticket only**. On a ticket that already exists they are live state: carry them over from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`; `acceptanceCriteria` entries start with `"done": false` and ticking one means flipping it to `true`; `comments` starts as `[]`.
 

@@ -16,7 +16,7 @@ Once done, use /mod-matt-code-review to review the work.
 
 Updating the tickets you implemented is part of the job, not an optional extra. Once the implementing agent's review is
 done and the suite is green, advance every ticket whose work landed
-(`.scratch/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and ticket numbers are independent): flip every
+(`.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and ticket numbers are independent): flip every
 satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done-coding-awaiting-final-review"`. This
 state means the implementation and this skill's own review are complete, but independent final review is still pending;
 this skill must never set `done-final-review`. Rewrite the whole file as strict JSON, keeping every other field (`id`,
@@ -35,7 +35,7 @@ Do not commit, stage, or push anything — the user commits manually.
 Instead, finish by returning a suggested commit message for the work: a concise imperative subject line (≤72 chars) plus
 a short body explaining the *why* when the change isn't self-evident. Match the repo's existing commit style (check
 `git log`). Include the path of each implemented ticket JSON file, relative to the repository and beginning with
-`.scratch/`. Also include the spec path from each ticket's `spec` field, if set and not `null` (dedupe if several
+`.myprds/`. Also include the spec path from each ticket's `spec` field, if set and not `null` (dedupe if several
 tickets share one). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no
 emoji badge.
 
