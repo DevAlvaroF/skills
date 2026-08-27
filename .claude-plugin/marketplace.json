@@ -51,19 +51,6 @@
         "./modified-matt-to-issues",
         "./modified-matt-to-spec"
       ]
-    },
-    {
-      "name": "alvaro-skills",
-      "source": "./skills/alvaro",
-      "description": "Standalone skills that aren't part of the Matt Pocock engineering set.",
-      "category": "engineering",
-      "keywords": [
-        "engineering",
-        "code-review"
-      ],
-      "skills": [
-        "./alvaro-adversarial-reviewer"
-      ]
     }
   ]
 }

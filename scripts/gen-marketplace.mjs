@@ -10,65 +10,58 @@
 //
 //   node scripts/gen-marketplace.mjs
 
-import { readdirSync, existsSync, writeFileSync, mkdirSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import {readdirSync, existsSync, writeFileSync, mkdirSync} from "node:fs";
+import {join, dirname} from "node:path";
+import {fileURLToPath} from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const GROUPS = [
-  {
-    dir: "makerkit-custom",
-    name: "makerkit-custom-skills",
-    description:
-      "Makerkit-aware engineering skills: they know about docs/ .mdoc product docs, the fork/upstream remote pair, and the monorepo AGENTS.md layout.",
-    keywords: ["makerkit", "engineering", "tdd", "code-review", "grilling"],
-  },
-  {
-    dir: "modified-matt",
-    name: "modified-matt-skills",
-    description:
-      "The same engineering skills without the Makerkit-specific assumptions. For any repo. Agent-written config lives in docs/agents/, with ADRs in docs/adr/.",
-    keywords: ["engineering", "tdd", "code-review", "grilling"],
-  },
-  {
-    dir: "alvaro",
-    name: "alvaro-skills",
-    description:
-      "Standalone skills that aren't part of the Matt Pocock engineering set.",
-    keywords: ["engineering", "code-review"],
-  },
+    {
+        dir: "makerkit-custom",
+        name: "makerkit-custom-skills",
+        description:
+            "Makerkit-aware engineering skills: they know about docs/ .mdoc product docs, the fork/upstream remote pair, and the monorepo AGENTS.md layout.",
+        keywords: ["makerkit", "engineering", "tdd", "code-review", "grilling"],
+    },
+    {
+        dir: "modified-matt",
+        name: "modified-matt-skills",
+        description:
+            "The same engineering skills without the Makerkit-specific assumptions. For any repo. Agent-written config lives in docs/agents/, with ADRs in docs/adr/.",
+        keywords: ["engineering", "tdd", "code-review", "grilling"],
+    }
 ];
 
 const skillsIn = (group) => {
-  const base = join(root, "skills", group);
-  return readdirSync(base, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && existsSync(join(base, e.name, "SKILL.md")))
-    .map((e) => `./${e.name}`)
-    .sort();
+    const base = join(root, "skills", group);
+    return readdirSync(base, {withFileTypes: true})
+        .filter((e) => e.isDirectory() && existsSync(join(base, e.name, "SKILL.md")))
+        .map((e) => `./${e.name}`)
+        .sort();
 };
 
 const manifest = {
-  name: "devalvarof-skills",
-  owner: { name: "Alvaro F", url: "https://github.com/DevAlvaroF" },
-  description:
-    "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic, plus standalone extras.",
-  plugins: GROUPS.map((g) => ({
-    name: g.name,
-    source: `./skills/${g.dir}`,
-    description: g.description,
-    category: "engineering",
-    keywords: g.keywords,
-    skills: skillsIn(g.dir),
-  })),
+    name: "devalvarof-skills",
+    owner: {name: "Alvaro F", url: "https://github.com/DevAlvaroF"},
+    description:
+        "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic, plus standalone extras.",
+    plugins: GROUPS.map((g) => ({
+        name: g.name,
+        source: `./skills/${g.dir}`,
+        description: g.description,
+        category: "engineering",
+        keywords: g.keywords,
+        skills: skillsIn(g.dir),
+    })),
 };
 
-mkdirSync(join(root, ".claude-plugin"), { recursive: true });
+mkdirSync(join(root, ".claude-plugin"), {recursive: true});
 writeFileSync(
-  join(root, ".claude-plugin/marketplace.json"),
-  JSON.stringify(manifest, null, 2) + "\n",
+    join(root, ".claude-plugin/marketplace.json"),
+    JSON.stringify(manifest, null, 2) + "\n",
 );
 
 for (const p of manifest.plugins) {
-  console.log(`${p.name}: ${p.skills.length} skills`);
+    console.log(`${p.name}: ${p.skills.length} skills`);
 }
