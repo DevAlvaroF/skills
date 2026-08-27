@@ -1,6 +1,6 @@
 ---
 name: makerkit-matt-code-review
-description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
+description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side, then always assesses the Standards findings for refactor-worthiness and applies the safe ones. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
 ---
 
 ## Collect the diff
@@ -146,6 +146,30 @@ rerank findings, because the two axes are deliberately separate (see _Why two ax
 
 End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a
 single winner across axes: that's the reranking the separation exists to prevent.
+
+### 6. Assess refactors
+
+This step always runs — assessing refactor-worthiness is not something the user has to ask for separately, and it is
+not conditional on the diff looking messy.
+
+Take only the **Standards** sub-agent's findings (hard violations and smell-baseline hits from step 3). Spec findings
+are never auto-applied: they're about whether the code matches the spec's intent, which isn't a mechanical fix. For
+each Standards finding, use judgement, not a fixed rule, to decide:
+
+- **Fix now**, directly in the working tree, when it's small, local, and safe: a rename, extracting one duplicated
+  shape, deleting a speculative-generality abstraction, collapsing a repeated switch.
+- **Flag only**, listing it instead of touching it, when it's large, crosses many files, is ambiguous, or risks a
+  behavior change — a Shotgun Surgery or Divergent Change spanning the codebase, or anything you're not confident is
+  the right fix.
+
+After applying any fixes, re-run the repo's verification before reporting them as done: `pnpm typecheck`,
+`pnpm lint:fix`, `pnpm format:fix` per the root `AGENTS.md`'s standing rule (and `/rls-review` if a fix touched
+anything RLS-adjacent).
+
+Report the outcome under a third heading, `## Refactors`, separate from `## Standards` and `## Spec`: what was fixed,
+and what was flagged and left alone. This is not the cross-axis reranking step 5 forbids — that rule is about not
+collapsing Standards and Spec into one ranked list. Assessing and applying refactors stays entirely inside the
+Standards axis, after both reports have already been presented untouched.
 
 ## Why two axes
 
