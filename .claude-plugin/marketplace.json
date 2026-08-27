@@ -21,7 +21,6 @@
       "skills": [
         "./makerkit-matt-domain-modeling",
         "./makerkit-matt-grill-with-docs",
-        "./makerkit-matt-grilling",
         "./makerkit-matt-implement",
         "./makerkit-matt-setup-matt-pocock-skills",
         "./makerkit-matt-tdd",
@@ -45,7 +44,6 @@
         "./mod-matt-codebase-design",
         "./mod-matt-domain-modeling",
         "./mod-matt-grill-with-docs",
-        "./mod-matt-grilling",
         "./mod-matt-implement",
         "./mod-matt-improve-codebase-architecture",
         "./mod-matt-setup-matt-pocock-skills",

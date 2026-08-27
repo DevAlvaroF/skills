@@ -258,14 +258,19 @@ The two flavours no longer hold the same skill set, so they're listed
 separately. Names are unprefixed below; in the picker each carries its group's
 prefix (`makerkit-matt-tdd`, `mod-matt-tdd`).
 
-**Makerkit Matt** (8) — user-invoked only: `grill-with-docs`, `implement`,
+**Makerkit Matt** (7) — user-invoked only: `grill-with-docs`, `implement`,
 `setup-matt-pocock-skills`, `to-spec`, `to-tickets`. Model-invoked:
-`domain-modeling`, `grilling`, `tdd`.
+`domain-modeling`, `tdd`.
 
-**Modified Matt** (11) — user-invoked only: `grill-with-docs`, `implement`,
+**Modified Matt** (10) — user-invoked only: `grill-with-docs`, `implement`,
 `improve-codebase-architecture`, `setup-matt-pocock-skills`, `to-spec`,
 `to-tickets`. Model-invoked: `code-review`, `codebase-design`,
-`domain-modeling`, `grilling`, `tdd`.
+`domain-modeling`, `tdd`.
+
+`grill-with-docs` carries the interview itself — it used to delegate to a
+separate `grilling` skill, which is now folded into it. It calls
+`domain-modeling` alongside the interview so terms and decisions get recorded
+as they crystallise.
 
 `code-review`, `codebase-design` and `improve-codebase-architecture` exist only
 in **Modified Matt**: the Makerkit flavour defers review to the repo's own
