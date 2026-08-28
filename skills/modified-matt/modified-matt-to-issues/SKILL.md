@@ -95,3 +95,7 @@ An issue already on disk may carry live state that exists nowhere else: a `statu
 `.myprds/docs/agents/issue-tracker.md` § Issue shape defines the fields, their types, and what each empty value means. Follow it exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field present on every issue.
 
 The `status`, `acceptanceCriteria[].done`, and `comments` values shown there are **seed values for a newly created issue only**. On an issue that already exists they are live state: carry them over from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`; `acceptanceCriteria` entries start with `"done": false` and ticking one means flipping it to `true`; `comments` starts as `[]`.
+
+## Next step
+
+Once the user approves the published issues, the next step is `/modified-matt-implement`, taking one issue from the frontier.

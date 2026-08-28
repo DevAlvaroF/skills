@@ -39,7 +39,9 @@ on it: a running exploration is an unsettled prerequisite, so only the questions
 to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
 
 The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed.
-Do not act on it until the user confirms you have reached a shared understanding.
+Do not act on it until the user confirms you have reached a shared understanding. Once they confirm,
+`/makerkit-custom-to-spec` turns this session into a spec — run it **in this same session**, while the design tree is
+still in context.
 
 ## Ground yourself first
 
