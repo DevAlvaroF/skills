@@ -10,6 +10,9 @@ Implement the work described by the user in the spec or issues.
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
 and tell the user to run `/modified-matt-setup-skills`.
 
+Read each issue you're implementing first (`.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work from its
+`whatToBuild`, `acceptanceCriteria`, `testSeams` and `spec`.
+
 Use /modified-matt-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.

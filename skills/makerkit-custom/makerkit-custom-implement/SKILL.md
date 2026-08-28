@@ -6,6 +6,13 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or issues.
 
+**Read `.myprds/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
+numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
+and tell the user to run `/makerkit-custom-setup-skills`.
+
+Read each issue you're implementing first (`.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work from its
+`whatToBuild`, `acceptanceCriteria`, `testSeams` and `spec`.
+
 ## Ground yourself first
 
 **Before writing any code**, read the project's own documentation:
@@ -34,9 +41,6 @@ Once the implementation is done, run the following in order:
 
 Check the diff against the originating issue / spec: does the code faithfully implement it? Standards conformance
 (AGENTS.md, code smells) belongs to `/reviewer` in step 2 — this step is spec-fidelity only.
-
-Read `.myprds/issue-tracker.md` for the issue shape and status lifecycle before touching any issue file. If it's
-missing, stop and tell the user to run `/makerkit-custom-setup-skills`.
 
 ### Collect the diff
 

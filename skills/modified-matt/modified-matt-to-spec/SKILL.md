@@ -5,7 +5,8 @@ disable-model-invocation: true
 ---
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the
-user; just synthesize what you already know.
+user; just synthesize what you already know. If the design conversation isn't in this session's context, say so and
+ask the user to point you at it rather than inventing a decision log.
 
 **Read `.myprds/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop

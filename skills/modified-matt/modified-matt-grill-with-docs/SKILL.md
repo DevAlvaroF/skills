@@ -4,9 +4,9 @@ description: A relentless interview to sharpen a plan or design, which also crea
 disable-model-invocation: true
 ---
 
-**Before the first round**, call the Skill tool with "modified-matt-domain-modeling" and run it alongside this interview: it
-challenges the terms as they come up and records vocabulary and decisions the moment they crystallise, rather than at
-the end.
+**Before the first round**, call the Skill tool with "modified-matt-domain-modeling" and apply its rules throughout
+this interview: it challenges the terms as they come up and records vocabulary and decisions the moment they
+crystallise, rather than at the end.
 
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision
 branches into the decisions that hang off it.
