@@ -11,10 +11,9 @@ npx skills@latest add devalvarof/skills
 That's the whole install. The CLI clones the repo, shows a picker, and writes
 the skills you tick into the project.
 
-The repo ships **three groups**. Two of them are full flavours of the same
+The repo ships **two groups**. Both are full flavours of the same
 engineering skill set — **install one or the other, never both**: a project
-that installed both would offer the agent two copies of every skill. The third
-is a small standalone group that sits happily alongside either.
+that installed both would offer the agent two copies of every skill.
 
 **The two flavours are siblings, not mirrors.** `makerkit-custom` is adapted for
 the specific architecture of the [makerkit.dev](https://makerkit.dev) SaaS
@@ -31,10 +30,9 @@ Don't assume parity between them; check what each actually contains.
 | Group in the picker | Directory | Prefix | Skills | For |
 |---|---|---|---|---|
 | **Makerkit Custom Skills** | `skills/makerkit-custom/` | `makerkit-custom-*` | 7 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
-| **Modified Matt Skills** | `skills/modified-matt/` | `modified-matt-*` | 10 | Every other repo. Agent-written config goes in `.myprds/docs/agents/`, with ADRs in `.myprds/docs/adr/` |
-| **Alvaro Skills** | `skills/alvaro/` | `alvaro-*` | 1 | Standalone extras, not part of the Matt Pocock set; safe next to either flavour |
+| **Modified Matt Skills** | `skills/modified-matt/` | `modified-matt-*` | 7 | Every other repo. Agent-written config goes in `.myprds/docs/agents/`, with ADRs in `.myprds/docs/adr/` |
 
-Directory and prefix match in all three groups: `skills/<group>/` holds skills
+Directory and prefix match in both groups: `skills/<group>/` holds skills
 prefixed `<group>-`. The directory name is what the scoped install URL wants;
 the prefix is what you type to invoke a skill.
 
@@ -53,10 +51,10 @@ npx skills@latest add devalvarof/skills
 
 Four prompts, in order:
 
-1. **Select skills.** All three groups are drawn as collapsible headings —
+1. **Select skills.** Both groups are drawn as collapsible headings —
    move to **Makerkit Custom Skills** or **Modified Matt Skills** and hit space to
    take that whole flavour in one keystroke. Don't tick *Select All*: that's
-   all 20 skills across all three groups, including both flavours at once.
+   all 14 skills, meaning both flavours at once.
 2. **Which agents.** `Claude Code` is preselected. Add `Codex` if you use it.
    The Universal target (`.agents/skills`) is always included.
 3. **Installation method.** Pick `Symlink` (Recommended). `Copy to all agents`
@@ -68,8 +66,8 @@ Two things silently skip the menu, so run this in a plain terminal:
 
 - Running it from inside a Claude Code or Codex session. The CLI detects the
   agent and installs everything non-interactively.
-- Passing `-s`/`--skill`, `-y`/`--yes`, or `--all`. Any of them takes all 20
-  skills across all three groups with no prompt.
+- Passing `-s`/`--skill`, `-y`/`--yes`, or `--all`. Any of them takes all 14
+  skills across both groups with no prompt.
 
 ### Symlink or copy
 
@@ -111,14 +109,10 @@ npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/make
 # any other repo
 npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/modified-matt \
   -a claude-code codex -s '*' -y
-
-# the standalone extras, alongside either of the above
-npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/alvaro \
-  -a claude-code codex -s '*' -y
 ```
 
 **Never combine the bare `devalvarof/skills` name with `-s '*'` or `-y`.**
-That walks into all three groups and installs all 20 skills. Either prompt (no
+That walks into both groups and installs all 14 skills. Either prompt (no
 `-s`, no `-y`) or scope with the `tree/main/skills/<group>` URL.
 
 Named subsets work too:
@@ -181,7 +175,7 @@ skills-refresh() {
     # skills-lock.json records a skillPath per skill; the group is in it
     group=$(grep -o '"skillPath": "skills/[a-z-]*' "$d" | head -1 | sed 's|.*skills/||')
     case "$group" in
-      makerkit-custom|modified-matt|alvaro) ;;
+      makerkit-custom|modified-matt) ;;
       *) echo "-- skip ${d%/skills-lock.json} (not from this repo)"; continue ;;
     esac
     (cd "${d%/skills-lock.json}" && echo "-> $PWD ($group)" && \
@@ -254,40 +248,34 @@ outside these skills) so an issue can't reach "done" without a human actually
 looking at it. An issue parked at `done-coding-awaiting-final-review` is
 correctly waiting on that human, not stuck.
 
-The two flavours no longer hold the same skill set, so they're listed
-separately. Names are unprefixed below; in the picker each carries its group's
+Both flavours now hold the same seven skills, though the *contents* still
+diverge. Names are unprefixed below; in the picker each carries its group's
 prefix (`makerkit-custom-tdd`, `modified-matt-tdd`).
 
-**Makerkit Custom** (7) — user-invoked only: `grill-with-docs`, `implement`,
-`setup-skills`, `to-spec`, `to-issues`. Model-invoked:
-`domain-modeling`, `tdd`.
-
-**Modified Matt** (10) — user-invoked only: `grill-with-docs`, `implement`,
-`improve-codebase-architecture`, `setup-skills`, `to-spec`,
-`to-issues`. Model-invoked: `code-review`, `codebase-design`,
-`domain-modeling`, `tdd`.
+**Makerkit Custom** (7) and **Modified Matt** (7) — user-invoked only:
+`grill-with-docs`, `implement`, `setup-skills`, `to-spec`, `to-issues`.
+Model-invoked: `domain-modeling`, `tdd`.
 
 `grill-with-docs` carries the interview itself — it used to delegate to a
 separate `grilling` skill, which is now folded into it. It calls
 `domain-modeling` alongside the interview so terms and decisions get recorded
 as they crystallise.
 
-`code-review`, `codebase-design` and `improve-codebase-architecture` exist only
-in **Modified Matt**: the Makerkit flavour defers review to the repo's own
-`/reviewer` and `/rls-review` skills instead.
-
-**Alvaro Skills** (1) — `alvaro-adversarial-reviewer`, model-invoked, belongs
-to neither flavour's list.
+`implement` carries the code review in both flavours; there is no separate
+review skill. What it reviews differs: **Modified Matt** runs both axes
+(Standards and Spec) in parallel sub-agents, carrying a built-in Fowler smell
+baseline, while **Makerkit Custom** reviews spec-fidelity only and defers
+standards to the repo's own `/reviewer` and `/rls-review` skills.
 
 ## Layout
 
 ```
 .claude-plugin/
-  marketplace.json        # declares the three groups; generated, see below
+  marketplace.json        # declares the two groups; generated, see below
 scripts/
   gen-marketplace.mjs     # regenerates it from what's on disk
 skills/
-  <group>/                # makerkit-custom | modified-matt | alvaro
+  <group>/                # makerkit-custom | modified-matt
     <prefixed-skill-name>/
       SKILL.md            # required
       references/         # optional, loaded on demand
@@ -312,7 +300,7 @@ the manifest still installs, but shows up under "Other" instead of its group.
   `license`, `allowed-tools`, `metadata`. Stick to these unless you have a
   reason; unrecognised keys are at best ignored and at worst rejected.
 - Skill names share one namespace with bundled and third-party skills.
-  Keep the group prefix (`makerkit-custom-`, `modified-matt-`, or `alvaro-`).
+  Keep the group prefix (`makerkit-custom-` or `modified-matt-`).
 - They are independent copies; a fix applied to `skills/makerkit-custom/` does
   not reach `skills/modified-matt/`. Mirror a fix in both only when it's about
   generic skill mechanics (frontmatter, tool usage, process bugs). A fix
@@ -364,8 +352,7 @@ Skills that are fine to trigger automatically need neither.
 - Don't also install `mattpocock/skills` into the same project. These are
   adapted copies of those skills; you'd get both sets.
 - Don't install both flavours into the same project. Same skills, two
-  prefixes; the agent would see every skill twice. **Alvaro Skills** is not a
-  flavour and is fine alongside either.
+  prefixes; the agent would see every skill twice.
 - The group headings in the picker come from `.claude-plugin/marketplace.json`,
   not from the `skills/<group>/` directories. Add a skill without
   regenerating the manifest and it lands under "Other".
