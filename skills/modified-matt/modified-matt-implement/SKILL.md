@@ -6,6 +6,10 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or issues.
 
+**Read `.myprds/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
+numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
+and tell the user to run `/modified-matt-setup-skills`.
+
 Use /modified-matt-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.
@@ -22,9 +26,6 @@ Review the changes along two axes:
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their
 findings.
-
-The issue tracker should have been provided to you. If `.myprds/docs/agents/issue-tracker.md` is missing, tell the user
-to run `/modified-matt-setup-skills`.
 
 ### Collect the diff
 
