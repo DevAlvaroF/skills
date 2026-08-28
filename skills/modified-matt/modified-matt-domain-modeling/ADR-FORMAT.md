@@ -1,6 +1,6 @@
 # ADR Format
 
-ADRs live in `.myprds/docs/adr/` and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
+ADRs live in `.myprds/docs/adr/` at the repo root — one directory for the whole repo, including multi-context repos — and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
 
 Create the `.myprds/docs/adr/` directory lazily: only when the first ADR is needed.
 

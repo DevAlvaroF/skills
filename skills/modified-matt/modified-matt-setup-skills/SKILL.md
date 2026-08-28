@@ -21,7 +21,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` section in either?
 - `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root
-- `.myprds/docs/adr/` and any `src/*/.myprds/docs/adr/` directories
+- `.myprds/docs/adr/`
 - `.myprds/docs/agents/*.md`: does this skill's prior output already exist?
 - `.myprds/`: existing feature directories, their `spec.md` files, and every JSON file under `issues/`. If any exist this is an upgrade rather than a first run, so read enough of them to answer Section C
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.

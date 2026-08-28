@@ -9,37 +9,7 @@ Actively build and sharpen the project's domain model as you design. This is the
 
 ## File structure
 
-Most repos have a single context:
-
-```
-/
-├── CONTEXT.md
-├── .myprds/
-│   └── docs/
-│       └── adr/
-│           ├── 0001-event-sourced-orders.md
-│           └── 0002-postgres-for-write-model.md
-└── src/
-```
-
-If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The map points to where each one lives:
-
-```
-/
-├── CONTEXT-MAP.md
-├── .myprds/
-│   └── docs/
-│       └── adr/        ← system-wide decisions
-└── src/
-    ├── ordering/
-    │   ├── CONTEXT.md
-    │   └── .myprds/docs/adr/   ← context-specific decisions
-    └── billing/
-        ├── CONTEXT.md
-        └── .myprds/docs/adr/
-```
-
-Create files lazily: only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `.myprds/docs/adr/` exists, create it when the first ADR is needed.
+Layout follows [./CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md): a root `CONTEXT.md`, or a root `CONTEXT-MAP.md` pointing at per-context files. Create lazily — `CONTEXT.md` when the first term resolves, `.myprds/docs/adr/` when the first ADR is needed.
 
 ## During the session
 
