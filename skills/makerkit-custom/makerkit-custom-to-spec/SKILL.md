@@ -121,6 +121,7 @@ Confirm each of these. Any "no" is a fix, not a caveat: don't publish until it's
 - Every user story carries a `US-NNN` ID, and no ID was renumbered or reused from an earlier revision
 - Every user story describes externally observable behaviour, not an implementation detail
 - The test seams in Testing Decisions are the ones the user confirmed in step 2
+- The feature directory is named `<NN>-<feature-slug>`, numbered per `.myprds/issue-tracker.md`
 - Out of Scope is non-empty: a spec that excludes nothing hasn't been scoped
 - Testing Decisions names prior art: actual similar tests in this codebase, not a description of what one would look
   like
