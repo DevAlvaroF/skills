@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Break a plan, spec, or conversation into a set of **issues**: tracer-bullet vertical slices, each declaring the issues that **block** it.
 
-The issue tracker conventions should have been provided to you. If not, tell the user to run `/modified-matt-setup-skills`.
+**Read `.myprds/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop and tell the user to run `/modified-matt-setup-skills`.
 
 ## Process
 
@@ -70,11 +70,13 @@ Iterate until the user approves the breakdown.
 - **Absent or empty** → first publish. Create the issues as described below, numbering from `01` in dependency order (blockers first).
 - **Non-empty** → **reconciliation mode**. Write nothing until the whole reconciliation is resolved and shown to the user; see *Reconciling with existing issues* below.
 
-Write one file per issue under `.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that issue's `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's `spec.md` path if this run started from a spec (a spec path was passed in, or one exists at `.myprds/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that issue in step 4, and `covers` to the `US-NNN` IDs agreed there. Use the per-issue JSON template below: one issue per file, never a single combined file.
+Write one file per issue under `.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that issue's `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's `spec.md` path if this run started from a spec (a spec path was passed in, or one exists at `.myprds/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that issue in step 4, and `covers` to the `US-NNN` IDs agreed there. Use the issue shape from `.myprds/docs/agents/issue-tracker.md` § Issue shape: one issue per file, never a single combined file.
 
 Work the **frontier**: any issue whose blockers are all done. For a purely linear chain that means top to bottom.
 
 Do NOT modify the feature's `spec.md`.
+
+Avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
 
 #### Reconciling with existing issues
 
@@ -88,31 +90,8 @@ An issue already on disk may carry live state that exists nowhere else: a `statu
 6. **A `covers` entry with no matching story is a dangling reference.** It means the spec was revised and that `US-NNN` was dropped or renamed. Never silently remove it. List each one with the issue it sits on and ask the user whether that issue is now out of scope or should point at a different story.
 7. **Report.** Show a table of every issue in the directory and what happened to it: created / updated / status preserved / archived.
 
-<local-issue-template>
+#### The issue shape
 
-```json
-{
-  "id": "<NN>",
-  "slug": "<slug>",
-  "title": "<Issue title>",
-  "status": "ready-for-agent",
-  "spec": ".myprds/<NN>-<feature-slug>/spec.md",
-  "whatToBuild": "The end-to-end behaviour this issue makes work, from the user's perspective, not a layer-by-layer implementation list.",
-  "blockedBy": ["<NN>", "<NN>"],
-  "testSeams": ["<seam description>", "<seam description>"],
-  "covers": ["US-003", "US-007"],
-  "acceptanceCriteria": [
-    { "text": "Acceptance criterion 1", "done": false },
-    { "text": "Acceptance criterion 2", "done": false }
-  ],
-  "comments": []
-}
-```
+`.myprds/docs/agents/issue-tracker.md` § Issue shape defines the fields, their types, and what each empty value means. Follow it exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field present on every issue.
 
-Write strict JSON: no comments, no trailing commas, and every field present on every issue. `spec` is the path to the spec this issue was broken out of, relative to the repository root and beginning with `.myprds/`; set it to `null` when there is no spec (issues drafted straight from a plan or conversation). `blockedBy` holds the `id` of each issue that gates this one, and is an empty array `[]` when the issue can start immediately. `testSeams` lists the public boundaries this issue's tests hit, as confirmed with the user in step 4; `[]` when the issue has no dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this issue satisfies; `[]` when the issue satisfies no story directly, and always `[]` when `spec` is `null`.
-
-The `status`, `acceptanceCriteria[].done`, and `comments` values in the template are **seed values for a newly created issue only**. On an issue that already exists they are live state: carry them over from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`; `acceptanceCriteria` entries start with `"done": false` and ticking one means flipping it to `true`; `comments` starts as `[]`.
-
-</local-issue-template>
-
-Avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
+The `status`, `acceptanceCriteria[].done`, and `comments` values shown there are **seed values for a newly created issue only**. On an issue that already exists they are live state: carry them over from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`; `acceptanceCriteria` entries start with `"done": false` and ticking one means flipping it to `true`; `comments` starts as `[]`.
