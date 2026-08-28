@@ -46,13 +46,15 @@ Do not act on it until the user confirms you have reached a shared understanding
 **Before the first round**, read the project's own documentation so you never spend a question on something the repo
 already answers:
 
-- the root `AGENTS.md`, then the nearest `AGENTS.md` to the area in question, following the doc-consumption rules they
-  set out, plus the vendored Next.js docs for anything Next.js. Where those files and this description differ, **follow
-  the repo**.
-- the `README.md` of each app or package involved (`apps/*/README.md`, `packages/*/README.md`) — what that piece is and
-  how it fits;
-- the Makerkit docs under `docs/` (`.mdoc` files by topic: `billing`, `security`, `data-fetching`, …) — how a feature is
-  *meant* to work.
+- the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
+  vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
+  description differ, **follow the repo**.
+- the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
+  piece is and how it fits. Read directly, and only for the pieces the feature touches.
+- the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
+  upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
+  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Per the frontier
+  rule above, don't block round one on it: only the questions downstream of its answer wait for it to report.
 
 Understanding the architecture is a first step, not a question. Ask the user only what the docs genuinely don't answer —
 and when a question survives that reading, say what you checked, so they can see it's a real gap rather than a shortcut.

@@ -4,7 +4,7 @@ description: "Configure this repo for the engineering skills: set up its issue t
 disable-model-invocation: true
 ---
 
-# Setup Matt Pocock's Skills
+# Setup the Makerkit engineering skills
 
 Scaffold the per-repo configuration that the engineering skills assume:
 
@@ -80,8 +80,9 @@ in [issue-tracker-local.md](./issue-tracker-local.md):
   those fields in the same pass.
 
 Present the drift as a per-file list and ask whether to migrate. Never migrate silently, and never touch live state
-while doing it: `status`, `acceptanceCriteria[].done`, and `comments` hold work that exists nowhere else. `.myprds/` is
-usually gitignored, so assume there is no undo and get the answer before writing.
+while doing it. Check `.gitignore` before relying on git for undo: where `.myprds/` is tracked, `git diff` is your
+safety net; where it's ignored, there is no undo. Either way get the answer before writing — `status`,
+`acceptanceCriteria[].done`, and `comments` hold work that exists nowhere else.
 
 Backfilling real `covers` values is not this skill's job. Set them to `[]` and tell the user that re-running
 `/makerkit-custom-to-issues` against the spec maps stories to issues properly, reconciling against what is already on

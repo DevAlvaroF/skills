@@ -1,8 +1,8 @@
 # Issue tracker: Local Files
 
 This file is the schema of record for `/modified-matt-to-spec`, `/modified-matt-to-issues`, and
-`/modified-matt-implement`. Those skills read the generated `.myprds/docs/agents/issue-tracker.md` rather than carrying their own
-copy — so a schema change starts here.
+`/modified-matt-implement`. Those skills read the generated `.myprds/docs/agents/issue-tracker.md` rather than carrying
+their own copy — so a schema change starts here.
 
 Specs for this repo live as markdown files in `.myprds/`; **issues are JSON files**, so other software can read them
 without parsing prose.

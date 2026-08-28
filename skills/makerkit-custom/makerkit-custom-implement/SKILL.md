@@ -6,13 +6,19 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or issues.
 
-Before writing code, read the root `AGENTS.md`, then the nearest `AGENTS.md` to the code you're changing, and follow the
-doc-consumption rules they set out, plus the vendored Next.js docs before any Next.js work. Where those files and this
-description differ, **follow the repo**.
+## Ground yourself first
 
-**If the nearest `AGENTS.md` has a `## Skills` section, invoke the skills it names while writing that surface's code.**
-They encode how this repo builds services, server actions, forms, migrations and E2E tests; that's a decision made at
-implementation time, not something the review steps below can retrofit.
+**Before writing any code**, read the project's own documentation:
+
+- the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
+  vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
+  description differ, **follow the repo**.
+- the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
+  piece is and how it fits. Read directly, and only for the pieces the feature touches.
+- the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
+  upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
+  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Per the frontier
+  rule above, don't block round one on it: only the questions downstream of its answer wait for it to report.
 
 Use /makerkit-custom-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
 
@@ -29,8 +35,8 @@ Once the implementation is done, run the following in order:
 Check the diff against the originating issue / spec: does the code faithfully implement it? Standards conformance
 (AGENTS.md, code smells) belongs to `/reviewer` in step 2 — this step is spec-fidelity only.
 
-The issue tracker should have been provided to you. If `.myprds/issue-tracker.md` is missing, tell the user to run
-`/makerkit-custom-setup-skills`.
+Read `.myprds/issue-tracker.md` for the issue shape and status lifecycle before touching any issue file. If it's
+missing, stop and tell the user to run `/makerkit-custom-setup-skills`.
 
 ### Collect the diff
 
@@ -55,8 +61,8 @@ Look for the originating spec, in this order:
 1. A `.myprds/<NN>-<feature-slug>/` path referenced in the commit messages (per this skill's convention of including the
    issue and `spec.md` paths in its suggested commit message).
 2. A path the user passed as an argument.
-3. A spec file under `.myprds/` or `specs/` matching the branch name or feature. Do **not** treat `docs/` as a spec
-   location: in this repo it holds upstream Makerkit product documentation (`.mdoc` files), not agent-authored specs.
+3. A spec file under `.myprds/` matching the branch name or feature — never `docs/`, which is upstream Makerkit product
+   documentation, not agent-authored specs.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip
    and report "no spec available".
 

@@ -9,9 +9,9 @@ TDD is the red → green loop. This skill is the reference that makes that loop 
 test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult
 them before and during the loop, not after.
 
-When exploring the codebase, read the root `AGENTS.md`, then the nearest `AGENTS.md` to the code under test, and follow
-the doc-consumption rules they set out, so test names and interface vocabulary match the project's language. Where those
-files and this description differ, **follow the repo**.
+When exploring the codebase, read the nearest `AGENTS.md` to the code under test — the root file is already in your
+context via `CLAUDE.md` — so test names and interface vocabulary match the project's language. Where it and this
+description differ, **follow the repo**.
 
 The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, seams over
 internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A thin
