@@ -21,8 +21,8 @@ Look at the current repo to understand its starting state. Read whatever exists;
 
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` section in either?
 - `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root
-- `docs/adr/` and any `src/*/docs/adr/` directories
-- `docs/agents/*.md`: does this skill's prior output already exist?
+- `.myprds/docs/adr/` and any `src/*/.myprds/docs/adr/` directories
+- `.myprds/docs/agents/*.md`: does this skill's prior output already exist?
 - `.myprds/`: existing feature directories, their `spec.md` files, and every JSON file under `issues/`. If any exist this is an upgrade rather than a first run, so read enough of them to answer Section C
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
 
@@ -32,9 +32,9 @@ Summarise what's present and what's missing. Then take the sections in order. On
 
 Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when there's no monorepo).
 
-**Section A: Issue tracker.** These skills track work as local JSON issue files under `.myprds/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown alongside them. This is fixed — there's no tracker choice to make, so skip straight to writing `docs/agents/issue-tracker.md` from the local template without asking.
+**Section A: Issue tracker.** These skills track work as local JSON issue files under `.myprds/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown alongside them. This is fixed — there's no tracker choice to make, so skip straight to writing `.myprds/docs/agents/issue-tracker.md` from the local template without asking.
 
-**Section B: Domain docs.** Default to **single-context** (one `CONTEXT.md` + `docs/adr/` at the repo root). This fits almost every repo; write it without asking.
+**Section B: Domain docs.** Default to **single-context** (one `CONTEXT.md` + `.myprds/docs/adr/` at the repo root). This fits almost every repo; write it without asking.
 
 Offer **multi-context** (a root `CONTEXT-MAP.md` pointing to per-context `CONTEXT.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
 
@@ -57,7 +57,7 @@ Backfilling real `covers` values is not this skill's job. Set them to `[]` and t
 Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `docs/agents/issue-tracker.md` and `docs/agents/domain.md`
+- The contents of `.myprds/docs/agents/issue-tracker.md` and `.myprds/docs/agents/domain.md`
 - Any `.myprds` migration agreed in Section C, as a per-file list
 
 For a file that already exists, show the **delta** rather than the whole file: what the current seed adds, changes, or drops relative to what is on disk. A wall of unchanged text buries the one line that actually moved.
@@ -83,11 +83,11 @@ The block:
 
 ### Issue tracker
 
-[one-line summary of where issues are tracked]. See `docs/agents/issue-tracker.md`.
+[one-line summary of where issues are tracked]. See `.myprds/docs/agents/issue-tracker.md`.
 
 ### Domain docs
 
-[one-line summary of layout: "single-context" or "multi-context"]. See `docs/agents/domain.md`.
+[one-line summary of layout: "single-context" or "multi-context"]. See `.myprds/docs/agents/domain.md`.
 ```
 
 Then write the docs files, using the seed templates in this skill folder as a starting point:
@@ -95,7 +95,7 @@ Then write the docs files, using the seed templates in this skill folder as a st
 - [issue-tracker-local.md](./issue-tracker-local.md): local file-based issue tracker (JSON issues)
 - [domain.md](./domain.md): domain doc consumer rules + layout
 
-**Upgrade these files in place; do not regenerate them.** For each of `docs/agents/issue-tracker.md` and `docs/agents/domain.md`:
+**Upgrade these files in place; do not regenerate them.** For each of `.myprds/docs/agents/issue-tracker.md` and `.myprds/docs/agents/domain.md`:
 
 - If it doesn't exist, write it from the seed.
 - If it does, read it and compare against the seed. Apply what the seed adds or changes; leave everything else as the user left it. Sections the file has and the seed doesn't are the user's own additions: keep them unless they contradict a seed section, and say which ones you kept.
@@ -105,6 +105,8 @@ Finally, apply whatever `.myprds` migration the user approved in Section C, one 
 
 ### 5. Done
 
-Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later, and that re-running this skill upgrades what is there in place — it diffs against the current seeds, audits `.myprds/`, and asks before changing anything.
+Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `.myprds/docs/agents/*.md` directly later, and that re-running this skill upgrades what is there in place — it diffs against the current seeds, audits `.myprds/`, and asks before changing anything.
+
+Check `.gitignore`. If `.myprds/` is ignored, point out that `issue-tracker.md`, `domain.md`, and any ADRs under `.myprds/docs/adr/` won't be committed with the repo — so the `## Agent skills` block will point at files a fresh clone doesn't have, and this skill needs running again there. Offer to un-ignore `.myprds/docs/` so the generated config and the ADRs travel with the repo while the issue files stay local.
 
 If Section C found drift, close with the follow-ups it left open: issues whose `covers` is now `[]` and wants a `/modified-matt-to-issues` pass, and anything reported but deliberately not migrated.

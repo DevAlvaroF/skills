@@ -31,7 +31,7 @@
     {
       "name": "modified-matt-skills",
       "source": "./skills/modified-matt",
-      "description": "The same engineering skills without the Makerkit-specific assumptions. For any repo. Agent-written config lives in docs/agents/, with ADRs in docs/adr/.",
+      "description": "The same engineering skills without the Makerkit-specific assumptions. For any repo. Agent-written config lives in .myprds/docs/agents/, with ADRs in .myprds/docs/adr/.",
       "category": "engineering",
       "keywords": [
         "engineering",
