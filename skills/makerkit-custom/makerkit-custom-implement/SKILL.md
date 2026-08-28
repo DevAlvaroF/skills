@@ -58,8 +58,7 @@ git show HEAD
 
 Look for the originating spec, in this order:
 
-1. A `.myprds/<NN>-<feature-slug>/` path referenced in the commit messages (per this skill's convention of including the
-   issue and `spec.md` paths in its suggested commit message).
+1. The `spec` field of the issue(s) you just implemented.
 2. A path the user passed as an argument.
 3. A spec file under `.myprds/` matching the branch name or feature — never `docs/`, which is upstream Makerkit product
    documentation, not agent-authored specs.
