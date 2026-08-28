@@ -25,7 +25,7 @@ If implementation reveals a pre-agreed seam doesn't hold (the boundary doesn't e
 
 Ask: "What's the public interface, and which seams should we test?"
 
-When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), call the Skill tool with "modified-matt-codebase-design" for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
+When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), settle that with the user before writing the test. Don't let the test quietly design the interface.
 
 ## Anti-patterns
 
@@ -37,4 +37,4 @@ When the shape of that interface is itself in question (how deep the module is, 
 
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
 - **One slice at a time.** One seam, one test, one minimal implementation per cycle.
-- **Refactoring is not part of the loop.** The review stage always assesses the diff for refactor-worthy smells and applies the safe ones (see the `modified-matt-code-review` skill's Assess step), not the red → green implementation cycle.
+- **Refactoring is not part of the loop.** The review stage always assesses the diff for refactor-worthy smells and applies the safe ones (see the `modified-matt-implement` skill's _Assess refactors_ step), not the red → green implementation cycle.

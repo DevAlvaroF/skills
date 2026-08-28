@@ -4,7 +4,7 @@
     "name": "Alvaro F",
     "url": "https://github.com/DevAlvaroF"
   },
-  "description": "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic, plus standalone extras.",
+  "description": "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic.",
   "plugins": [
     {
       "name": "makerkit-custom-skills",
@@ -40,12 +40,9 @@
         "grilling"
       ],
       "skills": [
-        "./modified-matt-code-review",
-        "./modified-matt-codebase-design",
         "./modified-matt-domain-modeling",
         "./modified-matt-grill-with-docs",
         "./modified-matt-implement",
-        "./modified-matt-improve-codebase-architecture",
         "./modified-matt-setup-skills",
         "./modified-matt-tdd",
         "./modified-matt-to-issues",

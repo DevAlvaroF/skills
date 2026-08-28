@@ -2,11 +2,11 @@
 // Regenerates .claude-plugin/marketplace.json from whatever is on disk.
 //
 // The manifest is what makes `npx skills add DevAlvaroF/skills`
-// show "Makerkit Custom Skills", "Modified Matt Skills" and "Alvaro Skills" as
-// toggleable groups in its picker: the CLI reads plugins[].skills and tags
-// each skill with the owning
-// plugin name. A skill missing from the manifest still installs, but lands in
-// an "Other" group. Run this after adding or renaming a skill.
+// show "Makerkit Custom Skills" and "Modified Matt Skills" as toggleable
+// groups in its picker: the CLI reads plugins[].skills and tags each skill
+// with the owning plugin name. A skill missing from the manifest still
+// installs, but lands in an "Other" group. Run this after adding, removing or
+// renaming a skill.
 //
 //   node scripts/gen-marketplace.mjs
 
@@ -45,7 +45,7 @@ const manifest = {
     name: "devalvarof-skills",
     owner: {name: "Alvaro F", url: "https://github.com/DevAlvaroF"},
     description:
-        "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic, plus standalone extras.",
+        "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic.",
     plugins: GROUPS.map((g) => ({
         name: g.name,
         source: `./skills/${g.dir}`,
