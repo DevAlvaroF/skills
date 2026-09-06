@@ -20,7 +20,7 @@ and tell the user to run `/makerkit-custom-setup-skills`.
 Work from whatever is already in the conversation context. If the user passes a reference (a spec path or issue path) as
 an argument, read the file's full contents.
 
-### 2. Explore the codebase (optional)
+### 2. Explore the codebase
 
 **Before starting**, If you have not already explored the codebase to understand the state of the code,read the
 project's own documentation:
@@ -47,7 +47,8 @@ Break the work into **tracer bullet** issues.
 - Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests): vertical, NOT a horizontal
   slice of one layer
 - A completed slice is demoable or verifiable on its own
-- Each slice is sized to fit in a single fresh context window
+- Each slice is sized to fit in a single fresh context window. You can't measure tokens directly, so use the file count
+  as the proxy: a slice that looks like it will create or edit more than ~10 files is too big — split it
 - Any prefactoring should be done first
 
 </vertical-slice-rules>
