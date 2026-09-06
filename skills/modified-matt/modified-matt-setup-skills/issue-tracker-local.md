@@ -37,8 +37,8 @@ Implementation issues (written by the issues skill):
   "blockedBy": [
     "<NN>"
   ],
-  "testSeams": [
-    "<seam description>"
+  "testBoundaries": [
+    "<boundary description>"
   ],
   "covers": [
     "US-003"
@@ -60,8 +60,8 @@ Implementation issues (written by the issues skill):
 
 `spec` is the path to the spec this issue was broken out of, relative to the repository root and beginning with
 `.mysdd/`; `null` when there is no spec (issues drafted straight from a plan or conversation). `blockedBy` holds the
-`id` of each issue that gates this one, and is `[]` when the issue can start immediately. `testSeams` lists the public
-boundaries this issue's tests hit, confirmed with the user when the issue was drafted; `[]` when the issue has no
+`id` of each issue that gates this one, and is `[]` when the issue can start immediately. `testBoundaries` lists the
+public boundaries this issue's tests hit, confirmed with the user when the issue was drafted; `[]` when the issue has no
 dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this issue satisfies; `[]` when the
 issue satisfies no story directly, and always `[]` when `spec` is `null`. `comments` starts as `[]`.
 

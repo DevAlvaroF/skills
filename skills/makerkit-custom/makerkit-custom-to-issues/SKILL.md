@@ -55,10 +55,10 @@ Break the work into **tracer bullet** issues.
 Give each issue its **blocking edges**: the other issues that must complete before it can start. An issue with no
 blockers can start immediately.
 
-Identify each issue's **test seam (s)**: the public boundary its tests will hit. When the issue set descends from a spec
-with a Testing Decisions section, draw seams from what was agreed there; propose a new one only when a slice needs a
-boundary the spec didn't cover. An issue with no dedicated tests (e.g. a pure prefactor, or one leg of a wide-refactor
-batch) can carry no seams.
+Identify each issue's **test boundaries**: the public interface its tests will hit. When the issue set descends from a
+spec with a Testing Decisions section, draw boundaries from what was agreed there; propose a new one only when a slice
+needs a boundary the spec didn't cover. An issue with no dedicated tests (e.g. a pure prefactor, or one leg of a
+wide-refactor batch) can carry no boundaries.
 
 When the issue set descends from a spec, map each slice to the **user stories it satisfies**: the `US-NNN` IDs from the
 spec's User Stories section. Between them the issues should satisfy every story in the spec; a story no slice covers is
@@ -81,7 +81,7 @@ Present the proposed breakdown as a numbered list. For each issue, show:
 - **Title**: short descriptive name
 - **Blocked by**: which other issues (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this issue makes work
-- **Test seams**: which seam (s) this issue's tests will hit
+- **Test boundaries**: which boundaries this issue's tests will hit
 - **Covers**: which user stories (`US-NNN`) from the spec this issue satisfies
 
 Ask the user:
@@ -89,7 +89,7 @@ Ask the user:
 - Does the granularity feel right? (too coarse / too fine)
 - Are the blocking edges correct: does each issue only depend on issues that genuinely gate it?
 - Should any issues be merged or split further?
-- Are the test seams right: does each issue test at the right boundary, and are any missing or superfluous?
+- Are the test boundaries right: does each issue test at the right boundary, and are any missing or superfluous?
 - Is every user story covered? List each `US-NNN` in the spec that no issue covers, and ask whether it is a deliberate
   deferral or a slice you missed.
 
@@ -107,10 +107,10 @@ Iterate until the user approves the breakdown.
 Write one file per issue under `.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is
 its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that issue's
 `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's `spec.md`
-path if this run started from a spec (a spec path was passed in, or one exists at
-`.mysdd/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that issue in step 4,
-and `covers` to the `US-NNN` IDs agreed there. Use the issue shape from `.mysdd/issue-tracker.md` § Issue shape: one
-issue per file, never a single combined file.
+path if this run started from a spec (a spec path was passed in, or one exists at `.mysdd/<NN>-<feature-slug>/spec.md`);
+otherwise `null`. Set `testBoundaries` to the boundaries agreed for that issue in step 4, and `covers` to the `US-NNN`
+IDs agreed there. Use the issue shape from `.mysdd/issue-tracker.md` § Issue shape: one issue per file, never a single
+combined file.
 
 Work the **frontier**: any issue whose blockers are all done. For a purely linear chain that means top to bottom.
 
@@ -131,8 +131,8 @@ is non-empty, reconcile — never regenerate.
    `slug`. Numbers are addresses, not identities.
 2. **On a slug match, preserve — never reset.** Carry `status` and `comments` over verbatim. For each
    `acceptanceCriteria` entry, match on `text` and keep that entry's existing `done` value; never flip a `true` back to
-   `false`. Update only `title`, `whatToBuild`, `blockedBy`, `testSeams`, `covers`, `spec`, and criteria genuinely added
-   or removed by text.
+   `false`. Update only `title`, `whatToBuild`, `blockedBy`, `testBoundaries`, `covers`, `spec`, and criteria genuinely
+   added or removed by text.
 3. **On no match, it's a new issue.** Assign `id` = the highest `id` present in the directory (including
    `issues/archive/`) + 1. **Never reuse a retired number.**
 4. **`id` and filename are immutable once written.** Never renumber an existing issue, even when the dependency order

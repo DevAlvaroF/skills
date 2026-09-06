@@ -64,9 +64,11 @@ When they exist, the repo was set up against an older version of these conventio
 the other skills run against it. Check each feature directory for drift from the issue shape
 in [issue-tracker-local.md](./issue-tracker-local.md):
 
-- **Missing fields.** An issue lacking `spec`, `blockedBy`, `testSeams`, `covers`, or `comments` predates that field.
-  These are additive and safe to backfill: `spec` to that feature's `spec.md` when one exists and `null` when it
+- **Missing fields.** An issue lacking `spec`, `blockedBy`, `testBoundaries`, `covers`, or `comments` predates that
+  field. These are additive and safe to backfill: `spec` to that feature's `spec.md` when one exists and `null` when it
   doesn't, the rest to `[]`.
+- **Legacy `testSeams`.** An issue carrying `testSeams` instead of `testBoundaries` predates the rename. Same field,
+  same values: rename the key in place and carry the array over verbatim. Never drop the entries.
 - **Unknown `status`.** Any value outside `ready-for-agent` / `done-coding-awaiting-final-review` / `done-final-review`
   came from an older lifecycle. Never guess a mapping — list each one and ask.
 - **Shape violations.** A single combined issues file (one array rather than one file per issue), issues sitting

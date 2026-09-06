@@ -11,7 +11,7 @@ numbering, the issue JSON shape, and the status lifecycle. This skill does not r
 and tell the user to run `/makerkit-custom-setup-skills`.
 
 Read each issue you're implementing first (`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work from its
-`whatToBuild`, `acceptanceCriteria`, `testSeams` and `spec`.
+`whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`.
 
 ## Ground yourself first
 
@@ -27,7 +27,9 @@ Read each issue you're implementing first (`.mysdd/<NN>-<feature-slug>/issues/<N
   `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Don't block on
   it: start on whatever part of the implementation doesn't depend on its answer while it works.
 
-Use /makerkit-custom-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
+Use /makerkit-custom-tdd where possible, at each issue's pre-agreed boundaries (its `testBoundaries` field). If
+implementation surfaces a boundary the issue doesn't list — or shows a listed one doesn't hold — stop and agree it with
+the user before writing the test, then add it to that issue's `testBoundaries` when you write the file back.
 
 Once the implementation is done, run the following in order:
 
@@ -104,9 +106,10 @@ done and the tests you ran are green, advance every issue whose work landed
 satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done-coding-awaiting-final-review"`. This
 state means the implementation and this skill's own review are complete, but independent final review is still pending;
 this skill must never set `done-final-review`. Rewrite the whole file as strict JSON, keeping every other field (`id`,
-`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `testSeams`, `covers`, `comments`) intact — `comments` holds review
-history that exists nowhere else, so dropping or emptying it loses it permanently. Re-read each file after writing to
-confirm it still parses.
+`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `covers`, `comments`) intact — `comments` holds review history that
+exists nowhere else, so dropping or emptying it loses it permanently. `testBoundaries` is the one field you may change:
+add a boundary the user agreed during implementation, never remove one. Re-read each file after writing to confirm it
+still parses.
 
 If an issue is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
 outstanding. Never tick a criterion you did not verify.

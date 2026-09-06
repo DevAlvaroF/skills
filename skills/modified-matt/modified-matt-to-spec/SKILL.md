@@ -17,11 +17,11 @@ and tell the user to run `/modified-matt-setup-skills`.
 1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain
    glossary vocabulary throughout the spec, and respect any ADRs in the area you're touching.
 
-2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use
-   the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across
-   the codebase, the better - the ideal number is one.
+2. Sketch out the boundaries at which you're going to test the feature. Existing boundaries should be preferred to new
+   ones. Use the highest boundary possible. If new boundaries are needed, propose them at the highest point you can. The
+   fewer boundaries across the codebase, the better - the ideal number is one.
 
-Check with the user that these seams match their expectations.
+Check with the user that these boundaries match their expectations.
 
 3. Write the spec using the template below, then publish it as `spec.md` under the feature's
    `.mysdd/<NN>-<feature-slug>/` directory. A spec is prose, not an issue, so it carries no status; the
@@ -107,7 +107,7 @@ Confirm each of these. Any "no" is a fix, not a caveat: don't publish until it's
 
 - Every user story carries a `US-NNN` ID, and no ID was renumbered or reused from an earlier revision
 - Every user story describes externally observable behaviour, not an implementation detail
-- The test seams in Testing Decisions are the ones the user confirmed in step 2
+- The test boundaries in Testing Decisions are the ones the user confirmed in step 2
 - The feature directory is named `<NN>-<feature-slug>`, numbered per `.mysdd/docs/agents/issue-tracker.md`
 - Out of Scope is non-empty: a spec that excludes nothing hasn't been scoped
 - Testing Decisions names prior art: actual similar tests in this codebase, not a description of what one would

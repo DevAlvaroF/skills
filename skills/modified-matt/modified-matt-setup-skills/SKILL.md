@@ -42,7 +42,8 @@ Offer **multi-context** (a root `CONTEXT-MAP.md` pointing to per-context `CONTEX
 
 When they exist, the repo was set up against an older version of these conventions, and the gap is worth naming before the other skills run against it. Check each feature directory for drift from the issue shape in [issue-tracker-local.md](./issue-tracker-local.md):
 
-- **Missing fields.** An issue lacking `spec`, `blockedBy`, `testSeams`, `covers`, or `comments` predates that field. These are additive and safe to backfill: `spec` to that feature's `spec.md` when one exists and `null` when it doesn't, the rest to `[]`.
+- **Missing fields.** An issue lacking `spec`, `blockedBy`, `testBoundaries`, `covers`, or `comments` predates that field. These are additive and safe to backfill: `spec` to that feature's `spec.md` when one exists and `null` when it doesn't, the rest to `[]`.
+- **Legacy `testSeams`.** An issue carrying `testSeams` instead of `testBoundaries` predates the rename. Same field, same values: rename the key in place and carry the array over verbatim. Never drop the entries.
 - **Unknown `status`.** Any value outside `ready-for-agent` / `done-coding-awaiting-final-review` / `done-final-review` came from an older lifecycle. Never guess a mapping — list each one and ask.
 - **Shape violations.** A single combined issues file (one array rather than one file per issue), issues sitting directly in the feature directory instead of under `issues/`, or two issues sharing an `id`. Report each. Offer to split a combined file into per-issue files under the ids the issues already carry; never assign new ones.
 - **Specs without story IDs.** A `spec.md` whose User Stories carry no `US-NNN` IDs predates them, so no issue's `covers` can reference it. Offer to backfill IDs sequentially in document order — safe only while nothing references them, so if any issue in that feature already has a non-empty `covers`, report it and leave the spec alone.

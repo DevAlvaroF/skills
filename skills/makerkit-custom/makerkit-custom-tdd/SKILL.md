@@ -13,9 +13,9 @@ When exploring the codebase, read the nearest `AGENTS.md` to the code under test
 context via `CLAUDE.md` — so test names and interface vocabulary match the project's language. Where it and this
 description differ, **follow the repo**.
 
-The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, seams over
-internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A thin
-`AGENTS.md` is not permission to skip the loop.
+The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, boundaries
+over internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A
+thin `AGENTS.md` is not permission to skip the loop.
 
 ## What a good test is
 
@@ -25,21 +25,21 @@ and it survives refactors because it doesn't care about internal structure.
 
 See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking guidelines.
 
-## Seams: where tests go
+## Test boundaries: where tests go
 
-A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests
-live at seams, never against internals.
+A **test boundary** is the public interface you test at: the point where you observe behavior without reaching inside.
+Tests live at boundaries, never against internals.
 
-**Test only at pre-agreed seams.** If you're implementing from an issue, its `testSeams` field (set by
+**Test only at pre-agreed boundaries.** If you're implementing from an issue, its `testBoundaries` field (set by
 `/makerkit-custom-to-issues` when the issue was drafted) is that agreement — use it, don't re-ask. Otherwise, before
-writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed
-seam. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and
-complex logic instead of every edge case.
+writing any test, write down the boundaries under test and confirm them with the user. No test is written at an
+unconfirmed boundary. You can't test everything, so agreeing the boundaries up front is how testing effort lands on the
+critical paths and complex logic instead of every edge case.
 
-If implementation reveals a pre-agreed seam doesn't hold (the boundary doesn't exist, or testing there misses the
+If implementation reveals a pre-agreed boundary doesn't hold (that interface doesn't exist, or testing there misses the
 behavior that matters), stop and confirm the change with the user rather than silently testing elsewhere.
 
-Ask: "What's the public interface, and which seams should we test?"
+Ask: "What's the public interface, and which boundaries should we test?"
 
 ## Anti-patterns
 
@@ -59,6 +59,6 @@ Ask: "What's the public interface, and which seams should we test?"
 
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or
   add speculative features.
-- **One slice at a time.** One seam, one test, one minimal implementation per cycle.
+- **One slice at a time.** One boundary, one test, one minimal implementation per cycle.
 - **Refactoring is not part of the loop.** The review stage always assesses the diff for refactor-worthy smells and
   applies the safe ones, not the red → green implementation cycle.
