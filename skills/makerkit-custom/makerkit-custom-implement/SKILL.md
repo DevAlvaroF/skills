@@ -24,8 +24,8 @@ Read each issue you're implementing first (`.mysdd/<NN>-<feature-slug>/issues/<N
   piece is and how it fits. Read directly, and only for the pieces the feature touches.
 - the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
   upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
-  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Per the frontier
-  rule above, don't block round one on it: only the questions downstream of its answer wait for it to report.
+  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Don't block on
+  it: start on whatever part of the implementation doesn't depend on its answer while it works.
 
 Use /makerkit-custom-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
 
@@ -35,7 +35,10 @@ Once the implementation is done, run the following in order:
    verification list; run it whether or not the repo mentions anything like it.
 2. **The repo's verification steps**, from the root `AGENTS.md` § Verification, in the order given there. If that
    section is renamed, missing, or differs from this description, **follow the repo** — and say out loud which list you
-   actually ran.
+   actually ran. Where one of those steps is a whole-repo run — the full test suite, a build, a lint sweep — **run it
+   through a sub-agent**: its output is mostly noise this context never needs. Ask the sub-agent to run the repo's exact
+   command and report only the failures (test or rule name, file, and the assertion or error line) under 200 words, plus
+   an overall pass/fail verdict. Fix any failures here, then send it back to re-run.
 
 ## Step 1 in detail: review the work
 
@@ -44,17 +47,22 @@ Check the diff against the originating issue / spec: does the code faithfully im
 
 ### Collect the diff
 
+**Stay out of the full diff yourself.** The sub-agents below read it; in this context take only its shape:
+
 ```bash
-git diff HEAD
+git diff --stat HEAD
 git status --short
 ```
 
-If no uncommitted changes exist, review the last commit:
+If no uncommitted changes exist, the review target is the last commit instead:
 
 ```bash
 git show --stat HEAD
-git show HEAD
 ```
+
+Hand each sub-agent the *command* that reproduces the full diff — `git diff HEAD`, or `git show HEAD` when reviewing
+the last commit — and let it run that itself. Never paste diff contents into a sub-agent prompt, and never read the
+full diff into this context: it is the largest thing this skill touches, and doing both means paying for it twice.
 
 ### Process
 
@@ -75,8 +83,9 @@ Run this as a sub-agent so a large diff/spec doesn't pollute this skill's own co
 
 **Spec sub-agent prompt** should include:
 
-- The diff (from _Collect the diff_ above).
-- The path or fetched contents of the spec.
+- The diff command from _Collect the diff_ (the command, never the diff itself) and the commit list.
+- The *path* to the spec. Pass the path only and let the sub-agent read it; don't read the spec into this context to
+  paste it in.
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that
   wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote
   the spec line for each finding. Under 400 words."

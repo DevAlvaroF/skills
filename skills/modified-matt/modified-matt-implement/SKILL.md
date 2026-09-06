@@ -15,7 +15,11 @@ Read each issue you're implementing first (`.mysdd/<NN>-<feature-slug>/issues/<N
 
 Use /modified-matt-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
 
-Run typechecking regularly, single test files regularly, and the full test suite once at the end.
+Run typechecking regularly and single test files regularly — those are short, and you need their output in hand to
+drive the next cycle. Run the **full test suite once at the end, through a sub-agent**: suite output is mostly
+passing-test noise and stack traces this context never needs. Ask it to run the suite and report only the failures —
+test name, file, and the assertion or error line for each — under 200 words, plus an overall pass/fail verdict. Fix any
+failures here, then send it back to re-run.
 
 Once the implementation is done, review the work yourself using the **How to Review** section below. That
 review belongs to this skill: run it before advancing any issue, whether or not the repo documents anything like it.
@@ -32,17 +36,22 @@ findings.
 
 ### Collect the diff
 
+**Stay out of the full diff yourself.** The sub-agents below read it; in this context take only its shape:
+
 ```bash
-git diff HEAD
+git diff --stat HEAD
 git status --short
 ```
 
-If no uncommitted changes exist, review the last commit:
+If no uncommitted changes exist, the review target is the last commit instead:
 
 ```bash
 git show --stat HEAD
-git show HEAD
 ```
+
+Hand each sub-agent the *command* that reproduces the full diff — `git diff HEAD`, or `git show HEAD` when reviewing
+the last commit — and let it run that itself. Never paste diff contents into a sub-agent prompt, and never read the
+full diff into this context: it is the largest thing this skill touches, and doing both means paying for it twice.
 
 ### Process
 
@@ -101,7 +110,7 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 **Standards sub-agent prompt** should include:
 
-- The full diff command and commit list.
+- The diff command from _Collect the diff_ (the command, never the diff itself) and the commit list.
 - The list of standards-source files you found in step 2, **plus the smell baseline from step 2** pasted in full (the
   sub-agent has no other access to it).
 - The brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the
@@ -112,8 +121,9 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 **Spec sub-agent prompt** should include:
 
-- The diff command and commit list.
-- The path or fetched contents of the spec.
+- The diff command from _Collect the diff_ (the command, never the diff itself) and the commit list.
+- The *path* to the spec. Pass the path only and let the sub-agent read it; don't read the spec into this context to
+  paste it in.
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that
   wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote
   the spec line for each finding. Under 400 words."
@@ -144,7 +154,7 @@ Standards finding, use judgement, not a fixed rule, to decide:
   right fix.
 
 After applying any fixes, re-run whatever verification the repo defines (tests, lint, build) before reporting them as
-done.
+done — through a sub-agent reporting failures only, on the same terms as the end-of-implementation suite run above.
 
 Report the outcome under a third heading, `## Refactors`, separate from `## Standards` and `## Spec`: what was fixed,
 and what was flagged and left alone. This is not the cross-axis reranking step 4 forbids — that rule is about not
