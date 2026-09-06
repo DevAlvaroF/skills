@@ -8,13 +8,13 @@ disable-model-invocation: true
 
 Scaffold the per-repo configuration that the engineering skills assume:
 
-- **Issue tracker**: local JSON issue files under `.myprds/`, documented in `.myprds/issue-tracker.md`
+- **Issue tracker**: local JSON issue files under `.mysdd/`, documented in `.mysdd/issue-tracker.md`
 - **Project docs**: nothing to generate — the repo's own `AGENTS.md` distribution is the documentation
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then
 write.
 
-The one generated file is `.myprds/issue-tracker.md`, sitting alongside the issues it describes. The root `AGENTS.md`
+The one generated file is `.mysdd/issue-tracker.md`, sitting alongside the issues it describes. The root `AGENTS.md`
 points at it, so both Claude Code and Codex find it. Do not write config into `docs/` — in a Makerkit repo that
 directory is upstream product documentation (`.mdoc` files), not agent config, and do not reintroduce a generated
 project-docs file: the `AGENTS.md` files are read directly, with no index in between.
@@ -29,7 +29,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
   either? Note whether `CLAUDE.md` is a real document or just an `@AGENTS.md` import line.
 - The full `AGENTS.md` distribution: `find . -name AGENTS.md -not -path '*/node_modules/*'`. In a Makerkit monorepo this
   returns the root file plus one per app and per package. Note which paths have their own and which don't.
-- `.myprds/`: does `issue-tracker.md` — this skill's prior output — already exist? What feature directories, `spec.md`
+- `.mysdd/`: does `issue-tracker.md` — this skill's prior output — already exist? What feature directories, `spec.md`
   files, and JSON files under `issues/` are there? If any exist this is an upgrade rather than a first run, so read
   enough of them to answer Section C
 
@@ -41,9 +41,9 @@ Lead each section with the recommended answer so the user can accept it in a wor
 the choice genuinely branches.
 
 **Section A: Issue tracker.** These skills track work as local JSON issue files under
-`.myprds/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown
+`.mysdd/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown
 alongside them. This is fixed — there's no tracker choice to make, so skip straight to writing
-`.myprds/issue-tracker.md` from the local template without asking.
+`.mysdd/issue-tracker.md` from the local template without asking.
 
 **Section B: Project docs.** Nothing is generated here. This repo documents itself through a **distribution of
 `AGENTS.md` files**: a root file that maps the monorepo, plus one per app and per package that owns the conventions for
@@ -58,7 +58,7 @@ skills will navigate; naming it here is how the user sees whether a subtree is u
 If `find` returned **no** `AGENTS.md` files at all, say so and ask whether to seed a root one before continuing —
 without it the other skills have nothing to read.
 
-**Section C: Existing `.myprds` content.** Skip this section entirely when step 1 found no feature directories.
+**Section C: Existing `.mysdd` content.** Skip this section entirely when step 1 found no feature directories.
 
 When they exist, the repo was set up against an older version of these conventions, and the gap is worth naming before
 the other skills run against it. Check each feature directory for drift from the issue shape
@@ -80,7 +80,7 @@ in [issue-tracker-local.md](./issue-tracker-local.md):
   those fields in the same pass.
 
 Present the drift as a per-file list and ask whether to migrate. Never migrate silently, and never touch live state
-while doing it. Check `.gitignore` before relying on git for undo: where `.myprds/` is tracked, `git diff` is your
+while doing it. Check `.gitignore` before relying on git for undo: where `.mysdd/` is tracked, `git diff` is your
 safety net; where it's ignored, there is no undo. Either way get the answer before writing — `status`,
 `acceptanceCriteria[].done`, and `comments` hold work that exists nowhere else.
 
@@ -94,8 +94,8 @@ Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `AGENTS.md` / `CLAUDE.md` is being edited (see step 4 for selection
   rules)
-- The contents of `.myprds/issue-tracker.md`
-- Any `.myprds` migration agreed in Section C, as a per-file list
+- The contents of `.mysdd/issue-tracker.md`
+- Any `.mysdd` migration agreed in Section C, as a per-file list
 
 If `issue-tracker.md` already exists, show the **delta** rather than the whole file: what the current seed adds,
 changes, or drops relative to what is on disk. A wall of unchanged text buries the one line that actually moved.
@@ -125,7 +125,7 @@ The block:
 
 ### Issue tracker
 
-[one-line summary of where issues are tracked]. See `.myprds/issue-tracker.md`.
+[one-line summary of where issues are tracked]. See `.mysdd/issue-tracker.md`.
 
 ### Project docs
 
@@ -133,7 +133,7 @@ Conventions live in a distribution of `AGENTS.md` files (root + per app/package)
 `AGENTS.md` to the code you're touching. Where the nearest one has a `## Skills` section, invoke the skills it names.
 ```
 
-Then write `.myprds/issue-tracker.md`, creating `.myprds/` if it doesn't exist, from the seed template in this skill
+Then write `.mysdd/issue-tracker.md`, creating `.mysdd/` if it doesn't exist, from the seed template in this skill
 folder:
 
 - [issue-tracker-local.md](./issue-tracker-local.md): local file-based issue tracker (JSON issues)
@@ -149,16 +149,16 @@ folder:
 Section B writes nothing. If the repo needs a root `AGENTS.md` seeded, that was agreed there; otherwise leave every
 `AGENTS.md` alone.
 
-Finally, apply whatever `.myprds` migration the user approved in Section C, one file at a time. Re-read each issue,
+Finally, apply whatever `.mysdd` migration the user approved in Section C, one file at a time. Re-read each issue,
 mutate the parsed object, and write the whole file back as strict JSON. Report per file what changed.
 
 ### 5. Done
 
 Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit
-`.myprds/issue-tracker.md` directly later, and that re-running this skill upgrades what is there in place — it diffs
-against the current seed, re-runs the `AGENTS.md` `find`, audits `.myprds/`, and asks before changing anything.
+`.mysdd/issue-tracker.md` directly later, and that re-running this skill upgrades what is there in place — it diffs
+against the current seed, re-runs the `AGENTS.md` `find`, audits `.mysdd/`, and asks before changing anything.
 
-If `.myprds/` is gitignored, point out that `issue-tracker.md` won't be committed with the repo, so a fresh clone needs
+If `.mysdd/` is gitignored, point out that `issue-tracker.md` won't be committed with the repo, so a fresh clone needs
 this skill run again.
 
 If Section C found drift, close with the follow-ups it left open: issues whose `covers` is now `[]` and wants a

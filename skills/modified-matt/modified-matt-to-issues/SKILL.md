@@ -1,6 +1,6 @@
 ---
 name: modified-matt-to-issues
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .myprds/.
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .mysdd/.
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Break a plan, spec, or conversation into a set of **issues**: tracer-bullet vertical slices, each declaring the issues that **block** it.
 
-**Read `.myprds/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop and tell the user to run `/modified-matt-setup-skills`.
+**Read `.mysdd/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop and tell the user to run `/modified-matt-setup-skills`.
 
 ## Process
 
@@ -70,7 +70,7 @@ Iterate until the user approves the breakdown.
 - **Absent or empty** → first publish. Create the issues as described below, numbering from `01` in dependency order (blockers first).
 - **Non-empty** → **reconciliation mode**. Write nothing until the whole reconciliation is resolved and shown to the user; see *Reconciling with existing issues* below.
 
-Write one file per issue under `.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that issue's `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's `spec.md` path if this run started from a spec (a spec path was passed in, or one exists at `.myprds/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that issue in step 4, and `covers` to the `US-NNN` IDs agreed there. Use the issue shape from `.myprds/docs/agents/issue-tracker.md` § Issue shape: one issue per file, never a single combined file.
+Write one file per issue under `.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that issue's `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's `spec.md` path if this run started from a spec (a spec path was passed in, or one exists at `.mysdd/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that issue in step 4, and `covers` to the `US-NNN` IDs agreed there. Use the issue shape from `.mysdd/docs/agents/issue-tracker.md` § Issue shape: one issue per file, never a single combined file.
 
 Work the **frontier**: any issue whose blockers are all done. For a purely linear chain that means top to bottom.
 
@@ -92,7 +92,7 @@ An issue already on disk may carry live state that exists nowhere else: a `statu
 
 #### The issue shape
 
-`.myprds/docs/agents/issue-tracker.md` § Issue shape defines the fields, their types, and what each empty value means. Follow it exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field present on every issue.
+`.mysdd/docs/agents/issue-tracker.md` § Issue shape defines the fields, their types, and what each empty value means. Follow it exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field present on every issue.
 
 The `status`, `acceptanceCriteria[].done`, and `comments` values shown there are **seed values for a newly created issue only**. On an issue that already exists they are live state: carry them over from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`; `acceptanceCriteria` entries start with `"done": false` and ticking one means flipping it to `true`; `comments` starts as `[]`.
 

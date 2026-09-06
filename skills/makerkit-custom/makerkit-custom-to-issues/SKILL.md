@@ -1,6 +1,6 @@
 ---
 name: makerkit-custom-to-issues
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .myprds/.
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .mysdd/.
 disable-model-invocation: true
 ---
 
@@ -9,7 +9,7 @@ disable-model-invocation: true
 Break a plan, spec, or conversation into a set of **issues**: tracer-bullet vertical slices, each declaring the issues
 that **block** it.
 
-**Read `.myprds/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
+**Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
 and tell the user to run `/makerkit-custom-setup-skills`.
 
@@ -104,12 +104,12 @@ Iterate until the user approves the breakdown.
 - **Non-empty** → **reconciliation mode**. Write nothing until the whole reconciliation is resolved and shown to the
   user; see *Reconciling with existing issues* below.
 
-Write one file per issue under `.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is
+Write one file per issue under `.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is
 its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that issue's
 `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's `spec.md`
 path if this run started from a spec (a spec path was passed in, or one exists at
-`.myprds/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that issue in step 4,
-and `covers` to the `US-NNN` IDs agreed there. Use the issue shape from `.myprds/issue-tracker.md` § Issue shape: one
+`.mysdd/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testSeams` to the seams agreed for that issue in step 4,
+and `covers` to the `US-NNN` IDs agreed there. Use the issue shape from `.mysdd/issue-tracker.md` § Issue shape: one
 issue per file, never a single combined file.
 
 Work the **frontier**: any issue whose blockers are all done. For a purely linear chain that means top to bottom.
@@ -148,7 +148,7 @@ is non-empty, reconcile — never regenerate.
 
 #### The issue shape
 
-`.myprds/issue-tracker.md` § Issue shape defines the fields, their types, and what each empty value means. Follow it
+`.mysdd/issue-tracker.md` § Issue shape defines the fields, their types, and what each empty value means. Follow it
 exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field present on
 every issue.
 

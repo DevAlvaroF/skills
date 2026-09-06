@@ -6,11 +6,11 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or issues.
 
-**Read `.myprds/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
+**Read `.mysdd/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
 and tell the user to run `/modified-matt-setup-skills`.
 
-Read each issue you're implementing first (`.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work from its
+Read each issue you're implementing first (`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work from its
 `whatToBuild`, `acceptanceCriteria`, `testSeams` and `spec`.
 
 Use /modified-matt-tdd where possible, at each issue's pre-agreed seams (its `testSeams` field).
@@ -52,7 +52,7 @@ Look for the originating spec, in this order:
 
 1. The `spec` field of the issue(s) you just implemented.
 2. A path the user passed as an argument.
-3. A spec file under `docs/`, `specs/`, or `.myprds/` matching the branch name or feature.
+3. A spec file under `docs/`, `specs/`, or `.mysdd/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip
    and report "no spec available".
 
@@ -164,7 +164,7 @@ Reporting them separately stops one axis from masking the other.
 
 Updating the issues you implemented is part of the job, not an optional extra. Once the implementing agent's review is
 done and the suite is green, advance every issue whose work landed
-(`.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and issue numbers are independent): flip every
+(`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and issue numbers are independent): flip every
 satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done-coding-awaiting-final-review"`. This
 state means the implementation and this skill's own review are complete, but independent final review is still pending;
 this skill must never set `done-final-review`. Rewrite the whole file as strict JSON, keeping every other field (`id`,
@@ -183,7 +183,7 @@ Do not commit, stage, or push anything — the user commits manually.
 Instead, finish by returning a suggested commit message for the work: a concise imperative subject line (≤72 chars) plus
 a short body explaining the *why* when the change isn't self-evident. Match the repo's existing commit style (check
 `git log`). Include the path of each implemented issue JSON file, relative to the repository and beginning with
-`.myprds/`. Also include the spec path from each issue's `spec` field, if set and not `null` (dedupe if several
+`.mysdd/`. Also include the spec path from each issue's `spec` field, if set and not `null` (dedupe if several
 issues share one). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no
 emoji badge.
 

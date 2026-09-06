@@ -28,7 +28,7 @@ const GROUPS = [
         dir: "modified-matt",
         name: "modified-matt-skills",
         description:
-            "The same engineering skills without the Makerkit-specific assumptions. For any repo. Agent-written config lives in .myprds/docs/agents/, with ADRs in .myprds/docs/adr/.",
+            "The same engineering skills without the Makerkit-specific assumptions. For any repo. Agent-written config lives in .mysdd/docs/agents/, with ADRs in .mysdd/docs/adr/.",
         keywords: ["engineering", "tdd", "code-review", "grilling"],
     }
 ];

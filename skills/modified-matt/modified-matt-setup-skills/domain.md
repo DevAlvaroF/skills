@@ -6,7 +6,7 @@ How the engineering skills should consume this repo's domain documentation when 
 
 - **`CONTEXT.md`** at the repo root, or
 - **`CONTEXT-MAP.md`** at the repo root if it exists: it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
-- **`.myprds/docs/adr/`**: read ADRs that touch the area you're about to work in. One directory for the whole repo, including multi-context repos.
+- **`.mysdd/docs/adr/`**: read ADRs that touch the area you're about to work in. One directory for the whole repo, including multi-context repos.
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The domain-modeling skill (reached via the grilling skill) creates them lazily when terms or decisions actually get resolved.
 
@@ -17,7 +17,7 @@ Single-context repo (most repos):
 ```
 /
 ├── CONTEXT.md
-├── .myprds/
+├── .mysdd/
 │   └── docs/
 │       └── adr/
 │           ├── 0001-event-sourced-orders.md
@@ -30,7 +30,7 @@ Multi-context repo (presence of `CONTEXT-MAP.md` at the root):
 ```
 /
 ├── CONTEXT-MAP.md
-├── .myprds/
+├── .mysdd/
 │   └── docs/
 │       └── adr/        ← all decisions, whichever context they belong to
 └── src/

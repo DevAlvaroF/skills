@@ -1,17 +1,17 @@
 # Issue tracker: Local Files
 
 This file is the schema of record for the spec, issues, and implement skills. Those skills read the generated
-`.myprds/docs/agents/issue-tracker.md` rather than carrying their own copy — so a schema change starts here.
+`.mysdd/docs/agents/issue-tracker.md` rather than carrying their own copy — so a schema change starts here.
 
-Specs for this repo live as markdown files in `.myprds/`; **issues are JSON files**, so other software can read them
+Specs for this repo live as markdown files in `.mysdd/`; **issues are JSON files**, so other software can read them
 without parsing prose.
 
 ## Conventions
 
-- One feature per directory: `.myprds/<NN>-<feature-slug>/`, where `NN` is a two-digit feature sequence number; start at
+- One feature per directory: `.mysdd/<NN>-<feature-slug>/`, where `NN` is a two-digit feature sequence number; start at
   `01` and increment the highest existing number for each new feature
-- The spec is `.myprds/<NN>-<feature-slug>/spec.md` (markdown: it is prose, not an issue)
-- Implementation issues are one JSON file per issue at `.myprds/<NN>-<feature-slug>/issues/<NN>-<slug>.json`, never a
+- The spec is `.mysdd/<NN>-<feature-slug>/spec.md` (markdown: it is prose, not an issue)
+- Implementation issues are one JSON file per issue at `.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`, never a
   single combined issues file. The feature directory and issue filenames use independent `NN` sequences; issue numbering
   starts at `01` and increments the highest existing number in that feature's `issues/` directory (including
   `issues/archive/`). An issue's `id` and filename are **immutable once created**: never renumber an existing issue and
@@ -32,7 +32,7 @@ Implementation issues (written by the issues skill):
   "slug": "<slug>",
   "title": "<Issue title>",
   "status": "ready-for-agent",
-  "spec": ".myprds/<NN>-<feature-slug>/spec.md",
+  "spec": ".mysdd/<NN>-<feature-slug>/spec.md",
   "whatToBuild": "The end-to-end behaviour this issue makes work, from the user's perspective, not a layer-by-layer implementation list.",
   "blockedBy": [
     "<NN>"
@@ -59,7 +59,7 @@ Implementation issues (written by the issues skill):
 ```
 
 `spec` is the path to the spec this issue was broken out of, relative to the repository root and beginning with
-`.myprds/`; `null` when there is no spec (issues drafted straight from a plan or conversation). `blockedBy` holds the
+`.mysdd/`; `null` when there is no spec (issues drafted straight from a plan or conversation). `blockedBy` holds the
 `id` of each issue that gates this one, and is `[]` when the issue can start immediately. `testSeams` lists the public
 boundaries this issue's tests hit, confirmed with the user when the issue was drafted; `[]` when the issue has no
 dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this issue satisfies; `[]` when the
@@ -77,7 +77,7 @@ Only the independent final reviewer sets `done-final-review`. If final review re
 
 ## When a skill says "publish to the issue tracker"
 
-Create a new file under `.myprds/<NN>-<feature-slug>/` (creating the directory if needed): a `.json` issue under
+Create a new file under `.mysdd/<NN>-<feature-slug>/` (creating the directory if needed): a `.json` issue under
 `issues/`, or a markdown file for a spec.
 
 ## When a skill says "fetch the relevant issue"

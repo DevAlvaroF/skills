@@ -9,7 +9,7 @@ Actively build and sharpen the project's domain model as you design. This is the
 
 ## File structure
 
-Layout follows [./CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md): a root `CONTEXT.md`, or a root `CONTEXT-MAP.md` pointing at per-context files. Create lazily — `CONTEXT.md` when the first term resolves, `.myprds/docs/adr/` when the first ADR is needed.
+Layout follows [./CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md): a root `CONTEXT.md`, or a root `CONTEXT-MAP.md` pointing at per-context files. Create lazily — `CONTEXT.md` when the first term resolves, `.mysdd/docs/adr/` when the first ADR is needed.
 
 ## During the session
 

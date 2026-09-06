@@ -1,8 +1,8 @@
 # ADR Format
 
-ADRs live in `.myprds/docs/adr/` at the repo root — one directory for the whole repo, including multi-context repos — and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
+ADRs live in `.mysdd/docs/adr/` at the repo root — one directory for the whole repo, including multi-context repos — and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
 
-Create the `.myprds/docs/adr/` directory lazily: only when the first ADR is needed.
+Create the `.mysdd/docs/adr/` directory lazily: only when the first ADR is needed.
 
 ## Template
 
@@ -24,7 +24,7 @@ Only include these when they add genuine value. Most ADRs won't need them.
 
 ## Numbering
 
-Scan `.myprds/docs/adr/` for the highest existing number and increment by one.
+Scan `.mysdd/docs/adr/` for the highest existing number and increment by one.
 
 ## When to offer an ADR
 
