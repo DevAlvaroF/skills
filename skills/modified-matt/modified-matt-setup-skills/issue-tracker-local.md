@@ -1,7 +1,7 @@
 # Issue tracker: Local Files
 
 This file is the schema of record for the spec, issues, and implement skills. Those skills read the generated
-`.mysdd/docs/agents/issue-tracker.md` rather than carrying their own copy — so a schema change starts here.
+`.mysdd/issue-tracker.md` rather than carrying their own copy — so a schema change starts here.
 
 Specs for this repo live as markdown files in `.mysdd/`; **issues are JSON files**, so other software can read them
 without parsing prose.

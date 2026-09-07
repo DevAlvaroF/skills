@@ -9,9 +9,9 @@ disable-model-invocation: true
 Break a plan, spec, or conversation into a set of **issues**: tracer-bullet vertical slices, each declaring the issues
 that **block** it.
 
-**Read `.mysdd/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature
-and issue numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is
-missing, stop and tell the user to run `/modified-matt-setup-skills`.
+**Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
+numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
+and tell the user to run `/modified-matt-setup-skills`.
 
 ## Process
 
@@ -100,8 +100,8 @@ two-digit sequence number; the issue filename's `NN` is a separate sequence with
 `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's `spec.md`
 path if this run started from a spec (a spec path was passed in, or one exists at `.mysdd/<NN>-<feature-slug>/spec.md`);
 otherwise `null`. Set `testBoundaries` to the boundaries agreed for that issue in step 4, and `covers` to the `US-NNN`
-IDs agreed there. Use the issue shape from `.mysdd/docs/agents/issue-tracker.md` § Issue shape: one issue per file,
-never a single combined file.
+IDs agreed there. Use the issue shape from `.mysdd/issue-tracker.md` § Issue shape: one issue per file, never a single
+combined file.
 
 Work the **frontier**: any issue whose blockers are all done. For a purely linear chain that means top to bottom.
 
@@ -139,9 +139,9 @@ is non-empty, reconcile — never regenerate.
 
 #### The issue shape
 
-`.mysdd/docs/agents/issue-tracker.md` § Issue shape defines the fields, their types, and what each empty value means.
-Follow it exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field
-present on every issue.
+`.mysdd/issue-tracker.md` § Issue shape defines the fields, their types, and what each empty value means. Follow it
+exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field present on
+every issue.
 
 The `status`, `acceptanceCriteria[].done`, and `comments` values shown there are **seed values for a newly created issue
 only**. On an issue that already exists they are live state: carry them over from the file on disk rather than

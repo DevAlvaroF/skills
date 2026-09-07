@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or issues.
 
-**Read `.mysdd/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
+**Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
 and tell the user to run `/modified-matt-setup-skills`.
 

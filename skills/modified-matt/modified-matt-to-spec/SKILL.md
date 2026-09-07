@@ -8,7 +8,7 @@ This skill takes the current conversation context and codebase understanding and
 user; just synthesize what you already know. If the design conversation isn't in this session's context, say so and
 ask the user to point you at it rather than inventing a decision log.
 
-**Read `.mysdd/docs/agents/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
+**Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
 and tell the user to run `/modified-matt-setup-skills`.
 
@@ -108,7 +108,7 @@ Confirm each of these. Any "no" is a fix, not a caveat: don't publish until it's
 - Every user story carries a `US-NNN` ID, and no ID was renumbered or reused from an earlier revision
 - Every user story describes externally observable behaviour, not an implementation detail
 - The test boundaries in Testing Decisions are the ones the user confirmed in step 2
-- The feature directory is named `<NN>-<feature-slug>`, numbered per `.mysdd/docs/agents/issue-tracker.md`
+- The feature directory is named `<NN>-<feature-slug>`, numbered per `.mysdd/issue-tracker.md`
 - Out of Scope is non-empty: a spec that excludes nothing hasn't been scoped
 - Testing Decisions names prior art: actual similar tests in this codebase, not a description of what one would
   look like

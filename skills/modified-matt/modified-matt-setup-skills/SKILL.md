@@ -22,7 +22,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` section in either?
 - `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root
 - `.mysdd/docs/adr/`
-- `.mysdd/docs/agents/*.md`: does this skill's prior output already exist?
+- `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md`: does this skill's prior output already exist?
 - `.mysdd/`: existing feature directories, their `spec.md` files, and every JSON file under `issues/`. If any exist this is an upgrade rather than a first run, so read enough of them to answer Section C
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
 
@@ -32,7 +32,7 @@ Summarise what's present and what's missing. Then take the sections in order. On
 
 Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when there's no monorepo).
 
-**Section A: Issue tracker.** These skills track work as local JSON issue files under `.mysdd/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown alongside them. This is fixed — there's no tracker choice to make, so skip straight to writing `.mysdd/docs/agents/issue-tracker.md` from the local template without asking.
+**Section A: Issue tracker.** These skills track work as local JSON issue files under `.mysdd/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown alongside them. This is fixed — there's no tracker choice to make, so skip straight to writing `.mysdd/issue-tracker.md` from the local template without asking.
 
 **Section B: Domain docs.** Default to **single-context** (one `CONTEXT.md` + `.mysdd/docs/adr/` at the repo root). This fits almost every repo; write it without asking.
 
@@ -58,7 +58,7 @@ Backfilling real `covers` values is not this skill's job. Set them to `[]` and t
 Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `.mysdd/docs/agents/issue-tracker.md` and `.mysdd/docs/agents/domain.md`
+- The contents of `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md`
 - Any `.mysdd` migration agreed in Section C, as a per-file list
 
 For a file that already exists, show the **delta** rather than the whole file: what the current seed adds, changes, or drops relative to what is on disk. A wall of unchanged text buries the one line that actually moved.
@@ -84,19 +84,19 @@ The block:
 
 ### Issue tracker
 
-[one-line summary of where issues are tracked]. See `.mysdd/docs/agents/issue-tracker.md`.
+[one-line summary of where issues are tracked]. See `.mysdd/issue-tracker.md`.
 
 ### Domain docs
 
 [one-line summary of layout: "single-context" or "multi-context"]. See `.mysdd/docs/agents/domain.md`.
 ```
 
-Then write the docs files, using the seed templates in this skill folder as a starting point:
+Then write the generated files, using the seed templates in this skill folder as a starting point:
 
 - [issue-tracker-local.md](./issue-tracker-local.md): local file-based issue tracker (JSON issues)
 - [domain.md](./domain.md): domain doc consumer rules + layout
 
-**Upgrade these files in place; do not regenerate them.** For each of `.mysdd/docs/agents/issue-tracker.md` and `.mysdd/docs/agents/domain.md`:
+**Upgrade these files in place; do not regenerate them.** For each of `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md`:
 
 - If it doesn't exist, write it from the seed.
 - If it does, read it and compare against the seed. Apply what the seed adds or changes; leave everything else as the user left it. Sections the file has and the seed doesn't are the user's own additions: keep them unless they contradict a seed section, and say which ones you kept.
@@ -106,8 +106,8 @@ Finally, apply whatever `.mysdd` migration the user approved in Section C, one f
 
 ### 5. Done
 
-Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `.mysdd/docs/agents/*.md` directly later, and that re-running this skill upgrades what is there in place — it diffs against the current seeds, audits `.mysdd/`, and asks before changing anything.
+Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md` directly later, and that re-running this skill upgrades what is there in place — it diffs against the current seeds, audits `.mysdd/`, and asks before changing anything.
 
-Check `.gitignore`. If `.mysdd/` is ignored, point out that `issue-tracker.md`, `domain.md`, and any ADRs under `.mysdd/docs/adr/` won't be committed with the repo — so the `## Agent skills` block will point at files a fresh clone doesn't have, and this skill needs running again there. Offer to un-ignore `.mysdd/docs/` so the generated config and the ADRs travel with the repo while the issue files stay local.
+Check `.gitignore`. If `.mysdd/` is ignored, point out that `issue-tracker.md`, `domain.md`, and any ADRs under `.mysdd/docs/adr/` won't be committed with the repo — so the `## Agent skills` block will point at files a fresh clone doesn't have, and this skill needs running again there. Offer to un-ignore `.mysdd/issue-tracker.md` and `.mysdd/docs/` so the generated config and the ADRs travel with the repo while the issue files stay local.
 
 If Section C found drift, close with the follow-ups it left open: issues whose `covers` is now `[]` and wants a `/modified-matt-to-issues` pass, and anything reported but deliberately not migrated.
