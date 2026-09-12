@@ -64,9 +64,10 @@ When they exist, the repo was set up against an older version of these conventio
 the other skills run against it. Check each feature directory for drift from the issue shape
 in [issue-tracker-local.md](./issue-tracker-local.md):
 
-- **Missing fields.** An issue lacking `spec`, `blockedBy`, `testBoundaries`, `covers`, or `comments` predates that
-  field. These are additive and safe to backfill: `spec` to that feature's `spec.md` when one exists and `null` when it
-  doesn't, the rest to `[]`.
+- **Missing fields.** An issue lacking `spec`, `blockedBy`, `testBoundaries`, `covers`, `codeCommit`,
+  `reviewCodeCommit`, or `comments` predates that field. These are additive and safe to backfill: `spec` to that
+  feature's `spec.md` when one exists and `null` when it doesn't, `codeCommit` and `reviewCodeCommit` to `null` (never
+  guess a SHA for work that predates the field), the rest to `[]`.
 - **Legacy `testSeams`.** An issue carrying `testSeams` instead of `testBoundaries` predates the rename. Same field,
   same values: rename the key in place and carry the array over verbatim. Never drop the entries.
 - **Unknown `status`.** Any value outside `ready-for-agent` / `done-coding-awaiting-final-review` / `done-final-review`
@@ -84,7 +85,7 @@ in [issue-tracker-local.md](./issue-tracker-local.md):
 Present the drift as a per-file list and ask whether to migrate. Never migrate silently, and never touch live state
 while doing it. Check `.gitignore` before relying on git for undo: where `.mysdd/` is tracked, `git diff` is your
 safety net; where it's ignored, there is no undo. Either way get the answer before writing — `status`,
-`acceptanceCriteria[].done`, and `comments` hold work that exists nowhere else.
+`acceptanceCriteria[].done`, `comments`, `codeCommit`, and `reviewCodeCommit` hold work that exists nowhere else.
 
 Backfilling real `covers` values is not this skill's job. Set them to `[]` and tell the user that re-running
 `/makerkit-custom-to-issues` against the spec maps stories to issues properly, reconciling against what is already on
@@ -127,7 +128,8 @@ The block:
 
 ### Issue tracker
 
-[one-line summary of where issues are tracked]. See `.mysdd/issue-tracker.md`.
+[one-line summary of where issues are tracked]. See `.mysdd/issue-tracker.md` (issue schema, status lifecycle, and
+commit message format).
 
 ### Project docs
 

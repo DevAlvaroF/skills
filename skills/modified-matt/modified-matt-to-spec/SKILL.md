@@ -95,7 +95,7 @@ spec: what was chosen, what was ruled out, and why. This is a summary, not a tra
 conversation.
 
 **Redact before you write.** This file is committed to the repository and `/modified-matt-implement` puts its path in the
-suggested commit message, so anything here reaches git history permanently. Exclude secrets, credentials, tokens, API keys,
+commit message, so anything here reaches git history permanently. Exclude secrets, credentials, tokens, API keys,
 connection strings, customer data, PII, internal URLs carrying auth, and any conversation unrelated to the decisions
 above. When a decision genuinely turns on a sensitive value, describe the value's role without reproducing it.
 

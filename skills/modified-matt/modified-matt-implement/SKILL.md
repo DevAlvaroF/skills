@@ -24,7 +24,9 @@ test name, file, and the assertion or error line for each — under 200 words, p
 failures here, then send it back to re-run.
 
 Once the implementation is done, review the work yourself using the **How to Review** section below. That
-review belongs to this skill: run it before advancing any issue, whether or not the repo documents anything like it.
+review belongs to this skill: run it before committing or advancing any issue, whether or not the repo documents
+anything like it. Then commit the work and advance the issues, in that order — the commit comes first because the issue
+records its SHA.
 
 ## How to Review
 
@@ -172,35 +174,56 @@ A change can pass one axis and fail the other:
 
 Reporting them separately stops one axis from masking the other.
 
+## Commit the work
+
+Once this skill's own review is done and the suite is green, commit the work. This is part of the job, not an optional
+extra: the issue's `codeCommit` is what points the final reviewer at the change, and it can't be written until the
+commit exists.
+
+1. **Don't commit an issue you left partly done.** If the work isn't finished, say so, leave the issue open, and stop
+   there for that issue — no partial commit.
+2. **Scan the spec for secrets first.** Before committing anything that references a spec path, **read that spec and
+   scan it for secret-shaped strings**: API keys and tokens, `sk-`/`ghp_`/`AKIA`-style prefixes, private key blocks,
+   connection strings or URLs with embedded credentials, `.env`-style assignments of a secret-looking name, and pasted
+   customer data or PII. If you find any, stop: do not commit, tell the user exactly what you found and where, and let
+   them redact the spec first.
+3. **Check the branch.** If `HEAD` is the repo's default branch, stop and ask the user before committing.
+4. **Stage the implementation files only.** Never `git add .mysdd/` and never `git add -A`. Then read
+   `git status --short` and confirm nothing unrelated was swept in.
+5. **Build the message.** Pick the header from the issue's `codeCommit` — `null` means `CODE: `, a SHA means
+   `CODE REVIEW FIXES: `. Read `codeCommit`, never `status`: an issue coming back from final review keeps its
+   `done-coding-awaiting-final-review` status, so the status can't tell you which round you're in. Write the message to
+   the shape in `.mysdd/issue-tracker.md` § Commit message format.
+   That file is the schema of record for the message the same way it is for the issue shape; this skill does not
+   restate it.
+6. **One issue, one commit.** With several issues in a run, commit them one at a time in dependency order. Only when
+   the work genuinely cannot be separated: one commit carrying an `Issue:` trailer per issue, and the same SHA recorded
+   on each of them.
+7. **Never push, never amend, never rebase.** One commit forward, nothing rewritten.
+
 ## Advance or close the issues
 
-Updating the issues you implemented is part of the job, not an optional extra. Once the implementing agent's review is
-done and the suite is green, advance every issue whose work landed
-(`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and issue numbers are independent): flip every
-satisfied entry in `acceptanceCriteria` to `"done": true` and set `"status": "done-coding-awaiting-final-review"`. This
-state means the implementation and this skill's own review are complete, but independent final review is still pending;
-this skill must never set `done-final-review`. Rewrite the whole file as strict JSON, keeping every other field (`id`,
-`slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `covers`, `comments`) intact — `comments` holds review history that
-exists nowhere else, so dropping or emptying it loses it permanently. `testBoundaries` is the one field you may change:
-add a boundary the user agreed during implementation, never remove one. Re-read each file after writing to confirm it
-still parses.
+Updating the issues you implemented is part of the job, not an optional extra. Run it **after** the commit, so the SHA
+exists: `git rev-parse HEAD` gives you the full SHA of the commit you just made.
+
+Then rewrite each committed issue **once** (`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and
+issue numbers are independent), carrying all three changes together: flip every satisfied entry in
+`acceptanceCriteria` to `"done": true`, set `"status": "done-coding-awaiting-final-review"`, and record the SHA — in
+`codeCommit` when it was `null`, otherwise in `reviewCodeCommit`, overwriting whatever was there. The
+`done-coding-awaiting-final-review` state means the implementation and this skill's own review are complete, but
+independent final review is still pending; this skill must never set `done-final-review`. On a review-fix round the
+issue is already in that state and stays there — re-asserting it changes nothing, and what records the round is
+`reviewCodeCommit` plus the findings in `comments`, never a status move. Rewrite the whole file as
+strict JSON, keeping every other field (`id`, `slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `covers`,
+`codeCommit`, `reviewCodeCommit`, `comments`) intact — `comments` holds review history that exists nowhere else, so
+dropping or emptying it loses it permanently, and dropping either commit field loses the only pointer from the issue to
+the code. `testBoundaries` is the one field you may change: add a boundary the user agreed during implementation, never
+remove one. Re-read each file after writing to confirm it still parses.
 
 If an issue is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
 outstanding. Never tick a criterion you did not verify.
 
-Then report which issues you advanced or closed and which you left open, with a one-line reason for each one still
-open.
-
-Do not commit, stage, or push anything — the user commits manually.
-
-Instead, finish by returning a suggested commit message for the work: a concise imperative subject line (≤72 chars) plus
-a short body explaining the *why* when the change isn't self-evident. Match the repo's existing commit style (check
-`git log`). Include the path of each implemented issue JSON file, relative to the repository and beginning with
-`.mysdd/`. Also include the spec path from each issue's `spec` field, if set and not `null` (dedupe if several
-issues share one). Include no tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no
-emoji badge.
-
-Before suggesting a commit message that references a spec path, **read that spec and scan it for secret-shaped strings**:
-API keys and tokens, `sk-`/`ghp_`/`AKIA`-style prefixes, private key blocks, connection strings or URLs with embedded
-credentials, `.env`-style assignments of a secret-looking name, and pasted customer data or PII. If you find any, stop:
-do not suggest the commit, tell the user exactly what you found and where, and let them redact the spec first.
+Then report, per issue: the commit SHA and its subject line, which issues you advanced or closed, and which you left
+open with a one-line reason for each. Where `.mysdd/` is **tracked** rather than gitignored, the issue file is now dirty
+in the working tree and deliberately outside the commit — say so, and leave it to the user rather than amending the
+commit to chase its own SHA.

@@ -42,14 +42,14 @@ Offer **multi-context** (a root `CONTEXT-MAP.md` pointing to per-context `CONTEX
 
 When they exist, the repo was set up against an older version of these conventions, and the gap is worth naming before the other skills run against it. Check each feature directory for drift from the issue shape in [issue-tracker-local.md](./issue-tracker-local.md):
 
-- **Missing fields.** An issue lacking `spec`, `blockedBy`, `testBoundaries`, `covers`, or `comments` predates that field. These are additive and safe to backfill: `spec` to that feature's `spec.md` when one exists and `null` when it doesn't, the rest to `[]`.
+- **Missing fields.** An issue lacking `spec`, `blockedBy`, `testBoundaries`, `covers`, `codeCommit`, `reviewCodeCommit`, or `comments` predates that field. These are additive and safe to backfill: `spec` to that feature's `spec.md` when one exists and `null` when it doesn't, `codeCommit` and `reviewCodeCommit` to `null` (never guess a SHA for work that predates the field), the rest to `[]`.
 - **Legacy `testSeams`.** An issue carrying `testSeams` instead of `testBoundaries` predates the rename. Same field, same values: rename the key in place and carry the array over verbatim. Never drop the entries.
 - **Unknown `status`.** Any value outside `ready-for-agent` / `done-coding-awaiting-final-review` / `done-final-review` came from an older lifecycle. Never guess a mapping — list each one and ask.
 - **Shape violations.** A single combined issues file (one array rather than one file per issue), issues sitting directly in the feature directory instead of under `issues/`, or two issues sharing an `id`. Report each. Offer to split a combined file into per-issue files under the ids the issues already carry; never assign new ones.
 - **Specs without story IDs.** A `spec.md` whose User Stories carry no `US-NNN` IDs predates them, so no issue's `covers` can reference it. Offer to backfill IDs sequentially in document order — safe only while nothing references them, so if any issue in that feature already has a non-empty `covers`, report it and leave the spec alone.
 - **Non-conforming directory names.** A feature directory that isn't `<NN>-<feature-slug>`. Report it and leave it alone unless the user asks: the path is an address that each issue's `spec` field points at, so a rename has to rewrite those fields in the same pass.
 
-Present the drift as a per-file list and ask whether to migrate. Never migrate silently, and never touch live state while doing it: `status`, `acceptanceCriteria[].done`, and `comments` hold work that exists nowhere else. `.mysdd/` is usually gitignored, so assume there is no undo and get the answer before writing.
+Present the drift as a per-file list and ask whether to migrate. Never migrate silently, and never touch live state while doing it: `status`, `acceptanceCriteria[].done`, `comments`, `codeCommit`, and `reviewCodeCommit` hold work that exists nowhere else. `.mysdd/` is usually gitignored, so assume there is no undo and get the answer before writing.
 
 Backfilling real `covers` values is not this skill's job. Set them to `[]` and tell the user that re-running `/modified-matt-to-issues` against the spec maps stories to issues properly, reconciling against what is already on disk.
 
@@ -84,7 +84,7 @@ The block:
 
 ### Issue tracker
 
-[one-line summary of where issues are tracked]. See `.mysdd/issue-tracker.md`.
+[one-line summary of where issues are tracked]. See `.mysdd/issue-tracker.md` (issue schema, status lifecycle, and commit message format).
 
 ### Domain docs
 

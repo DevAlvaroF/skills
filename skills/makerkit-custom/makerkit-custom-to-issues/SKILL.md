@@ -130,7 +130,8 @@ is non-empty, reconcile — never regenerate.
 
 1. **Identity is `slug`, never the number.** Match each entry in the approved breakdown to an existing file by its
    `slug`. Numbers are addresses, not identities.
-2. **On a slug match, preserve — never reset.** Carry `status` and `comments` over verbatim. For each
+2. **On a slug match, preserve — never reset.** Carry `status`, `comments`, `codeCommit`, and `reviewCodeCommit` over
+   verbatim — the two commit fields are the only pointer from the issue to the code that implemented it. For each
    `acceptanceCriteria` entry, match on `text` and keep that entry's existing `done` value; never flip a `true` back to
    `false`. Update only `title`, `whatToBuild`, `blockedBy`, `testBoundaries`, `covers`, `spec`, and criteria genuinely
    added or removed by text.
@@ -153,10 +154,11 @@ is non-empty, reconcile — never regenerate.
 exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field present on
 every issue.
 
-The `status`, `acceptanceCriteria[].done`, and `comments` values shown there are **seed values for a newly created issue
-only**. On an issue that already exists they are live state: carry them over from the file on disk rather than
-re-seeding them. `status` starts at `ready-for-agent`; `acceptanceCriteria` entries start with `"done": false` and
-ticking one means flipping it to `true`; `comments` starts as `[]`.
+The `status`, `acceptanceCriteria[].done`, `comments`, `codeCommit`, and `reviewCodeCommit` values shown there are
+**seed values for a newly created issue only**. On an issue that already exists they are live state: carry them over
+from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`; `acceptanceCriteria` entries
+start with `"done": false` and ticking one means flipping it to `true`; `comments` starts as `[]`; `codeCommit` and
+`reviewCodeCommit` both start as `null` and are written only by the implement skill when it commits.
 
 ## Next step
 

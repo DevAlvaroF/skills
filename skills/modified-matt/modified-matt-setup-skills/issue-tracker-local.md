@@ -43,6 +43,8 @@ Implementation issues (written by the issues skill):
   "covers": [
     "US-003"
   ],
+  "codeCommit": null,
+  "reviewCodeCommit": null,
   "acceptanceCriteria": [
     {
       "text": "Acceptance criterion 1",
@@ -63,7 +65,12 @@ Implementation issues (written by the issues skill):
 `id` of each issue that gates this one, and is `[]` when the issue can start immediately. `testBoundaries` lists the
 public boundaries this issue's tests hit, confirmed with the user when the issue was drafted; `[]` when the issue has no
 dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this issue satisfies; `[]` when the
-issue satisfies no story directly, and always `[]` when `spec` is `null`. `comments` starts as `[]`.
+issue satisfies no story directly, and always `[]` when `spec` is `null`. `codeCommit` is the full SHA of the commit
+that implemented the issue, and `reviewCodeCommit` the full SHA of the commit that applied the final reviewer's
+findings; both are single strings or `null`, and both start as `null`. Neither is ever set by hand: the implement skill
+writes them when it commits, and every other skill carries them over verbatim. A further round of review fixes
+overwrites `reviewCodeCommit` — the superseded SHA stays reachable through git history and the `comments` trail.
+`comments` starts as `[]`.
 
 The successful local implementation and review lifecycle is:
 
@@ -72,8 +79,55 @@ ready-for-agent -> done-coding-awaiting-final-review -> done-final-review
 ```
 
 `done-coding-awaiting-final-review` means coding, verification, and the implementing agent's own review are complete.
-Only the independent final reviewer sets `done-final-review`. If final review requires changes, return the issue to
-`ready-for-agent` and append the findings to `comments`.
+Only the independent final reviewer sets `done-final-review`. If final review requires changes, the issue stays at
+`done-coding-awaiting-final-review` — do not return it to `ready-for-agent`. Append the findings to `comments`, fix
+the issues found, and produce the `CODE REVIEW FIXES:` commit: the issue already carries a `codeCommit`, so that
+round records its SHA in `reviewCodeCommit` instead. A fix round is visible through `reviewCodeCommit` and the `comments`
+trail, never through a status change.
+
+## Commit message format
+
+Every commit an implement skill makes for an issue uses this shape:
+
+```text
+CODE: <imperative subject>
+
+<one to three lines on the why, when the change isn't self-evident>
+
+Issue: .mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json
+Spec: .mysdd/<NN>-<feature-slug>/spec.md
+```
+
+- The header prefix is one of exactly two literals: `CODE: ` or `CODE REVIEW FIXES: `. Nothing else. Pick it from the
+  issue's `codeCommit`: `null` means this is the first implementation round, so `CODE: `; a SHA means the issue has
+  already been implemented and committed and final review has since asked for changes, so `CODE REVIEW FIXES: `. The
+  header follows `codeCommit`, never `status` — a fix round leaves the status where it is.
+- The whole subject line, prefix included, is ≤72 characters.
+- One `Issue:` trailer per issue in the commit, repo-root-relative and beginning `.mysdd/`.
+- A `Spec:` trailer only when the issue's `spec` is not `null`, deduped when several issues in one commit share a spec.
+- No tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no emoji badge. The message
+  must read the same whichever agent, or human, produced it.
+
+A first-round commit:
+
+```text
+CODE: Gate workspace switching behind the seat check
+
+A member without an active seat could still switch into a workspace via the
+URL. The guard now runs before the loader resolves.
+
+Issue: .mysdd/03-workspace-seats/issues/02-seat-guard.json
+Spec: .mysdd/03-workspace-seats/spec.md
+```
+
+A commit applying final-review findings on the same issue:
+
+```text
+CODE REVIEW FIXES: Seat guard — handle the revoked-seat race
+
+Issue: .mysdd/03-workspace-seats/issues/02-seat-guard.json
+Spec: .mysdd/03-workspace-seats/spec.md
+```
 
 ## When a skill says "publish to the issue tracker"
 

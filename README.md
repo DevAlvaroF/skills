@@ -233,7 +233,7 @@ It writes an `## Agent skills` block in the project's root `AGENTS.md` (or
 | Flavour | Files written |
 |---|---|
 | Makerkit | `.mysdd/issue-tracker.md` |
-| Modified Matt | `.mysdd/docs/agents/issue-tracker.md`, `.mysdd/docs/agents/domain.md` |
+| Modified Matt | `.mysdd/issue-tracker.md`, `.mysdd/docs/agents/domain.md` |
 
 The other skills read those files. Makerkit has no generated project-docs file:
 that flavour reads the repo's own `AGENTS.md` distribution — the root file, then
@@ -247,6 +247,29 @@ is meant to be triggered by an external actor (a human, or a review process
 outside these skills) so an issue can't reach "done" without a human actually
 looking at it. An issue parked at `done-coding-awaiting-final-review` is
 correctly waiting on that human, not stuck.
+
+There's no back edge. When final review asks for changes the issue *stays* at
+`done-coding-awaiting-final-review` — the findings are appended to `comments`
+and fixed in place, rather than the issue being returned to `ready-for-agent`.
+A fix round shows up as a `reviewCodeCommit` and a comment, never as a status
+move.
+
+It also documents the commit message format. `implement` commits the work it
+lands — it used to stop at suggesting a message — and the subject line carries
+one of exactly two prefixes: `CODE: ` for a first implementation round, and
+`CODE REVIEW FIXES: ` for a round applying the final reviewer's findings. Which
+one is chosen comes from the issue's `codeCommit`, not its status. The
+body's `Issue:` and `Spec:` trailers point back at the `.mysdd/` paths, and the
+message carries no tool or model attribution, so it reads the same whichever
+agent (or human) produced it. The commit stages code only, never `.mysdd/`, and
+the skill never pushes, amends, or rebases.
+
+Two issue fields hold the result: `codeCommit`, the full SHA of the commit that
+implemented the issue, and `reviewCodeCommit`, the SHA of the commit that
+applied the reviewer's findings. Both are `null` until the relevant commit
+exists, both are written only by `implement`, and `codeCommit` is what selects
+the subject prefix. That's the pointer the external final reviewer follows from
+an issue to the code, and a second round of fixes overwrites `reviewCodeCommit`.
 
 Both flavours now hold the same seven skills, though the *contents* still
 diverge. Names are unprefixed below; in the picker each carries its group's
