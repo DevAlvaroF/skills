@@ -62,7 +62,7 @@ needs a boundary the spec didn't cover. An issue with no dedicated tests (e.g. a
 wide-refactor batch) can carry no boundaries.
 
 When the issue set descends from a spec, map each slice to the **user stories it satisfies**: the `US-NNN` IDs from the
-spec's User Stories section. Between them the issues should satisfy every story in the spec; a story no slice covers is
+spec's User Stories section. Between them the issues should satisfy every story in the spec not marked `(retired)`; a story no slice covers is
 either a missed slice or a deliberate deferral, and step 4 is where you find out which. An issue can satisfy no story
 directly — a pure prefactor, or one leg of an expand–contract batch — and carries none.
 
@@ -91,7 +91,7 @@ Ask the user:
 - Are the blocking edges correct: does each issue only depend on issues that genuinely gate it?
 - Should any issues be merged or split further?
 - Are the test boundaries right: does each issue test at the right boundary, and are any missing or superfluous?
-- Is every user story covered? List each `US-NNN` in the spec that no issue covers, and ask whether it is a deliberate
+- Is every user story covered? Skip stories marked `(retired)`. List each other `US-NNN` in the spec that no issue covers, and ask whether it is a deliberate
   deferral or a slice you missed.
 
 Iterate until the user approves the breakdown.
@@ -144,7 +144,8 @@ is non-empty, reconcile — never regenerate.
    keep it, or move it to `issues/archive/`? No `rm`, no silent drop, no answer assumed on their behalf.
 6. **A `covers` entry with no matching story is a dangling reference.** It means the spec was revised and that `US-NNN`
    was dropped or renamed. Never silently remove it. List each one with the issue it sits on and ask the user whether
-   that issue is now out of scope or should point at a different story.
+   that issue is now out of scope or should point at a different story. A `covers` entry naming a story marked
+   `(retired)` is the same case, even though the ID is still in the spec: list it and ask the same question.
 7. **Report.** Show a table of every issue in the directory and what happened to it: created / updated / status
    preserved / archived.
 
