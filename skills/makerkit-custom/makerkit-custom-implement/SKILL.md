@@ -33,10 +33,6 @@ Use /makerkit-custom-tdd where possible, at each issue's pre-agreed boundaries (
 implementation surfaces a boundary the issue doesn't list — or shows a listed one doesn't hold — stop and agree it with
 the user before writing the test, then add it to that issue's `testBoundaries` when you write the file back.
 
-**Don't write a separate plan, and don't stop for approval of one: the issue is the plan.** Its `whatToBuild`,
-`acceptanceCriteria` and `testBoundaries` were agreed before it reached you. If an issue only looks workable with a plan
-of its own, it was cut too coarsely. Say so, and don't plan around it.
-
 If you hand parts of the work to sub-agents, split it **before** dispatching any. Give each sub-agent a disjoint set of
 files and the test boundaries it owns. Do anything several slices depend on in this context first. That includes a
 shared type, a migration or RLS policy, or a contract two apps or packages both change. Two sub-agents never edit the
