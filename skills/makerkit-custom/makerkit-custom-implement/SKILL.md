@@ -11,7 +11,9 @@ numbering, the issue JSON shape, and the status lifecycle. This skill does not r
 and tell the user to run `/makerkit-custom-setup-skills`.
 
 Read each issue you're implementing first (`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work from its
-`whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`.
+`whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. If an issue's `codeCommit` already holds a SHA, it has
+been implemented: any further change to it is a final-review fix round, which belongs to the final reviewer, not this
+skill. Stop for that issue and tell the user.
 
 ## Ground yourself first
 
@@ -116,10 +118,9 @@ commit exists.
 3. **Check the branch.** If `HEAD` is the repo's default branch, stop and ask the user before committing.
 4. **Stage the implementation files only.** Never `git add .mysdd/` and never `git add -A`. Then read
    `git status --short` and confirm nothing unrelated was swept in.
-5. **Build the message.** Pick the header from the issue's `codeCommit` — `null` means `CODE: `, a SHA means
-   `CODE REVIEW FIXES: `. Read `codeCommit`, never `status`: an issue coming back from final review keeps its
-   `done-coding-awaiting-final-review` status, so the status can't tell you which round you're in. Write the message to
-   the shape in `.mysdd/issue-tracker.md` § Commit message format.
+5. **Build the message.** The header is always `CODE: `: this skill only ever makes the first-round commit, on an issue
+   whose `codeCommit` is `null`. `CODE REVIEW FIXES: ` commits belong to the final reviewer. Write the message to the
+   shape in `.mysdd/issue-tracker.md` § Commit message format.
    That file is the schema of record for the message the same way it is for the issue shape; this skill does not
    restate it.
 6. **One issue, one commit.** With several issues in a run, commit them one at a time in dependency order. Only when
@@ -134,16 +135,13 @@ exists: `git rev-parse HEAD` gives you the full SHA of the commit you just made.
 
 Then rewrite each committed issue **once** (`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and
 issue numbers are independent), carrying all three changes together: flip every satisfied entry in
-`acceptanceCriteria` to `"done": true`, set `"status": "done-coding-awaiting-final-review"`, and record the SHA — in
-`codeCommit` when it was `null`, otherwise in `reviewCodeCommit`, overwriting whatever was there. The
+`acceptanceCriteria` to `"done": true`, set `"status": "done-coding-awaiting-final-review"`, and record the SHA in
+`codeCommit`. Never write `reviewCodeCommit`: only the final reviewer sets it. The
 `done-coding-awaiting-final-review` state means the implementation and this skill's own review are complete, but
-independent final review is still pending; this skill must never set `done-final-review`. On a review-fix round the
-issue is already in that state and stays there — re-asserting it changes nothing, and what records the round is
-`reviewCodeCommit` plus the findings in `comments`, never a status move. Rewrite the whole file as
+independent final review is still pending; this skill must never set `done-final-review`. Rewrite the whole file as
 strict JSON, keeping every other field (`id`, `slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `covers`,
-`codeCommit`, `reviewCodeCommit`, `comments`) intact — `comments` holds review history that exists nowhere else, so
-dropping or emptying it loses it permanently, and dropping either commit field loses the only pointer from the issue to
-the code. `testBoundaries` is the one field you may change: add a boundary the user agreed during implementation, never
+`reviewCodeCommit`, `comments`) intact — `comments` holds review history that exists nowhere else, so dropping or
+emptying it loses it permanently, and dropping either commit field loses the only pointer from the issue to the code. `testBoundaries` is the one field you may change: add a boundary the user agreed during implementation, never
 remove one. Re-read each file after writing to confirm it still parses.
 
 If an issue is only partly done, leave it open: tick only the criteria that are genuinely met and say which are

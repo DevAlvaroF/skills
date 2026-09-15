@@ -67,9 +67,11 @@ public boundaries this issue's tests hit, confirmed with the user when the issue
 dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this issue satisfies; `[]` when the
 issue satisfies no story directly, and always `[]` when `spec` is `null`. `codeCommit` is the full SHA of the commit
 that implemented the issue, and `reviewCodeCommit` the full SHA of the commit that applied the final reviewer's
-findings; both are single strings or `null`, and both start as `null`. Neither is ever set by hand: the implement skill
-writes them when it commits, and every other skill carries them over verbatim. A further round of review fixes
-overwrites `reviewCodeCommit` — the superseded SHA stays reachable through git history and the `comments` trail.
+findings; both are single strings or `null`, and both start as `null`. Each has exactly one writer: only the implement
+skill writes `codeCommit`, when it commits; only the final reviewer — a human, or an LLM prompted to act as the final
+reviewer — writes `reviewCodeCommit`, when it commits its fixes. Every skill carries whichever field it doesn't own over
+verbatim. A further round of review fixes overwrites `reviewCodeCommit` — the superseded SHA stays reachable through git
+history and the `comments` trail.
 `comments` starts as `[]`.
 
 The successful local implementation and review lifecycle is:
@@ -80,14 +82,14 @@ ready-for-agent -> done-coding-awaiting-final-review -> done-final-review
 
 `done-coding-awaiting-final-review` means coding, verification, and the implementing agent's own review are complete.
 Only the independent final reviewer sets `done-final-review`. If final review requires changes, the issue stays at
-`done-coding-awaiting-final-review` — do not return it to `ready-for-agent`. Append the findings to `comments`, fix
-the issues found, and produce the `CODE REVIEW FIXES:` commit: the issue already carries a `codeCommit`, so that
-round records its SHA in `reviewCodeCommit` instead. A fix round is visible through `reviewCodeCommit` and the `comments`
-trail, never through a status change.
+`done-coding-awaiting-final-review` — do not return it to `ready-for-agent`, and do not re-run the implement skill on
+it. The final reviewer appends the findings to `comments`, fixes the issues found, produces the `CODE REVIEW FIXES:`
+commit, and records its SHA in `reviewCodeCommit`; `codeCommit` keeps pointing at the implementation. A fix round is
+visible through `reviewCodeCommit` and the `comments` trail, never through a status change.
 
 ## Commit message format
 
-Every commit an implement skill makes for an issue uses this shape:
+Every commit made for an issue — by the implement skill or by the final reviewer — uses this shape:
 
 ```text
 CODE: <imperative subject>
@@ -99,9 +101,9 @@ Spec: .mysdd/<NN>-<feature-slug>/spec.md
 ```
 
 - The header prefix is one of exactly two literals: `CODE: ` or `CODE REVIEW FIXES: `. Nothing else. Pick it from the
-  issue's `codeCommit`: `null` means this is the first implementation round, so `CODE: `; a SHA means the issue has
-  already been implemented and committed and final review has since asked for changes, so `CODE REVIEW FIXES: `. The
-  header follows `codeCommit`, never `status` — a fix round leaves the status where it is.
+  issue's `codeCommit`: `null` means this is the implement skill's first-round commit, so `CODE: `; a SHA means the
+  issue has already been implemented and committed and this is the final reviewer's fix commit, so
+  `CODE REVIEW FIXES: `. The header follows `codeCommit`, never `status` — a fix round leaves the status where it is.
 - The whole subject line, prefix included, is ≤72 characters.
 - One `Issue:` trailer per issue in the commit, repo-root-relative and beginning `.mysdd/`.
 - A `Spec:` trailer only when the issue's `spec` is not `null`, deduped when several issues in one commit share a spec.
