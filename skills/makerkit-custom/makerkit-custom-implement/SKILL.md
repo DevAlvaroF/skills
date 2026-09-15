@@ -94,7 +94,8 @@ independent final review is still pending; this skill must never set `done-final
 strict JSON, keeping every other field (`id`, `slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `covers`,
 `reviewCodeCommit`, `comments`) intact — `comments` holds review history that exists nowhere else, so dropping or
 emptying it loses it permanently, and dropping either commit field loses the only pointer from the issue to the code. `testBoundaries` is the one field you may change: add a boundary the user agreed during implementation, never
-remove one. Re-read each file after writing to confirm it still parses.
+remove one. Re-read each file after writing to confirm it still parses. If writing the issue fails after the commit
+succeeded, report the commit's full SHA and the error instead of committing again.
 
 If an issue is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
 outstanding. Never tick a criterion you did not verify.

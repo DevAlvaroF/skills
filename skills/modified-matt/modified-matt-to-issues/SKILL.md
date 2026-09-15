@@ -159,5 +159,5 @@ Spec and its Issues defines. Follow it exactly — this skill does not restate i
 
 ## Next step
 
-Once the Spec and its issues are committed, the next step is `/modified-matt-implement`, taking one issue from the
-frontier.
+Once the Spec and its issues are committed, or the commit was skipped because `.mysdd/` is gitignored, the next step is
+`/modified-matt-implement`, taking one issue from the frontier.
