@@ -67,6 +67,7 @@ Each story's `US-NNN` is **immutable once written**. Never renumber a story and 
 downstream issues reference these IDs in their `covers` field, so an ID is an address, not a position in the running
 order. On a later revision a new story takes the highest existing ID + 1, wherever it sits in the list, and a dropped
 story leaves its ID retired, not recycled.
+A dropped story stays in the list under its own ID, marked `(retired)`: never delete it or merge it into another.
 
 ## Implementation Decisions
 

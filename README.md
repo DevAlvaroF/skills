@@ -29,8 +29,8 @@ Don't assume parity between them; check what each actually contains.
 
 | Group in the picker | Directory | Prefix | Skills | For |
 |---|---|---|---|---|
-| **Makerkit Custom Skills** | `skills/makerkit-custom/` | `makerkit-custom-*` | 7 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
-| **Modified Matt Skills** | `skills/modified-matt/` | `modified-matt-*` | 7 | Every other repo. Agent-written config goes in `.mysdd/docs/agents/`, with ADRs in `.mysdd/docs/adr/` |
+| **Makerkit Custom Skills** | `skills/makerkit-custom/` | `makerkit-custom-*` | 8 | Makerkit repos; the skills know about `docs/` `.mdoc` files, the fork/upstream remote pair, and the monorepo `AGENTS.md` layout |
+| **Modified Matt Skills** | `skills/modified-matt/` | `modified-matt-*` | 8 | Every other repo. Agent-written config goes in `.mysdd/docs/agents/`, with ADRs in `.mysdd/docs/adr/` |
 
 Directory and prefix match in both groups: `skills/<group>/` holds skills
 prefixed `<group>-`. The directory name is what the scoped install URL wants;
@@ -241,12 +241,14 @@ the nearest one to the code in hand — directly.
 
 `issue-tracker.md` documents the issue lifecycle
 (`ready-for-agent -> done-coding-awaiting-final-review -> done-final-review`).
-No skill in this repo sets `done-final-review` — that's intentional, not a gap:
-`implement` is explicitly forbidden from setting it, and the final-review step
-is meant to be triggered by an external actor (a human, or a review process
-outside these skills) so an issue can't reach "done" without a human actually
-looking at it. An issue parked at `done-coding-awaiting-final-review` is
-correctly waiting on that human, not stuck.
+Only `final-review` sets `done-final-review`, and only a human starts it:
+`implement` is explicitly forbidden from setting it, and `final-review` is
+user-invoked only, so an issue can't reach "done" without someone choosing to
+run an independent review. An issue parked at
+`done-coding-awaiting-final-review` is correctly waiting on that, not stuck.
+`final-review` owns the reviewer's lifecycle, not the review technique: phase 1
+reviews the commit with whichever review skill is loaded beside it, phase 2
+plans the fixes, waits for approval, and commits them.
 
 There's no back edge. When final review asks for changes the issue *stays* at
 `done-coding-awaiting-final-review` — the findings are appended to `comments`
@@ -262,21 +264,24 @@ one is chosen comes from the issue's `codeCommit`, not its status. The
 body's `Issue:` and `Spec:` trailers point back at the `.mysdd/` paths, and the
 message carries no tool or model attribution, so it reads the same whichever
 agent (or human) produced it. The commit stages code only, never `.mysdd/`, and
-the skill never pushes, amends, or rebases.
+the skill never pushes, amends, or rebases. Closing an issue is a third,
+bookkeeping-only commit, `Closed Issue: <issue path>`, which stages the issue
+JSON and nothing else from the working tree.
 
 Two issue fields hold the result: `codeCommit`, the full SHA of the commit that
 implemented the issue, and `reviewCodeCommit`, the SHA of the commit that
 applied the reviewer's findings. Both are `null` until the relevant commit
-exists, both are written only by `implement`, and `codeCommit` is what selects
+exists, `implement` writes only `codeCommit` and `final-review` writes only
+`reviewCodeCommit`, and `codeCommit` is what selects
 the subject prefix. That's the pointer the external final reviewer follows from
 an issue to the code, and a second round of fixes overwrites `reviewCodeCommit`.
 
-Both flavours now hold the same seven skills, though the *contents* still
+Both flavours now hold the same eight skills, though the *contents* still
 diverge. Names are unprefixed below; in the picker each carries its group's
 prefix (`makerkit-custom-tdd`, `modified-matt-tdd`).
 
-**Makerkit Custom** (7) and **Modified Matt** (7) — user-invoked only:
-`grill-with-docs`, `implement`, `setup-skills`, `to-spec`, `to-issues`.
+**Makerkit Custom** (8) and **Modified Matt** (8) — user-invoked only:
+`grill-with-docs`, `implement`, `final-review`, `setup-skills`, `to-spec`, `to-issues`.
 Model-invoked: `domain-modeling`, `tdd`.
 
 `grill-with-docs` carries the interview itself — it used to delegate to a
@@ -284,8 +289,8 @@ separate `grilling` skill, which is now folded into it. It calls
 `domain-modeling` alongside the interview so terms and decisions get recorded
 as they crystallise.
 
-`implement` carries the code review in both flavours; there is no separate
-review skill. What it reviews differs: **Modified Matt** runs both axes
+`implement` carries its own pre-commit review in both flavours, in a
+`REVIEW.md` beside its `SKILL.md` that loads when the review runs. What it reviews differs: **Modified Matt** runs both axes
 (Standards and Spec) in parallel sub-agents, carrying a built-in Fowler smell
 baseline, while **Makerkit Custom** reviews spec-fidelity only and defers
 standards to the repo's own `/reviewer` and `/rls-review` skills.

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Final Review"
+  short_description: "Review an implemented issue, fix and close it"
+policy:
+  allow_implicit_invocation: false

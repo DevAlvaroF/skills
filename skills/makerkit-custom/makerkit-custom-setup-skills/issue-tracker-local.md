@@ -80,7 +80,8 @@ ready-for-agent -> done-coding-awaiting-final-review -> done-final-review
 ```
 
 `done-coding-awaiting-final-review` means coding, verification, and the implementing agent's own review are complete.
-Only the independent final reviewer sets `done-final-review`. If final review requires changes, the issue stays at
+Only the independent final reviewer — `/makerkit-custom-final-review`, or a human acting in that role — sets
+`done-final-review`. If final review requires changes, the issue stays at
 `done-coding-awaiting-final-review` — do not return it to `ready-for-agent`, and do not re-run the implement skill on
 it. The final reviewer appends the findings to `comments`, fixes the issues found, produces the `CODE REVIEW FIXES:`
 commit, and records its SHA in `reviewCodeCommit`; `codeCommit` keeps pointing at the implementation. A fix round is
@@ -88,7 +89,7 @@ visible through `reviewCodeCommit` and the `comments` trail, never through a sta
 
 ## Commit message format
 
-Every commit made for an issue — by the implement skill or by the final reviewer — uses this shape:
+Every code commit made for an issue — by the implement skill or by the final reviewer — uses this shape:
 
 ```text
 CODE: <imperative subject>
@@ -103,6 +104,8 @@ Spec: .mysdd/<NN>-<feature-slug>/spec.md
   issue's `codeCommit`: `null` means this is the implement skill's first-round commit, so `CODE: `; a SHA means the
   issue has already been implemented and committed and this is the final reviewer's fix commit, so
   `CODE REVIEW FIXES: `. The header follows `codeCommit`, never `status` — a fix round leaves the status where it is.
+  `Closed Issue: ` is a third subject, but it is bookkeeping, not a code commit: it follows § Closing an issue, not
+  this format.
 - The whole subject line, prefix included, is ≤72 characters.
 - One `Issue:` trailer per issue in the commit, repo-root-relative and beginning `.mysdd/`.
 - A `Spec:` trailer only when the issue's `spec` is not `null`, deduped when several issues in one commit share a spec.
@@ -129,6 +132,20 @@ CODE REVIEW FIXES: Seat guard — handle the revoked-seat race
 Issue: .mysdd/03-workspace-seats/issues/02-seat-guard.json
 Spec: .mysdd/03-workspace-seats/spec.md
 ```
+
+## Closing an issue
+
+When the final reviewer sets `done-final-review` and `.mysdd/` is tracked rather than gitignored, it records the close in
+one commit of its own:
+
+- The subject is exactly `Closed Issue: <issue path>`, the path repo-root-relative and beginning `.mysdd/`. No body, no
+  trailers.
+- Stage only that issue's JSON file, plus any `.mysdd/` board-state file the tooling keeps and has changed (for example
+  `.mysdd/kanban-boards.json`). Never stage implementation files: those belong to the `CODE: ` and `CODE REVIEW FIXES: `
+  commits.
+- The no-attribution rule in § Commit message format applies.
+
+If `.mysdd/` is gitignored, make no commit: the status change is the whole close.
 
 ## When a skill says "publish to the issue tracker"
 
