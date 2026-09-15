@@ -257,16 +257,18 @@ A fix round shows up as a `reviewCodeCommit` and a comment, never as a status
 move.
 
 It also documents the commit message format. `implement` commits the work it
-lands — it used to stop at suggesting a message — and the subject line carries
-one of exactly two prefixes: `CODE: ` for a first implementation round, and
+lands — it used to stop at suggesting a message — and a code commit's subject
+carries one of two prefixes: `CODE: ` for a first implementation round, and
 `CODE REVIEW FIXES: ` for a round applying the final reviewer's findings. Which
 one is chosen comes from the issue's `codeCommit`, not its status. The
 body's `Issue:` and `Spec:` trailers point back at the `.mysdd/` paths, and the
 message carries no tool or model attribution, so it reads the same whichever
 agent (or human) produced it. The commit stages code only, never `.mysdd/`, and
-the skill never pushes, amends, or rebases. Closing an issue is a third,
-bookkeeping-only commit, `Closed Issue: <issue path>`, which stages the issue
-JSON and nothing else from the working tree.
+the skill never pushes, amends, or rebases. Two bookkeeping-only subjects sit
+beside them. `SPEC: <imperative subject>` is `to-issues` committing a feature's
+spec together with the issue files it created or updated, once the user has
+approved them. `Closed Issue: <issue path>` is closing an issue, and stages the
+issue JSON and nothing else from the working tree.
 
 Two issue fields hold the result: `codeCommit`, the full SHA of the commit that
 implemented the issue, and `reviewCodeCommit`, the SHA of the commit that

@@ -152,7 +152,12 @@ start with `"done": false` and ticking one means flipping it to `true`; `comment
 `reviewCodeCommit` both start as `null`; `codeCommit` is written only by the implement skill and `reviewCodeCommit` only
 by the final reviewer, never by this skill.
 
+### 6. Commit the Spec and the issues
+
+Once the user approves the published issues, commit the Spec and the issues as `.mysdd/issue-tracker.md` § Committing a
+Spec and its Issues defines. Follow it exactly — this skill does not restate it. Report the commit's SHA and subject.
+
 ## Next step
 
-Once the user approves the published issues, the next step is `/modified-matt-implement`, taking one issue from the
+Once the Spec and its issues are committed, the next step is `/modified-matt-implement`, taking one issue from the
 frontier.

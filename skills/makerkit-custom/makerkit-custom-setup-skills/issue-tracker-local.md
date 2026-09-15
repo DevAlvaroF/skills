@@ -100,12 +100,12 @@ Issue: .mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json
 Spec: .mysdd/<NN>-<feature-slug>/spec.md
 ```
 
-- The header prefix is one of exactly two literals: `CODE: ` or `CODE REVIEW FIXES: `. Nothing else. Pick it from the
-  issue's `codeCommit`: `null` means this is the implement skill's first-round commit, so `CODE: `; a SHA means the
-  issue has already been implemented and committed and this is the final reviewer's fix commit, so
-  `CODE REVIEW FIXES: `. The header follows `codeCommit`, never `status` — a fix round leaves the status where it is.
-  `Closed Issue: ` is a third subject, but it is bookkeeping, not a code commit: it follows § Closing an issue, not
-  this format.
+- The header prefix of a code commit is `CODE: ` or `CODE REVIEW FIXES: `. Pick it from the issue's `codeCommit`:
+  `null` means this is the implement skill's first-round commit, so `CODE: `; a SHA means the issue has already been
+  implemented and committed and this is the final reviewer's fix commit, so `CODE REVIEW FIXES: `. The header follows
+  `codeCommit`, never `status` — a fix round leaves the status where it is. `SPEC: ` and `Closed Issue: ` are the other
+  subjects, but they are bookkeeping, not code commits: they follow § Committing a Spec and its Issues and § Closing an
+  issue, not this format.
 - The whole subject line, prefix included, is ≤72 characters.
 - One `Issue:` trailer per issue in the commit, repo-root-relative and beginning `.mysdd/`.
 - A `Spec:` trailer only when the issue's `spec` is not `null`, deduped when several issues in one commit share a spec.
@@ -132,6 +132,20 @@ CODE REVIEW FIXES: Seat guard — handle the revoked-seat race
 Issue: .mysdd/03-workspace-seats/issues/02-seat-guard.json
 Spec: .mysdd/03-workspace-seats/spec.md
 ```
+
+## Committing a Spec and its Issues
+
+When the issues skill has published a feature's issues and `.mysdd/` is tracked rather than gitignored, it records the
+Spec and those issues in one commit of its own:
+
+- The subject is `SPEC: <imperative subject>`, ≤72 characters prefix included. An optional body of one to three lines
+  may say why. No trailers.
+- Stage only that feature's `spec.md` and the issue JSON files this run created or updated. Never stage implementation
+  files or another feature's files, and leave unrelated staged or working-tree changes out of the commit.
+- The no-attribution rule in § Commit message format applies.
+- Never make an empty commit, and never amend.
+
+If `.mysdd/` is gitignored, make no commit.
 
 ## Closing an issue
 
