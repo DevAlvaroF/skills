@@ -19,6 +19,16 @@ Use /modified-matt-tdd where possible, at each issue's pre-agreed boundaries (it
 implementation surfaces a boundary the issue doesn't list — or shows a listed one doesn't hold — stop and agree it with
 the user before writing the test, then add it to that issue's `testBoundaries` when you write the file back.
 
+**Don't write a separate plan, and don't stop for approval of one: the issue is the plan.** Its `whatToBuild`,
+`acceptanceCriteria` and `testBoundaries` were agreed before it reached you. If an issue only looks workable with a plan
+of its own, it was cut too coarsely. Say so, and don't plan around it.
+
+If you hand parts of the work to sub-agents, split it **before** dispatching any. Give each sub-agent a disjoint set of
+files and the test boundaries it owns. Do anything several slices depend on (a shared type, a schema, a contract two
+slices both change) in this context first. Two sub-agents never edit the same file. If the work won't split without
+overlapping files, don't force it: implement it here, one piece after another. The review, the commit and advancing the
+issues stay in this context.
+
 Run typechecking regularly and single test files regularly — those are short, and you need their output in hand to
 drive the next cycle. Run the **full test suite once at the end, through a sub-agent**: suite output is mostly
 passing-test noise and stack traces this context never needs. Ask it to run the suite and report only the failures —
