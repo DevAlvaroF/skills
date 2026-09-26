@@ -41,7 +41,8 @@ to report; ask the rest of the frontier now. The _decisions_ are the user's: put
 The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed.
 Do not act on it until the user confirms you have reached a shared understanding. Once they confirm,
 `/makerkit-custom-to-spec` turns this session into a spec — run it **in this same session**, while the design tree is
-still in context.
+still in context. Entries this session writes to `AGENTS.md` stay uncommitted. `/makerkit-custom-to-issues` commits
+them with the spec.
 
 ## Ground yourself first
 
@@ -51,6 +52,11 @@ already answers:
 - the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
   vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
   description differ, **follow the repo**.
+- the `## Vocabulary` and `## Decisions` sections of **every** `AGENTS.md` owning code this work touches — for each
+  touched path, the nearest `AGENTS.md` at or above it, plus the root — not only the nearest one. Use the vocabulary
+  as written. Decisions are binding: when your plan contradicts one, don't silently override it. Flag it — _Contradicts
+  **<entry statement>** in `<path>/AGENTS.md`, but worth reopening because…_ — and ask the user whether to change the
+  plan or supersede the entry.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
   piece is and how it fits. Read directly, and only for the pieces the feature touches.
 - the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+

@@ -8,7 +8,7 @@ project, never both.**
 
 | Flavour | Use it for |
 |---|---|
-| **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — knows its `AGENTS.md` layout, RLS, `.mdoc` docs and fork/upstream remotes |
+| **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — knows its `AGENTS.md` layout, RLS and `.mdoc` docs; keeps vocabulary and binding decisions in the owning `AGENTS.md` (no ADRs, no `CONTEXT.md`) |
 | **Modified Matt Skills** (`modified-matt-*`) | Any other repo |
 
 ---
@@ -64,6 +64,21 @@ install the other one.
 - Don't also install the same skills globally, or `mattpocock/skills` in the
   same project — the agent will see every skill twice.
 
+### Where decisions live (Makerkit flavour)
+
+- There are no ADRs and no `CONTEXT.md`.
+- Terms go in a `## Vocabulary` section and standing decisions in a
+  `## Decisions` section of the `AGENTS.md` that owns the code — each created
+  the first time it's needed.
+- Entries stand alone: they never point at an issue, a user story, a spec or
+  anything else under `.mysdd/`, which gets deleted while `AGENTS.md` stays.
+- Decisions are binding. Every skill reads those of each `AGENTS.md` owning
+  the code it touches and stops to ask rather than contradict one; the final
+  reviewer blocks on an unagreed contradiction.
+- The grill writes entries; `to-issues` commits them with the spec in the
+  `SPEC:` commit; `implement` and `final-review` commit a supersession with
+  the code that needed it.
+
 ---
 
 ## For developers
@@ -96,7 +111,9 @@ matt_submodule/skills             # upstream mattpocock/skills, for reference
 - Keep the flavour prefix on every skill name.
 - `description` is all the agent sees before loading a skill — write it as
   trigger conditions ("Use when…"), not a summary.
-- Keep `SKILL.md` short; put detail in `references/`.
+- Keep `SKILL.md` short; put detail in `references/`. The one deliberate
+  exception is `makerkit-custom-domain-modeling`, which inlines its entry
+  format so every skill that loads it gets the rules in one read.
 - Stick to frontmatter keys both agents understand: `name`, `description`,
   `license`, `allowed-tools`, `metadata`.
 

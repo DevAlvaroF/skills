@@ -6,7 +6,8 @@ disable-model-invocation: true
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the
 user; just synthesize what you already know. If the design conversation isn't in this session's context, say so and
-ask the user to point you at it rather than inventing a decision log.
+ask the user to point you at it rather than inventing a decision log. The one thing to stop and ask about is a
+contradiction with a recorded `## Decisions` entry that the conversation never resolved.
 
 **Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
@@ -19,12 +20,17 @@ and tell the user to run `/makerkit-custom-setup-skills`.
 - the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
   vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
   description differ, **follow the repo**.
+- the `## Vocabulary` and `## Decisions` sections of **every** `AGENTS.md` owning code this work touches — for each
+  touched path, the nearest `AGENTS.md` at or above it, plus the root — not only the nearest one. Use the vocabulary
+  as written. Decisions are binding: when your plan contradicts one, don't silently override it. Flag it — _Contradicts
+  **<entry statement>** in `<path>/AGENTS.md`, but worth reopening because…_ — and ask the user whether to change the
+  plan or supersede the entry.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
   piece is and how it fits. Read directly, and only for the pieces the feature touches.
 - the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
   upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
-  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Per the frontier
-  rule above, don't block round one on it: only the questions downstream of its answer wait for it to report.
+  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Don't block on
+  it: synthesise whatever doesn't depend on its answer while it works.
 
 ## Process
 
@@ -114,6 +120,9 @@ the commit message, so anything here reaches git history permanently. Exclude se
 API keys, connection strings, customer data, PII, internal URLs carrying auth, and any conversation unrelated to the
 decisions above. When a decision genuinely turns on a sensitive value, describe the value's role without reproducing it.
 
+When the design supersedes a `## Decisions` entry in an `AGENTS.md`, name that entry here by its statement and file.
+`/makerkit-custom-to-issues` reads this log to keep the `AGENTS.md` files in step with the spec.
+
 </spec-template>
 
 ## Before you publish
@@ -128,4 +137,7 @@ Confirm each of these. Any "no" is a fix, not a caveat: don't publish until it's
 - Testing Decisions names prior art: actual similar tests in this codebase, not a description of what one would look
   like
 - The decision log is a redacted summary in your own words, carrying no secrets, credentials, PII, or raw transcript
-- No file paths or code snippets anywhere, except a prototype-derived snippet that encodes a decision prose can't
+- No Implementation Decision contradicts a `## Decisions` entry in an owning `AGENTS.md`, unless the user agreed and
+  that entry is already marked `_Superseded by:_`
+- No file paths or code snippets anywhere, except a prototype-derived snippet that encodes a decision prose can't and
+  the `AGENTS.md` a superseded entry lives in

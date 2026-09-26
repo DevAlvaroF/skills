@@ -49,11 +49,16 @@ alongside them. This is fixed — there's no tracker choice to make, so skip str
 `AGENTS.md` files**: a root file that maps the monorepo, plus one per app and per package that owns the conventions for
 that subtree. There is no separate glossary file and no ADR directory; vocabulary and decisions live in whichever
 `AGENTS.md` owns the code they describe, and the other skills read those files directly rather than a generated index.
+Terms sit in a `## Vocabulary` section and standing decisions in a `## Decisions` section.
+`makerkit-custom-domain-modeling` creates each lazily, every skill treats the decisions as binding, and no entry ever
+points into `.mysdd/`.
 
 So this section reports rather than writes. Show the user the
 `find . -name AGENTS.md -not -path '*/node_modules/*' | sort` output from step 1, annotating each path with a one-line
-note on what that subtree owns, taken from that file's own opening lines rather than guessed. That is the map the other
-skills will navigate; naming it here is how the user sees whether a subtree is undocumented.
+note on what that subtree owns, taken from that file's own opening lines rather than guessed, and whether it already
+has a `## Vocabulary` or `## Decisions` section. That is the map the other skills will navigate; naming it here is how
+the user sees whether a subtree is undocumented. Flag any entry that points into `.mysdd/` (an issue, a `US-NNN`, a spec
+or feature path) for the user to reword; never rewrite one silently.
 
 If `find` returned **no** `AGENTS.md` files at all, say so and ask whether to seed a root one before continuing —
 without it the other skills have nothing to read.
@@ -135,6 +140,10 @@ commit message format).
 
 Conventions live in a distribution of `AGENTS.md` files (root + per app/package). Read the root file, then the nearest
 `AGENTS.md` to the code you're touching. Where the nearest one has a `## Skills` section, invoke the skills it names.
+
+An `AGENTS.md` may carry a `## Vocabulary` section (canonical terms: use them, avoid the listed synonyms) and a
+`## Decisions` section (standing decisions). Decisions are binding: read those of every `AGENTS.md` owning code you
+touch, and flag any plan that contradicts one rather than silently overriding it.
 ```
 
 Then write `.mysdd/issue-tracker.md`, creating `.mysdd/` if it doesn't exist, from the seed template in this skill

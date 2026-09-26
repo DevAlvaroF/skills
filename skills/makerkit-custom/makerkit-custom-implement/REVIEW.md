@@ -2,8 +2,10 @@
 
 Step 1 of `/makerkit-custom-implement`, run on its own work before the repo's verification steps.
 
-Check the diff against the originating issue / spec: does the code faithfully implement it? Standards conformance
-(AGENTS.md, code smells) belongs to `/reviewer` in step 2 — this step is spec-fidelity only.
+Check the diff against the originating issue / spec: does the code faithfully implement it? Spec fidelity includes the
+spec's Decision log and the `## Decisions` of each `AGENTS.md` owning a touched file — for each touched path, the
+nearest `AGENTS.md` at or above it, plus the root. Standards conformance (AGENTS.md rules, code smells) belongs to
+`/reviewer` in step 2 — this step is spec-fidelity only.
 
 ## Collect the diff
 
@@ -46,9 +48,11 @@ Run this as a sub-agent so a large diff/spec doesn't pollute this skill's own co
 - The diff command from _Collect the diff_ (the command, never the diff itself) and the commit list.
 - The *path* to the spec. Pass the path only and let the sub-agent read it; don't read the spec into this context to
   paste it in.
+- The paths of the `AGENTS.md` files owning the touched files, for their `## Decisions`.
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that
-  wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote
-  the spec line for each finding. Under 400 words."
+  wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong;
+  (d) places the diff contradicts the spec's Decision log or a `## Decisions` entry, unless the diff itself supersedes
+  it. Quote the spec line or entry for each finding. Under 400 words."
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 

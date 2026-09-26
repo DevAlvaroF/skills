@@ -21,7 +21,7 @@ const GROUPS = [
         dir: "makerkit-custom",
         name: "makerkit-custom-skills",
         description:
-            "Makerkit-aware engineering skills: they know about docs/ .mdoc product docs, the fork/upstream remote pair, and the monorepo AGENTS.md layout.",
+            "Makerkit-aware engineering skills: they know about docs/ .mdoc product docs and the monorepo AGENTS.md layout, where terms and binding decisions live in ## Vocabulary / ## Decisions sections of the owning AGENTS.md (no ADRs, no CONTEXT.md).",
         keywords: ["makerkit", "engineering", "tdd", "code-review", "grilling"],
     },
     {

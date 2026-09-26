@@ -20,6 +20,8 @@ without parsing prose.
 - Comments and conversation history append to the issue's `comments` array, oldest first
 - Every file under `issues/` is strict JSON: no comments, no trailing commas, every field present. Parse it, mutate the
   object, write the whole file back; never append loose text to an issue file
+- `.mysdd/` is disposable working state: features get archived and deleted, while the `AGENTS.md` files stay. So no
+  `## Vocabulary` or `## Decisions` entry in an `AGENTS.md` names an issue, a `US-NNN`, a spec or any `.mysdd/` path
 
 ## Issue shape
 
@@ -111,6 +113,8 @@ Spec: .mysdd/<NN>-<feature-slug>/spec.md
 - A `Spec:` trailer only when the issue's `spec` is not `null`, deduped when several issues in one commit share a spec.
 - No tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no emoji badge. The message
   must read the same whichever agent, or human, produced it.
+- A code commit stages implementation files only, never anything under `.mysdd/`. The one exception is an `AGENTS.md`
+  whose `## Decisions` the user agreed to change for this issue: it goes into the same commit, staged whole.
 
 A first-round commit:
 
@@ -136,16 +140,20 @@ Spec: .mysdd/03-workspace-seats/spec.md
 ## Committing a Spec and its Issues
 
 When the issues skill has published a feature's issues and `.mysdd/` is tracked rather than gitignored, it records the
-Spec and those issues in one commit of its own:
+Spec, those issues and the decisions they rest on in one commit of its own:
 
 - The subject is `SPEC: <imperative subject>`, ≤72 characters prefix included. An optional body of one to three lines
   may say why. No trailers.
-- Stage only that feature's `spec.md` and the issue JSON files this run created or updated. Never stage implementation
-  files or another feature's files, and leave unrelated staged or working-tree changes out of the commit.
+- Stage that feature's `spec.md`, the issue JSON files this run created or updated, and every `AGENTS.md` whose
+  `## Vocabulary` or `## Decisions` this run or the spec's design session changed. Stage each such `AGENTS.md` whole,
+  even when it carries other edits, and name it — with any other edits it carries — in the report. Never stage
+  implementation files or another feature's `.mysdd/` files, and leave unrelated staged or working-tree changes out of
+  the commit.
 - The no-attribution rule in § Commit message format applies.
 - Never make an empty commit, and never amend.
 
-If `.mysdd/` is gitignored, make no commit.
+If `.mysdd/` is gitignored, make a commit containing only those `AGENTS.md` files, subject `SPEC: <imperative subject>`,
+no trailers. If no `AGENTS.md` changed, make no commit.
 
 ## Closing an issue
 
@@ -155,8 +163,8 @@ one commit of its own:
 - The subject is exactly `Closed Issue: <issue path>`, the path repo-root-relative and beginning `.mysdd/`. No body, no
   trailers.
 - Stage only that issue's JSON file, plus any `.mysdd/` board-state file the tooling keeps and has changed (for example
-  `.mysdd/kanban-boards.json`). Never stage implementation files: those belong to the `CODE: ` and `CODE REVIEW FIXES: `
-  commits.
+  `.mysdd/kanban-boards.json`). Never stage implementation files or an `AGENTS.md`: those belong to the `SPEC: `,
+  `CODE: ` and `CODE REVIEW FIXES: ` commits.
 - The no-attribution rule in § Commit message format applies.
 
 If `.mysdd/` is gitignored, make no commit: the status change is the whole close.

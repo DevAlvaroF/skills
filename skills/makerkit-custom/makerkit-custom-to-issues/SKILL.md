@@ -22,18 +22,23 @@ an argument, read the file's full contents.
 
 ### 2. Explore the codebase
 
-**Before starting**, If you have not already explored the codebase to understand the state of the code,read the
+**Before starting**, if you haven't already explored the codebase to understand the state of the code, read the
 project's own documentation:
 
 - the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
   vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
   description differ, **follow the repo**.
+- the `## Vocabulary` and `## Decisions` sections of **every** `AGENTS.md` owning code this work touches — for each
+  touched path, the nearest `AGENTS.md` at or above it, plus the root — not only the nearest one. Use the vocabulary
+  as written. Decisions are binding: when your plan contradicts one, don't silently override it. Flag it — _Contradicts
+  **<entry statement>** in `<path>/AGENTS.md`, but worth reopening because…_ — and ask the user whether to change the
+  plan or supersede the entry.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
   piece is and how it fits. Read directly, and only for the pieces the feature touches.
 - the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
   upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
-  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Per the frontier
-  rule above, don't block round one on it: only the questions downstream of its answer wait for it to report.
+  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Don't block on
+  it: draft the slices that don't depend on its answer while it works.
 
 Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the
 easy change."
@@ -93,6 +98,7 @@ Ask the user:
 - Are the test boundaries right: does each issue test at the right boundary, and are any missing or superfluous?
 - Is every user story covered? Skip stories marked `(retired)`. List each other `US-NNN` in the spec that no issue covers, and ask whether it is a deliberate
   deferral or a slice you missed.
+- Does any issue contradict a `## Decisions` entry? Name each one, with its entry and file.
 
 Iterate until the user approves the breakdown.
 
@@ -162,12 +168,42 @@ start with `"done": false` and ticking one means flipping it to `true`; `comment
 `reviewCodeCommit` both start as `null`; `codeCommit` is written only by the implement skill and `reviewCodeCommit` only
 by the final reviewer, never by this skill.
 
-### 6. Commit the Spec and the issues
+### 6. Record the spec's standing decisions
 
-Once the user approves the published issues, commit the Spec and the issues as `.mysdd/issue-tracker.md` § Committing a
-Spec and its Issues defines. Follow it exactly — this skill does not restate it. Report the commit's SHA and subject.
+Skip this step when the run didn't start from a spec. Otherwise call the Skill tool with
+"makerkit-custom-domain-modeling" and apply its rules: the three tests, standalone entries, superseding and removing.
+
+1. **Add what's missing.** Walk the spec's Implementation Decisions and Decision log. Each decision that passes the
+   three tests and is not already recorded **or superseded** in the owning `AGENTS.md` becomes a standalone entry there.
+   The "or superseded" part stops a re-run from re-adding a decision that implement or final-review already replaced.
+2. **Retire what the spec dropped.** Trace this spec's earlier entries through git, never through IDs in the entries
+   (entries carry none):
+   - `git log --format='%H %s' -E --grep='^SPEC: ' -- <spec path>` finds this spec's earlier `SPEC:` commits.
+   - `git log --format='%H %s' -F --grep='Spec: <spec path>' -- ':(glob)**/AGENTS.md'` finds code commits that changed
+     a decision on the spec's behalf.
+   - Read each commit's `AGENTS.md` hunks with `git show --format= <sha> -- ':(glob)**/AGENTS.md'`. `SPEC:` commits
+     stage whole files, so count only the entries that match the spec as it stood at that commit
+     (`git show <sha>:<spec path>`).
+   - A live entry traced this way is a candidate when the current spec no longer carries its decision, or when every
+     issue of this spec has been retired to `issues/archive/`. Ask for each candidate: supersede or remove? Recommend
+     removal only when no issue that implemented it ever got a `codeCommit`, so it never reached the code. Never decide
+     for the user.
+   - When `.mysdd/` is gitignored there is no spec history to trace: say so and skip this half.
+3. **Collect the files for the commit:** every `AGENTS.md` step 6 changed, plus every one carrying uncommitted
+   `## Vocabulary` or `## Decisions` entries from this spec's design session
+   (`git status --short -- ':(glob)**/AGENTS.md'`). Each file is committed whole, so name any other uncommitted edit it
+   carries.
+4. **Show, then write.** List the adds, supersedes, removes and files next to the published issues. Write nothing to
+   an `AGENTS.md` until the user approves.
+
+### 7. Commit the Spec, the issues and the decisions
+
+Once the user approves the published issues and step 6, commit the Spec, the issues and the step-6 `AGENTS.md` files as
+`.mysdd/issue-tracker.md` § Committing a Spec and its Issues defines. Follow it exactly — this skill does not restate
+it. Report the commit's SHA and subject, and each `AGENTS.md` it carried. When `.mysdd/` is gitignored, that section's
+`AGENTS.md`-only `SPEC:` commit applies.
 
 ## Next step
 
-Once the Spec and its issues are committed, or the commit was skipped because `.mysdd/` is gitignored, the next step is
-`/makerkit-custom-implement`, taking one issue from the frontier.
+Once the Spec, its issues and its decisions are committed — or, with `.mysdd/` gitignored, once any `AGENTS.md` change
+is committed — the next step is `/makerkit-custom-implement`, taking one issue from the frontier.

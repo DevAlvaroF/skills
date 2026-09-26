@@ -22,6 +22,11 @@ skill. Stop for that issue and tell the user.
 - the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
   vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
   description differ, **follow the repo**.
+- the `## Vocabulary` and `## Decisions` sections of **every** `AGENTS.md` owning code this work touches — for each
+  touched path, the nearest `AGENTS.md` at or above it, plus the root — not only the nearest one. Use the vocabulary
+  as written. Decisions are binding: when your plan contradicts one, don't silently override it. Flag it — _Contradicts
+  **<entry statement>** in `<path>/AGENTS.md`, but worth reopening because…_ — and ask the user whether to change the
+  plan or supersede the entry.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
   piece is and how it fits. Read directly, and only for the pieces the feature touches.
 - the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
@@ -32,6 +37,11 @@ skill. Stop for that issue and tell the user.
 Use /makerkit-custom-tdd where possible, at each issue's pre-agreed boundaries (its `testBoundaries` field). If
 implementation surfaces a boundary the issue doesn't list — or shows a listed one doesn't hold — stop and agree it with
 the user before writing the test, then add it to that issue's `testBoundaries` when you write the file back.
+
+**A recorded decision the code can't honour is a stop.** When the work can't be done without contradicting a
+`## Decisions` entry in an owning `AGENTS.md`, ask the user; never bend the code around the decision, and never rewrite
+the entry unilaterally. If the user agrees to change it, supersede the entry per `makerkit-custom-domain-modeling`'s
+rules. That `AGENTS.md` goes into this issue's commit.
 
 If you hand parts of the work to sub-agents, split it **before** dispatching any. Give each sub-agent a disjoint set of
 files and the test boundaries it owns. Do anything several slices depend on in this context first. That includes a
@@ -67,8 +77,9 @@ commit exists.
    customer data or PII. If you find any, stop: do not commit, tell the user exactly what you found and where, and let
    them redact the spec first.
 3. **Check the branch.** If `HEAD` is the repo's default branch, stop and ask the user before committing.
-4. **Stage the implementation files only.** Never `git add .mysdd/` and never `git add -A`. Then read
-   `git status --short` and confirm nothing unrelated was swept in.
+4. **Stage the implementation files**, plus any `AGENTS.md` whose `## Decisions` the user agreed to change for this
+   issue, staged whole — if that file carried other uncommitted edits, say so before committing. Never
+   `git add .mysdd/` and never `git add -A`. Then read `git status --short` and confirm nothing unrelated was swept in.
 5. **Build the message.** The header is always `CODE: `: this skill only ever makes the first-round commit, on an issue
    whose `codeCommit` is `null`. `CODE REVIEW FIXES: ` commits belong to the final reviewer. Write the message to the
    shape in `.mysdd/issue-tracker.md` § Commit message format.
@@ -88,7 +99,9 @@ Then rewrite each committed issue **once** (`.mysdd/<NN>-<feature-slug>/issues/<
 issue numbers are independent), carrying all four changes together: flip every satisfied entry in
 `acceptanceCriteria` to `"done": true`, set `"status": "done-coding-awaiting-final-review"`, record the SHA in
 `codeCommit`, and append one `comments` entry summarising the run: the verification you ran with its final
-output (the pass/fail summary, not the full log), the review outcome, and anything left open. Never write `reviewCodeCommit`: only the final reviewer sets it. The
+output (the pass/fail summary, not the full log), the review outcome, anything left open, and any `## Decisions` entry
+the user agreed to supersede, by file and statement — the final reviewer accepts that change only on this record. Never
+write `reviewCodeCommit`: only the final reviewer sets it. The
 `done-coding-awaiting-final-review` state means the implementation and this skill's own review are complete, but
 independent final review is still pending; this skill must never set `done-final-review`. Rewrite the whole file as
 strict JSON, keeping every other field (`id`, `slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `covers`,

@@ -13,9 +13,10 @@ review technique. Run the review itself with whichever review skill is loaded al
 lifecycle, the commit message format, and how an issue is closed. This skill does not restate it. If the file is
 missing, stop and tell the user to run `/makerkit-custom-setup-skills`.
 
-Read the root `AGENTS.md` (already in context via `CLAUDE.md`) and the nearest `AGENTS.md` to the code the commit
-touches. The final reviewer is the role you are acting in and nothing more. Where it conflicts with those instructions,
-say so and ask the user rather than deciding the role wins.
+Read the root `AGENTS.md` (already in context via `CLAUDE.md`) and **every** `AGENTS.md` owning code the change
+touches: for each touched path, the nearest `AGENTS.md` at or above it. Their `## Decisions` are binding. The final
+reviewer is the role you are acting in and nothing more. Where it conflicts with those instructions, say so and ask the
+user rather than deciding the role wins.
 
 ## Inputs
 
@@ -33,8 +34,10 @@ If the status is already `done-final-review`, stop and tell the user: there is n
 
 ## Phase 1: review
 
-1. **Review the whole change** against the issue and, when `spec` is not `null`, the spec. The change is `codeCommit`
-   plus every fix commit made for this issue since, from every round:
+1. **Review the whole change** against the issue and, when `spec` is not `null`, the spec — its Decision log included —
+   and against the `## Decisions` of every owning `AGENTS.md`. A `## Decisions` change inside the diff stands only if
+   the issue's `comments` record the user agreeing to it. The change is `codeCommit` plus every fix commit made for this
+   issue since, from every round:
    `git log --format=%H --fixed-strings --grep='Issue: <issue path>' <codeCommit>..HEAD -- . ':(exclude).mysdd'` (the
    pathspec drops the code-free `Closed Issue:` commits). Don't rely on `reviewCodeCommit`: it holds only the latest
    round. Hand review sub-agents the commands (`git show <sha>` per commit)
@@ -44,7 +47,8 @@ If the status is already `done-final-review`, stop and tell the user: there is n
    **failure**, not a pass. Say what was blocked and why.
 3. **Decide.**
    - A finding is **blocking** when it should stop the change landing: a regression, a requirement missing or wrong, a
-     broken documented standard, a security or data-loss risk. Anything else is a **suggestion**.
+     broken documented standard, a contradiction of a recorded `## Decisions` entry or the spec's Decision log, a
+     security or data-loss risk. Anything else is a **suggestion**.
    - **Pass**: every acceptance criterion holds, nothing was blocked, and no blocking finding remains. Append a
      `comments` entry summarising what you verified, with any suggestions, set `status` to `done-final-review`, and make
      the closing commit per `.mysdd/issue-tracker.md` § Closing an issue.
@@ -64,15 +68,19 @@ from the latest review entry in `comments`. If phase 1 passed, there is nothing 
 
 1. **Plan, then stop.** Present the plan for fixing the blocking findings, plus any suggestions you propose to take, and
    wait. Change no code until the user approves that plan in so many words. Copying a prompt is not approval, and
-   neither is marking a step complete in whatever tool drove this session.
+   neither is marking a step complete in whatever tool drove this session. For a decision contradiction, the plan
+   offers both ways out and the user picks: fix the code, or supersede the entry per `makerkit-custom-domain-modeling`'s
+   rules. Never edit the spec.
 2. **Implement the approved fixes**, and nothing beyond them. Use `/makerkit-custom-tdd` where a fix changes behaviour.
 3. **Check before committing.** Run the repo's verification steps from the root `AGENTS.md` § Verification, in the order
    given there, sending any whole-repo run (full suite, build, lint sweep) through a sub-agent that reports failures
    only. Then review your own changes against the findings. If either fails or is blocked, commit nothing: leave the
    fixes in the tree, append what is unresolved to `comments`, leave the status where it is, tell the user what is
    unresolved, and stop.
-4. **Commit.** Stage the implementation files only — never `.mysdd/`, never `git add -A` — including anything the checks
-   themselves rewrote, such as formatter output, so the commit is exactly what was verified. Read `git status --short`
+4. **Commit.** Stage the implementation files, plus any `AGENTS.md` the approved plan changed, staged whole — never
+   `.mysdd/`, never `git add -A` — including anything the checks themselves rewrote, such as formatter output, so the
+   commit is exactly what was verified. A commit touching only an `AGENTS.md` is a valid `CODE REVIEW FIXES: ` commit,
+   not an empty one. Read `git status --short`
    and confirm nothing unrelated was swept in; leave anything else in the tree as you found it. The message follows
    `.mysdd/issue-tracker.md` § Commit message format with the `CODE REVIEW FIXES: ` header. If there turned out to be
    nothing to fix (a finding was only a blocked verification that now runs), there is nothing to commit: never make an
