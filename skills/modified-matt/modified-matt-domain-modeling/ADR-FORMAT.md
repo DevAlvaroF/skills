@@ -37,7 +37,7 @@ Only include these when they add genuine value. Most ADRs won't need them.
 
 ## Numbering
 
-Scan `.mysdd/docs/adr/` for the highest existing number and increment by one. Never reuse a number, not even a removed ADR's.
+Take the highest number among the ADRs in `.mysdd/docs/adr/` and every ADR ever committed there (`git log --format= --name-only --no-renames --diff-filter=A -- .mysdd/docs/adr/`), and increment by one. Never reuse a number, not even a removed ADR's: the history is what remembers a removed one.
 
 ## Superseding and removing
 

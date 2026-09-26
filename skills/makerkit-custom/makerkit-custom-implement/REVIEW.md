@@ -35,8 +35,8 @@ Look for the originating spec, in this order:
 2. A path the user passed as an argument.
 3. A spec file under `.mysdd/features/` matching the branch name or feature — never `docs/`, which is upstream Makerkit
    product documentation, not agent-authored specs.
-4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip
-   and report "no spec available".
+4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent still
+   runs, against the issue and the binding ADRs alone.
 
 ### 2. Spawn the Spec sub-agent
 
@@ -55,7 +55,8 @@ Run this as a sub-agent so a large diff/spec doesn't pollute this skill's own co
   not a finding: its replacement outranks both the old ADR and the matching spec decision, so check the diff against
   the replacement. Quote the spec line or ADR for each finding. Under 400 words."
 
-If the spec is missing, skip the Spec sub-agent and note this in the final report.
+If there is no spec, run the Spec sub-agent anyway: pass the issue path in its place, drop the Decision log from (d),
+and note "no spec available" in the final report. The binding-ADR check never depends on a spec.
 
 ### 3. Report
 

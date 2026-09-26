@@ -2,7 +2,8 @@
 
 ADRs live in `.mysdd/docs/adr/`, one directory for the whole repo, one decision per file: `0001-slug.md`,
 `0002-slug.md`, … Create the directory lazily, when the first ADR is needed. Number a new ADR as the highest `NNNN`
-there + 1, and never reuse a number, not even a removed ADR's.
+there or ever committed there (`git log --format= --name-only --no-renames --diff-filter=A -- .mysdd/docs/adr/`) + 1. Never reuse a number, not even a removed ADR's: the
+history is what remembers a removed one.
 
 ## Template
 

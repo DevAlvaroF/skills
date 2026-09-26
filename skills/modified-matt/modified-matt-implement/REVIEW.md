@@ -38,8 +38,8 @@ Look for the originating spec, in this order:
 1. The `spec` field of the issue(s) you just implemented.
 2. A path the user passed as an argument.
 3. A spec file under `docs/`, `specs/`, or `.mysdd/features/` matching the branch name or feature.
-4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip
-   and report "no spec available".
+4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent still
+   runs, against the issue and the binding ADRs alone.
 
 ### 2. Identify the standards sources
 
@@ -108,7 +108,8 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
   not a finding: its replacement outranks both the old ADR and the matching spec decision, so check the diff against
   the replacement. Quote the spec line or ADR for each finding. Under 400 words."
 
-If the spec is missing, skip the Spec sub-agent and note this in the final report.
+If there is no spec, run the Spec sub-agent anyway: pass the issue path in its place, drop the Decision log from (d),
+and note "no spec available" in the final report. The binding-ADR check never depends on a spec.
 
 ### 4. Aggregate
 

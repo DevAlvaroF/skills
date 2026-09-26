@@ -185,8 +185,10 @@ Skip this step when the run didn't start from a spec. Otherwise call the Skill t
    - **Candidates:** a live ADR stating a decision an earlier version made that the current spec no longer carries,
      unless it is a recorded replacement or another feature's spec still carries it; or, once every issue of this spec
      has been retired to `issues/archive/`, every live ADR of this spec, replacements included. Ask for each
-     candidate: supersede or remove? Recommend removal only when no issue carrying that decision ever got a
-     `codeCommit`, so it never reached the code. Never decide for the user.
+     candidate: supersede or remove? Recommend removal only on positive evidence that the decision never reached
+     the code: every issue carrying it still reads `ready-for-agent` with `codeCommit: null`, and the code doesn't
+     implement it. A `null` `codeCommit` alone proves nothing (setup backfills it on older, finished issues), so
+     without that evidence recommend superseding. Never decide for the user.
 3. **Collect the files for the commit:** every ADR step 6 added or changed, plus the uncommitted ADRs and
    `CONTEXT.md` edits from this spec's design session (`git status --short -- .mysdd/docs`). `CONTEXT.md` is committed
    whole, so name any other uncommitted edit it carries.
