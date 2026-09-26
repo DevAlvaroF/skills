@@ -1,6 +1,6 @@
 ---
 name: makerkit-custom-to-issues
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .mysdd/.
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .mysdd/features/.
 disable-model-invocation: true
 ---
 
@@ -100,20 +100,22 @@ Iterate until the user approves the breakdown.
 
 ### 5. Publish the issues
 
-**Inspect before you write.** List `issues/*.json` in the target feature directory first.
+**Inspect before you write.** List `issues/*.json` in the target feature directory first. Then run the ignore probe
+(`.mysdd/issue-tracker.md` § Ignore policy) with the spec and every issue file this run will create or update as its
+targets. If it reports an unresolved state, write nothing: list the paths and let the user resolve them.
 
 - **Absent or empty** → first publish. Create the issues as described below, numbering from `01` in dependency order
   (blockers first).
 - **Non-empty** → **reconciliation mode**. Write nothing until the whole reconciliation is resolved and shown to the
   user; see *Reconciling with existing issues* below.
 
-Write one file per issue under `.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is
-its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that issue's
-`id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's `spec.md`
-path if this run started from a spec (a spec path was passed in, or one exists at `.mysdd/<NN>-<feature-slug>/spec.md`);
-otherwise `null`. Set `testBoundaries` to the boundaries agreed for that issue in step 4, and `covers` to the `US-NNN`
-IDs agreed there. Use the issue shape from `.mysdd/issue-tracker.md` § Issue shape: one issue per file, never a single
-combined file.
+Write one file per issue under `.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's
+`NN` is its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that
+issue's `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's
+`spec.md` path if this run started from a spec (a spec path was passed in, or one exists at
+`.mysdd/features/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testBoundaries` to the boundaries agreed for
+that issue in step 4, and `covers` to the `US-NNN` IDs agreed there. Use the issue shape from `.mysdd/issue-tracker.md`
+§ Issue shape: one issue per file, never a single combined file.
 
 Work the **frontier**: any issue whose blockers are all done. For a purely linear chain that means top to bottom.
 
@@ -194,10 +196,12 @@ Skip this step when the run didn't start from a spec. Otherwise call the Skill t
 ### 7. Commit the Spec, the issues and the decisions
 
 Once the user approves the published issues and step 6, commit the Spec, the issues and the step-6 files as
-`.mysdd/issue-tracker.md` § Committing a Spec and its Issues defines. Follow it exactly — this skill does not restate
-it. Report the commit's SHA and subject, and each ADR and glossary change it carried.
+`.mysdd/issue-tracker.md` § Committing a Spec and its Issues defines, re-running its probe first. Follow it exactly —
+this skill does not restate it. In local mode that commit carries only the step-6 files, and there is none when they
+are empty. Report the commit's SHA and subject, and each ADR and glossary change it carried, or that no commit was
+made and why.
 
 ## Next step
 
-Once the Spec, its issues and its decisions are committed, the next step is `/makerkit-custom-implement`, taking one
-issue from the frontier.
+Once the Spec, its issues and its decisions are committed — or, in local mode, the decisions alone, if any — the next
+step is `/makerkit-custom-implement`, taking one issue from the frontier.

@@ -20,8 +20,8 @@ and ask the user rather than deciding the role wins.
 
 ## Inputs
 
-The user passes the issue path (`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`), and may name the agent that
-implemented it, the commit, and which phase to run. With no phase named, run phase 1 and stop.
+The user passes the issue path (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`), and may name the agent
+that implemented it, the commit, and which phase to run. With no phase named, run phase 1 and stop.
 
 Read the issue and take from it:
 
@@ -40,7 +40,7 @@ If the status is already `done-final-review`, stop and tell the user: there is n
    (`makerkit-custom-domain-modeling` § Superseding and removing): check the code against the replacement, not the spec
    line. The change is `codeCommit` plus every fix commit made for this issue since, from every round:
    `git log --format=%H --fixed-strings --grep='Issue: <issue path>' <codeCommit>..HEAD -- .
-   ':(exclude,glob).mysdd/*/issues/**' ':(exclude).mysdd/kanban-boards.json'` (the pathspec drops the code-free
+   ':(exclude).mysdd/features' ':(exclude).mysdd/kanban-boards.json'` (the pathspec drops the code-free
    `Closed Issue:` commits, not an ADR-only fix). Don't rely on `reviewCodeCommit`: it holds only the latest round. Hand
    review sub-agents the commands (`git show <sha>` per commit) and the paths; never paste the diff or the spec in.
 2. **Verify, don't assume.** Check each acceptance criterion against what the code actually does. A verification you
@@ -57,8 +57,10 @@ If the status is already `done-final-review`, stop and tell the user: there is n
      to `comments` as one entry, each marked blocking or suggestion and saying where it is and why it matters, blocked
      verifications included. Leave `status` at `done-coding-awaiting-final-review` and make no commit.
 
-Write the issue the way the tracker says: parse it, mutate the object, write the whole file back as strict JSON, and
-re-read it to confirm it parses. Never write `codeCommit`.
+Write the issue the way the tracker says: run its ignore probe (§ Ignore policy) with the issue path as the target,
+parse it, mutate the object, write the whole file back as strict JSON, and re-read it to confirm it parses. If the probe
+reports an unresolved state, write nothing: list the paths and let the user resolve them. Never write `codeCommit`. In
+local mode the close makes no commit (§ Closing an issue).
 
 Report the verdict and the findings to the user, then stop. Phase 2 continues in this same session.
 

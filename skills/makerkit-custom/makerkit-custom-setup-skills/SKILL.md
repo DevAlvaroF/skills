@@ -1,6 +1,6 @@
 ---
 name: makerkit-custom-setup-skills
-description: "Configure this repo for the engineering skills: set up its issue tracker and domain docs under .mysdd/, keep .mysdd/ out of .gitignore, and map its AGENTS.md conventions. Run once before first use of the other engineering skills."
+description: "Configure this repo for the engineering skills: set up its issue tracker and domain docs under .mysdd/, keep the tracker, docs and board file out of .gitignore, and map its AGENTS.md conventions. Run once before first use of the other engineering skills."
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Scaffold the per-repo configuration that the engineering skills assume:
 
-- **Issue tracker**: local JSON issue files under `.mysdd/`, documented in `.mysdd/issue-tracker.md`
+- **Issue tracker**: local JSON issue files under `.mysdd/features/`, documented in `.mysdd/issue-tracker.md`
 - **Domain docs**: a glossary (`.mysdd/docs/CONTEXT.md`) and scoped ADRs (`.mysdd/docs/adr/`), with the rules for
   reading them in `.mysdd/docs/agents/domain.md`
 - **Conventions**: nothing to generate — the repo's own `AGENTS.md` distribution is the documentation
@@ -17,7 +17,8 @@ This is a prompt-driven skill, not a deterministic script. Explore, present what
 write.
 
 The root `AGENTS.md` points at both generated files. Never write config into `docs/`, Makerkit's upstream `.mdoc`
-product docs. Don't seed `CONTEXT.md` or `adr/`; domain-modeling creates them lazily. `.mysdd/` is never gitignored.
+product docs. Don't seed `CONTEXT.md` or `adr/`; domain-modeling creates them lazily. The tracker, `.mysdd/docs/` and
+the board file are never gitignored; feature files may be, but only by ignoring `.mysdd/features/` as a whole.
 
 ## Process
 
@@ -31,10 +32,13 @@ Look at the current repo to understand its starting state. Read whatever exists;
   monorepo this returns the root file plus one per app and per package. Note which carry a `## Vocabulary` or
   `## Decisions` section: those are legacy entries for Section D.
 - `.mysdd/`: do `issue-tracker.md` and `docs/agents/domain.md` — this skill's prior output — already exist? What
-  feature directories, `spec.md` files, and JSON files under `issues/` are there? If any exist this is an upgrade rather
-  than a first run, so read enough of them to answer Section C.
-- Whether git ignores any of it: the ignore probe in [issue-tracker-local.md](./issue-tracker-local.md) § Conventions,
-  then `git ls-files -oi --exclude-standard -- .mysdd | git check-ignore -v --stdin` for other existing files.
+  feature directories under `.mysdd/features/`, `spec.md` files, and JSON files under `issues/` are there? If any exist
+  this is an upgrade rather than a first run, so read enough of them to answer Section C.
+- Whether git ignores any of it, per [issue-tracker-local.md](./issue-tracker-local.md) § Ignore policy. Run its probe
+  with no targets, then classify every existing feature file, tracked or not, ignored or not:
+  `git ls-files -co -- .mysdd/features | git check-ignore --no-index --stdin` prints the ignored ones (exit 0; exit 1
+  means none; any other exit is an error to report), and `git ls-files -- .mysdd/features` the tracked ones. For each
+  ignored path, `git check-ignore -v --no-index <path>` names the rule's file and line.
 
 ### 2. Present findings and ask
 
@@ -44,13 +48,25 @@ Lead each section with the recommended answer so the user can accept it in a wor
 the choice genuinely branches.
 
 **Section A: Issue tracker.** These skills track work as local JSON issue files under
-`.mysdd/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown
+`.mysdd/features/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown
 alongside them. This is fixed — there's no tracker choice to make, so skip straight to writing
 `.mysdd/issue-tracker.md` from the local template without asking.
 
-If step 1 found a rule ignoring `.mysdd` or anything under it, show each rule with its file and line and offer to remove
-it. This isn't optional: the other skills stop on an ignored `.mysdd/`. A rule in `.git/info/exclude` or the global
-excludes file isn't committed, so the user removes it there. Files the rule was hiding need a first commit.
+Then name the mode step 1 found (§ Ignore policy): **committed** when the probe prints nothing and no feature file is
+ignored; **local** when the probe prints `.mysdd/features/` and no protected path, every existing feature file is
+ignored, and none is tracked. Either is fine as it stands. Anything else is unresolved, and the other skills stop on
+it, so resolve it here before continuing. Show each responsible rule with its file and line, and each affected path:
+
+- **An ignored protected path, or a partial feature rule** (a broad `.mysdd/` or `.mysdd/*`, even with re-includes, a
+  rule on one feature or its `issues/`). In a committed `.gitignore`, offer to replace the rule with
+  `.mysdd/features/` (local) or to remove it (committed), and let the user pick. A rule in `.git/info/exclude` or the
+  global excludes file isn't committed: never edit either; show the user the file and line to change there.
+- **A tracked feature file under an ignore rule.** Report it and ask whether to drop the rule or untrack the files
+  themselves. Never untrack or force-add anything.
+
+A text edit is not proof. After any rule changes, re-run the step 1 checks and confirm the effective result is one of
+the two modes, not assumed from the edit: another rule, a negation or a tracked file can still leave it unresolved.
+Files a removed rule was hiding need a first commit.
 
 **Section B: Domain docs.** Write `.mysdd/docs/agents/domain.md` from the seed without asking. Then show the
 `AGENTS.md` map from step 1, annotating each path with a one-line note on what that subtree owns, taken from that file's
@@ -60,7 +76,7 @@ user sees whether a subtree is undocumented.
 If `find` returned **no** `AGENTS.md` files at all, say so and ask whether to seed a root one before continuing —
 without it the `## Agent skills` block has nowhere to live.
 
-**Section C: Existing `.mysdd` content.** Skip this section entirely when step 1 found no feature directories.
+**Section C: Existing features.** Skip this section entirely when step 1 found no feature directories.
 
 When they exist, the repo was set up against an older version of these conventions, and the gap is worth naming before
 the other skills run against it. Check each feature directory for drift from the issue shape
@@ -97,8 +113,8 @@ section. An earlier version of these skills kept terms and decisions there; they
 `makerkit-custom-domain-modeling` for the formats and propose, per entry: a term → `CONTEXT.md`; a decision → an ADR
 scoped to that `AGENTS.md`'s directory (no `scope` for the root file); a superseded decision → an ADR whose `status`
 says so. Flag any entry pointing into `.mysdd/` (an issue, a `US-NNN`, a spec or feature path) for the user to reword;
-never rewrite one silently. Moved sections come out of an `AGENTS.md` only once the probe prints nothing: a decision
-never leaves a tracked file for an ignored one.
+never rewrite one silently. Moved sections come out of an `AGENTS.md` only once the probe prints no tracker or docs
+path: a decision never leaves a tracked file for an ignored one.
 
 ### 3. Confirm and edit
 
@@ -107,7 +123,7 @@ Show the user a draft of:
 - The `## Agent skills` block to add to whichever of `AGENTS.md` / `CLAUDE.md` is being edited (see step 4 for selection
   rules)
 - The contents of `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md`
-- Any ignore rule removal agreed in Section A, and any migration agreed in Sections C and D, as a per-file list
+- Any ignore rule change agreed in Section A, and any migration agreed in Sections C and D, as a per-file list
 
 If a generated file already exists, show the **delta** rather than the whole file: what the current seed adds, changes,
 or drops relative to what is on disk. A wall of unchanged text buries the one line that actually moved.
@@ -163,10 +179,12 @@ Then write the generated files, creating directories as needed, from the seed te
   contradict a seed section, and say which ones you kept.
 - If the file and the seed are already equivalent, say so and write nothing.
 
-Remove the ignore rules agreed in Section A. Apply the Section C migration one file at a time: re-read each issue,
+Apply the ignore rule changes agreed in Section A and re-run the step 1 checks; if the result is still unresolved, say
+which paths and stop before the migrations. Apply the Section C migration one file at a time: re-read each issue,
 mutate the parsed object, and write the whole file back as strict JSON. Apply the Section D moves, re-run the probe,
-and only when it prints nothing remove the moved sections from each `AGENTS.md`. Report per file what changed. Beyond the `## Agent skills` block, a root file
-seeded in Section B and the Section D removals, leave every `AGENTS.md` alone.
+and only when it prints no tracker or docs path remove the moved sections from each `AGENTS.md`. Report per file what
+changed. Beyond the `## Agent skills` block, a root file seeded in Section B and the Section D removals, leave every
+`AGENTS.md` alone.
 
 ### 5. Done
 

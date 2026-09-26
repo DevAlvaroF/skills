@@ -20,10 +20,10 @@ Create each lazily, when its first entry needs writing. Never record a term or a
 load into every session, so they keep only the conventions, the monorepo map and the verification steps every session
 needs.
 
-**Docs stand alone.** `.mysdd/docs/` stays while the feature directories beside it get archived and deleted, so nothing
-under it points into one: no issue ID or path, no `US-NNN`, no spec path, no "see the spec". State the term, or the
-decision and its reasoning, in full. An ADR may cite another ADR by number and use glossary terms. When a decision turns
-on a secret, describe the secret's role, never its value.
+**Docs stand alone.** `.mysdd/docs/` stays while the feature directories under `.mysdd/features/` get archived and
+deleted, so nothing under it points into one: no issue ID or path, no `US-NNN`, no spec path, no "see the spec". State
+the term, or the decision and its reasoning, in full. An ADR may cite another ADR by number and use glossary terms.
+When a decision turns on a secret, describe the secret's role, never its value.
 
 This skill writes entries and never commits them. `/makerkit-custom-to-issues` commits them with the spec they came
 from; `/makerkit-custom-implement` and `/makerkit-custom-final-review` commit a supersession with the code that needed

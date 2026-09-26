@@ -37,7 +37,7 @@ Look for the originating spec, in this order:
 
 1. The `spec` field of the issue(s) you just implemented.
 2. A path the user passed as an argument.
-3. A spec file under `docs/`, `specs/`, or `.mysdd/` matching the branch name or feature.
+3. A spec file under `docs/`, `specs/`, or `.mysdd/features/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip
    and report "no spec available".
 

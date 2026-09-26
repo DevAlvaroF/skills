@@ -10,10 +10,12 @@ Implement the work described by the user in the spec or issues.
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
 and tell the user to run `/modified-matt-setup-skills`.
 
-Read each issue you're implementing first (`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work from its
-`whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. If an issue's `codeCommit` already holds a SHA, it has
-been implemented: any further change to it is a final-review fix round, which belongs to the final reviewer, not this
-skill. Stop for that issue and tell the user.
+Read each issue you're implementing first (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work
+from its `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. If an issue's `codeCommit` already holds a
+SHA, it has been implemented: any further change to it is a final-review fix round, which belongs to the final
+reviewer, not this skill. Stop for that issue and tell the user. Run the tracker's ignore probe
+(`.mysdd/issue-tracker.md` § Ignore policy) with the issue paths as targets before you start; if it reports an
+unresolved state, list the paths and stop until the user resolves them.
 
 Use /modified-matt-tdd where possible, at each issue's pre-agreed boundaries (its `testBoundaries` field). If
 implementation surfaces a boundary the issue doesn't list — or shows a listed one doesn't hold — stop and agree it with
@@ -67,8 +69,10 @@ commit exists.
 Updating the issues you implemented is part of the job, not an optional extra. Run it **after** the commit, so the SHA
 exists: `git rev-parse HEAD` gives you the full SHA of the commit you just made.
 
-Then rewrite each committed issue **once** (`.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and
-issue numbers are independent), carrying all four changes together: flip every satisfied entry in
+Re-run the ignore probe on the issue paths first. If it now reports an unresolved state, write nothing: report the
+commit's full SHA and the paths, and leave the issue to the user. Then rewrite each committed issue **once**
+(`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and issue numbers are independent),
+carrying all four changes together: flip every satisfied entry in
 `acceptanceCriteria` to `"done": true`, set `"status": "done-coding-awaiting-final-review"`, record the SHA in
 `codeCommit`, and append one `comments` entry summarising the run: the verification you ran with its final
 output (the pass/fail summary, not the full log), the review outcome, and anything left open. Never write `reviewCodeCommit`: only the final reviewer sets it. The
@@ -84,6 +88,6 @@ If an issue is only partly done, leave it open: tick only the criteria that are 
 outstanding. Never tick a criterion you did not verify.
 
 Then report, per issue: the commit SHA and its subject line, which issues you advanced or closed, and which you left
-open with a one-line reason for each. Where `.mysdd/` is **tracked** rather than gitignored, the issue file is now dirty
-in the working tree and deliberately outside the commit — say so, and leave it to the user rather than amending the
-commit to chase its own SHA.
+open with a one-line reason for each. In **committed** mode the issue file is now dirty in the working tree and
+deliberately outside the commit — say so, and leave it to the user rather than amending the commit to chase its own
+SHA. In local mode it is ignored and stays out of every commit.

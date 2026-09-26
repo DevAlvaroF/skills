@@ -1,6 +1,6 @@
 ---
 name: modified-matt-to-issues
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .mysdd/.
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .mysdd/features/.
 disable-model-invocation: true
 ---
 
@@ -88,20 +88,22 @@ Iterate until the user approves the breakdown.
 
 ### 5. Publish the issues
 
-**Inspect before you write.** List `issues/*.json` in the target feature directory first.
+**Inspect before you write.** List `issues/*.json` in the target feature directory first. Then run the ignore probe
+(`.mysdd/issue-tracker.md` § Ignore policy) with the spec and every issue file this run will create or update as its
+targets. If it reports an unresolved state, write nothing: list the paths and let the user resolve them.
 
 - **Absent or empty** → first publish. Create the issues as described below, numbering from `01` in dependency order
   (blockers first).
 - **Non-empty** → **reconciliation mode**. Write nothing until the whole reconciliation is resolved and shown to the
   user; see *Reconciling with existing issues* below.
 
-Write one file per issue under `.mysdd/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's `NN` is its
-two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that issue's
-`id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's `spec.md`
-path if this run started from a spec (a spec path was passed in, or one exists at `.mysdd/<NN>-<feature-slug>/spec.md`);
-otherwise `null`. Set `testBoundaries` to the boundaries agreed for that issue in step 4, and `covers` to the `US-NNN`
-IDs agreed there. Use the issue shape from `.mysdd/issue-tracker.md` § Issue shape: one issue per file, never a single
-combined file.
+Write one file per issue under `.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's
+`NN` is its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that
+issue's `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's
+`spec.md` path if this run started from a spec (a spec path was passed in, or one exists at
+`.mysdd/features/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testBoundaries` to the boundaries agreed for
+that issue in step 4, and `covers` to the `US-NNN` IDs agreed there. Use the issue shape from `.mysdd/issue-tracker.md`
+§ Issue shape: one issue per file, never a single combined file.
 
 Work the **frontier**: any issue whose blockers are all done. For a purely linear chain that means top to bottom.
 
@@ -155,9 +157,10 @@ by the final reviewer, never by this skill.
 ### 6. Commit the Spec and the issues
 
 Once the user approves the published issues, commit the Spec and the issues as `.mysdd/issue-tracker.md` § Committing a
-Spec and its Issues defines. Follow it exactly — this skill does not restate it. Report the commit's SHA and subject.
+Spec and its Issues defines, re-running its probe first. Follow it exactly — this skill does not restate it. Report the
+commit's SHA and subject, or, in local mode, that no commit was made.
 
 ## Next step
 
-Once the Spec and its issues are committed, or the commit was skipped because `.mysdd/` is gitignored, the next step is
-`/modified-matt-implement`, taking one issue from the frontier.
+Once the Spec and its issues are committed, or the commit was skipped because the feature files are local, the next
+step is `/modified-matt-implement`, taking one issue from the frontier.

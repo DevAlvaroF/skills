@@ -64,6 +64,28 @@ install the other one.
 - Don't also install the same skills globally, or `mattpocock/skills` in the
   same project — the agent will see every skill twice.
 
+### Where work lives (both flavours)
+
+- Each feature is a directory, `.mysdd/features/<NN>-<feature-slug>/`, holding
+  its `spec.md` and one JSON file per issue under `issues/`. The agent
+  creates `.mysdd/features/` with the first feature. The tracker schema,
+  `.mysdd/issue-tracker.md`, and the docs under `.mysdd/docs/` sit beside
+  it, not inside it.
+- The tracker, `.mysdd/docs/` and the board file `.mysdd/kanban-boards.json`
+  are always committed, never gitignored.
+- Feature files are either all committed or all local. To keep them local,
+  ignore the whole root with the one rule `.mysdd/features/`; the skills
+  then write specs and issues but never stage them, skip the `SPEC:` and
+  `Closed Issue:` bookkeeping commits for them, and still name their paths
+  in `Issue:` / `Spec:` trailers.
+- Anything in between — a rule on one feature or its issues, a broad
+  `.mysdd/` rule, a tracked file under an ignore rule — stops the skills
+  until you resolve it. Setup reports each rule by file and line and can
+  replace an overbroad rule in a committed `.gitignore` with
+  `.mysdd/features/`, then re-checks the result. It never edits
+  `.git/info/exclude` or a global excludes file, and no skill force-adds
+  or untracks a file.
+
 ### Where decisions live (Makerkit flavour)
 
 - Terms go in one glossary, `.mysdd/docs/CONTEXT.md`; decisions go one per
@@ -75,13 +97,13 @@ install the other one.
   `.mysdd/docs/agents/domain.md`, written by setup, holds the reading rules.
 - The docs stand alone: they never point at an issue, a user story, a spec
   or a feature directory, which get deleted while `.mysdd/docs/` stays.
-- `.mysdd/` is never gitignored; setup checks and offers to remove any rule.
+- `.mysdd/docs/` is never gitignored, even when feature files are local.
 - Decisions are binding. Every skill stops to ask rather than contradict
   one; the final reviewer blocks on an unagreed contradiction. A
   supersession you agreed to outranks the spec, which is never edited.
 - The grill writes terms and ADRs; `to-issues` commits them with the spec in
-  the `SPEC:` commit; `implement` and `final-review` commit a supersession
-  with the code that needed it.
+  the `SPEC:` commit (alone, when feature files are local); `implement` and
+  `final-review` commit a supersession with the code that needed it.
 - Upgrading from the version that kept `## Vocabulary` / `## Decisions` in
   `AGENTS.md`? Re-run setup: it offers to move them out.
 

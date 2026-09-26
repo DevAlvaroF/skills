@@ -40,8 +40,9 @@ and tell the user to run `/makerkit-custom-setup-skills`.
 Check with the user that these boundaries match their expectations.
 
 3. Write the spec using the template below, then publish it as `spec.md` under the feature's
-   `.mysdd/<NN>-<feature-slug>/` directory. A spec is prose, not an issue, so it carries no status; the
-   `/makerkit-custom-to-issues` skill is what turns it into `ready-for-agent` issues.
+   `.mysdd/features/<NN>-<feature-slug>/` directory, after running the tracker's ignore probe
+   (`.mysdd/issue-tracker.md` § Ignore policy) on that path. A spec is prose, not an issue, so it carries no status;
+   the `/makerkit-custom-to-issues` skill is what turns it into `ready-for-agent` issues.
 
 <spec-template>
 
@@ -128,7 +129,8 @@ Confirm each of these. Any "no" is a fix, not a caveat: don't publish until it's
 - Every user story carries a `US-NNN` ID, and no ID was renumbered or reused from an earlier revision
 - Every user story describes externally observable behaviour, not an implementation detail
 - The test boundaries in Testing Decisions are the ones the user confirmed in step 2
-- The feature directory is named `<NN>-<feature-slug>`, numbered per `.mysdd/issue-tracker.md`
+- The feature directory is `.mysdd/features/<NN>-<feature-slug>/`, numbered per `.mysdd/issue-tracker.md`
+- The ignore probe on the spec path reported committed or local mode, not unresolved
 - Out of Scope is non-empty: a spec that excludes nothing hasn't been scoped
 - Testing Decisions names prior art: actual similar tests in this codebase, not a description of what one would look
   like

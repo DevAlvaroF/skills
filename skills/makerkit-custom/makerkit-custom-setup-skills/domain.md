@@ -1,7 +1,8 @@
 # Domain Docs
 
 How the engineering skills consume this repo's glossary and decisions. Both live under `.mysdd/docs/`, which is
-committed and outlives the feature directories beside it. `AGENTS.md` files hold conventions, never terms or decisions.
+committed and outlives the feature directories under `.mysdd/features/`. `AGENTS.md` files hold conventions, never
+terms or decisions.
 
 ```
 .mysdd/docs/
