@@ -1,6 +1,6 @@
 ---
 name: modified-matt-implement
-description: "Implement a piece of work based on a spec or set of issues."
+description: "Implement, verify, commit and advance one or more issues from the project's issue tracker. Use when an issue under .mysdd/features/ is ready-for-agent and the user asks to implement it."
 disable-model-invocation: true
 ---
 
@@ -17,9 +17,16 @@ reviewer, not this skill. Stop for that issue and tell the user. Run the tracker
 (`.mysdd/issue-tracker.md` § Ignore policy) with the issue paths as targets before you start; if it reports an
 unresolved state, list the paths and stop until the user resolves them.
 
+Read the glossary and the binding ADRs for the paths you touch, per `.mysdd/docs/agents/domain.md`. ADRs are binding.
+
 Use /modified-matt-tdd where possible, at each issue's pre-agreed boundaries (its `testBoundaries` field). If
 implementation surfaces a boundary the issue doesn't list — or shows a listed one doesn't hold — stop and agree it with
 the user before writing the test, then add it to that issue's `testBoundaries` when you write the file back.
+
+**A recorded decision the code can't honour is a stop.** When the work can't be done without contradicting a binding
+ADR, ask the user; never bend the code around the decision, and never rewrite the ADR unilaterally. If the user agrees
+to change it, supersede it per `modified-matt-domain-modeling`'s rules. The ADR files that changed go into this
+issue's commit.
 
 If you hand parts of the work to sub-agents, split it **before** dispatching any. Give each sub-agent a disjoint set of
 files and the test boundaries it owns. Do anything several slices depend on (a shared type, a schema, a contract two
@@ -52,8 +59,9 @@ commit exists.
    customer data or PII. If you find any, stop: do not commit, tell the user exactly what you found and where, and let
    them redact the spec first.
 3. **Check the branch.** If `HEAD` is the repo's default branch, stop and ask the user before committing.
-4. **Stage the implementation files only.** Never `git add .mysdd/` and never `git add -A`. Then read
-   `git status --short` and confirm nothing unrelated was swept in.
+4. **Stage the implementation files**, plus the ADR file(s) the user agreed to change for this issue, each by path.
+   Never `git add .mysdd/` and never `git add -A`. Then read `git status --short` and confirm nothing unrelated was
+   swept in.
 5. **Build the message.** The header is always `CODE: `: this skill only ever makes the first-round commit, on an issue
    whose `codeCommit` is `null`. `CODE REVIEW FIXES: ` commits belong to the final reviewer. Write the message to the
    shape in `.mysdd/issue-tracker.md` § Commit message format.
@@ -75,7 +83,9 @@ commit's full SHA and the paths, and leave the issue to the user. Then rewrite e
 carrying all four changes together: flip every satisfied entry in
 `acceptanceCriteria` to `"done": true`, set `"status": "done-coding-awaiting-final-review"`, record the SHA in
 `codeCommit`, and append one `comments` entry summarising the run: the verification you ran with its final
-output (the pass/fail summary, not the full log), the review outcome, and anything left open. Never write `reviewCodeCommit`: only the final reviewer sets it. The
+output (the pass/fail summary, not the full log), the review outcome, anything left open, and any ADR the user agreed
+to supersede, with its replacement, by number and title — the final reviewer accepts that change, and lets it outrank
+the spec, only on this record. Never write `reviewCodeCommit`: only the final reviewer sets it. The
 `done-coding-awaiting-final-review` state means the implementation and this skill's own review are complete, but
 independent final review is still pending; this skill must never set `done-final-review`. Rewrite the whole file as
 strict JSON, keeping every other field (`id`, `slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `covers`,

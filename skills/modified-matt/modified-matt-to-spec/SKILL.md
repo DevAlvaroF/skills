@@ -6,7 +6,8 @@ disable-model-invocation: true
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the
 user; just synthesize what you already know. If the design conversation isn't in this session's context, say so and
-ask the user to point you at it rather than inventing a decision log.
+ask the user to point you at it rather than inventing a decision log. The one thing to stop and ask about is a
+contradiction with a binding ADR that the conversation never resolved.
 
 **Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
@@ -14,8 +15,9 @@ and tell the user to run `/modified-matt-setup-skills`.
 
 ## Process
 
-1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain
-   glossary vocabulary throughout the spec, and respect any ADRs in the area you're touching.
+1. Explore the repo to understand the current state of the codebase, if you haven't already. Read the glossary and the
+   binding ADRs for the paths you touch, per `.mysdd/docs/agents/domain.md`. ADRs are binding. Use the glossary's
+   vocabulary throughout the spec.
 
 2. Sketch out the boundaries at which you're going to test the feature. Existing boundaries should be preferred to new
    ones. Use the highest boundary possible. If new boundaries are needed, propose them at the highest point you can. The
@@ -101,6 +103,9 @@ commit message, so anything here reaches git history permanently. Exclude secret
 connection strings, customer data, PII, internal URLs carrying auth, and any conversation unrelated to the decisions
 above. When a decision genuinely turns on a sensitive value, describe the value's role without reproducing it.
 
+When the design supersedes an ADR, name it here by number and title (ADR-NNNN, <title>). `/modified-matt-to-issues`
+reads this log to keep `.mysdd/docs/adr/` in step with the spec.
+
 </spec-template>
 
 ## Before you publish
@@ -117,4 +122,6 @@ Confirm each of these. Any "no" is a fix, not a caveat: don't publish until it's
   look like
 - The decision log is a redacted summary in your own words, carrying no secrets, credentials, PII, or raw
   transcript
+- No Implementation Decision contradicts a live binding ADR. An ADR the user agreed to supersede already reads
+  `superseded`, and the Decision log names it
 - No file paths or code snippets anywhere, except a prototype-derived snippet that encodes a decision prose can't

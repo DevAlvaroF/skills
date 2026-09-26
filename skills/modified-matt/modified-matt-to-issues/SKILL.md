@@ -22,8 +22,9 @@ an argument, read the file's full contents.
 
 ### 2. Explore the codebase
 
-If you have not already explored the codebase, do so to understand the current state of the code. Issue titles and
-descriptions should use the project's domain glossary vocabulary, and respect ADRs in the area you're touching.
+If you have not already explored the codebase, do so to understand the current state of the code. Read the glossary
+and the binding ADRs for the paths you touch, per `.mysdd/docs/agents/domain.md`. ADRs are binding. Issue titles and
+descriptions should use the glossary's vocabulary.
 
 Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the
 easy change."
@@ -83,6 +84,7 @@ Ask the user:
 - Are the test boundaries right: does each issue test at the right boundary, and are any missing or superfluous?
 - Is every user story covered? Skip stories marked `(retired)`. List each other `US-NNN` in the spec that no issue covers, and ask whether it is a deliberate
   deferral or a slice you missed.
+- Does any issue contradict a binding ADR? Name each one, with the ADR's number and title.
 
 Iterate until the user approves the breakdown.
 
@@ -154,13 +156,44 @@ start with `"done": false` and ticking one means flipping it to `true`; `comment
 `reviewCodeCommit` both start as `null`; `codeCommit` is written only by the implement skill and `reviewCodeCommit` only
 by the final reviewer, never by this skill.
 
-### 6. Commit the Spec and the issues
+### 6. Record the spec's standing decisions
 
-Once the user approves the published issues, commit the Spec and the issues as `.mysdd/issue-tracker.md` § Committing a
-Spec and its Issues defines, re-running its probe first. Follow it exactly — this skill does not restate it. Report the
-commit's SHA and subject, or, in local mode, that no commit was made.
+Skip this step when the run didn't start from a spec. Otherwise call the Skill tool with
+"modified-matt-domain-modeling" and apply its rules: the three tests, docs stand alone, superseding and removing.
+
+1. **Add what's missing.** Walk the spec's Implementation Decisions and Decision log. Each decision that passes the
+   three tests and is not already recorded **or superseded** in `.mysdd/docs/adr/` becomes a new ADR, scoped to the
+   paths it binds. The "or superseded" part stops a re-run from re-adding a decision that implement or final-review
+   already replaced.
+2. **Retire what the spec dropped.** Trace provenance through the spec's own history and its issues' `comments` —
+   never through IDs in the ADRs (they carry none).
+   - **Every decision this spec ever made:** the Implementation Decisions and Decision log of each committed version
+     (`git log --format=%H -- <spec path>`, then `git show <sha>:<spec path>`), plus each replacement recorded as an
+     agreed supersession in the `comments` of its issues, `issues/archive/` included. In **local** mode the spec has
+     no history, so use the current spec and those `comments` alone, and say that the trace was that narrow.
+   - **Its live ADRs:** read every ADR in `.mysdd/docs/adr/` whose status isn't superseded, and match each against
+     those decisions by what it states.
+   - **Candidates:** a live ADR stating a decision an earlier version made that the current spec no longer carries,
+     unless it is a recorded replacement or another feature's spec still carries it; or, once every issue of this spec
+     has been retired to `issues/archive/`, every live ADR of this spec, replacements included. Ask for each
+     candidate: supersede or remove? Recommend removal only when no issue carrying that decision ever got a
+     `codeCommit`, so it never reached the code. Never decide for the user.
+3. **Collect the files for the commit:** every ADR step 6 added or changed, plus the uncommitted ADRs and glossary
+   edits from this spec's design session
+   (`git status --short -- .mysdd/docs CONTEXT-MAP.md ':(glob)**/CONTEXT.md'`). A glossary file is committed whole, so
+   name any other uncommitted edit it carries.
+4. **Show, then write.** List the adds, supersedes, removes and files next to the published issues. Write nothing to
+   `.mysdd/docs/` until the user approves, and run the ignore probe with each ADR as a target before writing it.
+
+### 7. Commit the Spec, the issues and the decisions
+
+Once the user approves the published issues and step 6, commit the Spec, the issues and the step-6 files as
+`.mysdd/issue-tracker.md` § Committing a Spec and its Issues defines, re-running its probe first. Follow it exactly —
+this skill does not restate it. In local mode that commit carries only the step-6 files, and there is none when they
+are empty. Report the commit's SHA and subject, and each ADR and glossary change it carried, or that no commit was
+made and why.
 
 ## Next step
 
-Once the Spec and its issues are committed, or the commit was skipped because the feature files are local, the next
+Once the Spec, its issues and its decisions are committed — or, in local mode, the decisions alone, if any — the next
 step is `/modified-matt-implement`, taking one issue from the frontier.

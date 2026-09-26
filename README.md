@@ -9,7 +9,7 @@ project, never both.**
 | Flavour | Use it for |
 |---|---|
 | **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — knows its `AGENTS.md` layout, RLS and `.mdoc` docs; keeps the glossary and scoped, binding ADRs under `.mysdd/docs/`, out of the always-loaded `AGENTS.md` |
-| **Modified Matt Skills** (`modified-matt-*`) | Any other repo |
+| **Modified Matt Skills** (`modified-matt-*`) | Any other repo — root `CONTEXT.md` glossary, scoped and binding ADRs under `.mysdd/docs/adr/` |
 
 ---
 
@@ -86,26 +86,36 @@ install the other one.
   `.git/info/exclude` or a global excludes file, and no skill force-adds
   or untracks a file.
 
-### Where decisions live (Makerkit flavour)
+### Where decisions live (both flavours)
 
-- Terms go in one glossary, `.mysdd/docs/CONTEXT.md`; decisions go one per
-  file in `.mysdd/docs/adr/`. Each is created the first time it's needed.
-  `AGENTS.md` keeps conventions only: it loads into every session, so every
-  term or decision there would be a permanent context cost.
-- Each ADR's `scope` frontmatter lists the paths it binds (none = the whole
-  repo), so a skill reads only the ADRs covering what it touches.
-  `.mysdd/docs/agents/domain.md`, written by setup, holds the reading rules.
+- Decisions go one per file in `.mysdd/docs/adr/`, created the first time
+  one is needed. Each ADR's `scope` frontmatter lists the paths it binds
+  (none = the whole repo), so a skill reads only the ADRs covering what it
+  touches. `.mysdd/docs/agents/domain.md`, written by setup, holds the
+  reading rules.
+- No term or decision goes in `CLAUDE.md` / `AGENTS.md`: they load into
+  every session, so every entry there would be a permanent context cost.
 - The docs stand alone: they never point at an issue, a user story, a spec
-  or a feature directory, which get deleted while `.mysdd/docs/` stays.
+  or a feature directory, which get deleted while the docs stay.
 - `.mysdd/docs/` is never gitignored, even when feature files are local.
 - Decisions are binding. Every skill stops to ask rather than contradict
-  one; the final reviewer blocks on an unagreed contradiction. A
-  supersession you agreed to outranks the spec, which is never edited.
+  one; the final reviewer blocks on an unagreed contradiction. An ADR that
+  reached the code is superseded, never deleted, and a supersession you
+  agreed to outranks the spec, which is never edited.
 - The grill writes terms and ADRs; `to-issues` commits them with the spec in
-  the `SPEC:` commit (alone, when feature files are local); `implement` and
-  `final-review` commit a supersession with the code that needed it.
-- Upgrading from the version that kept `## Vocabulary` / `## Decisions` in
-  `AGENTS.md`? Re-run setup: it offers to move them out.
+  the `SPEC:` commit (alone, when feature files are local), and retires the
+  ones the spec dropped; `implement` and `final-review` commit a
+  supersession with the code that needed it.
+
+**Modified Matt:** the glossary stays at the repo root — `CONTEXT.md`, or
+`CONTEXT-MAP.md` plus one `CONTEXT.md` per context. ADRs written before
+`scope` existed still work as repo-wide, reading their `**Status:**` line;
+re-run setup to add frontmatter to them.
+
+**Makerkit:** the glossary is `.mysdd/docs/CONTEXT.md`, one for the whole
+repo, and `AGENTS.md` keeps conventions only. Upgrading from the version
+that kept `## Vocabulary` / `## Decisions` in `AGENTS.md`? Re-run setup: it
+offers to move them out.
 
 ---
 

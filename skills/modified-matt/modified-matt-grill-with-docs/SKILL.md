@@ -6,7 +6,8 @@ disable-model-invocation: true
 
 **Before the first round**, call the Skill tool with "modified-matt-domain-modeling" and apply its rules throughout
 this interview: it challenges the terms as they come up and records vocabulary and decisions the moment they
-crystallise, rather than at the end.
+crystallise, rather than at the end. Read the glossary and the binding ADRs for the paths the design touches, per
+`.mysdd/docs/agents/domain.md`. ADRs are binding.
 
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision
 branches into the decisions that hang off it.
@@ -41,4 +42,5 @@ to report; ask the rest of the frontier now. The _decisions_ are the user's: put
 The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed.
 Do not act on it until the user confirms you have reached a shared understanding. Once they confirm,
 `/modified-matt-to-spec` turns this session into a spec — run it **in this same session**, while the design tree is
-still in context.
+still in context. The glossary terms and ADRs this session writes stay uncommitted. `/modified-matt-to-issues`
+commits them with the spec.

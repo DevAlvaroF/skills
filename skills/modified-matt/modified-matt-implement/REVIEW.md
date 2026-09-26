@@ -100,9 +100,13 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 - The diff command from _Collect the diff_ (the command, never the diff itself) and the commit list.
 - The *path* to the spec. Pass the path only and let the sub-agent read it; don't read the spec into this context to
   paste it in.
+- The paths of the binding ADRs for the touched files, per `.mysdd/docs/agents/domain.md`.
+- Each ADR the user agreed to supersede in this run, with its replacement, by number and title.
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that
-  wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote
-  the spec line for each finding. Under 400 words."
+  wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong;
+  (d) places the diff contradicts the spec's Decision log or a binding ADR. An agreed supersession listed above is
+  not a finding: its replacement outranks both the old ADR and the matching spec decision, so check the diff against
+  the replacement. Quote the spec line or ADR for each finding. Under 400 words."
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 

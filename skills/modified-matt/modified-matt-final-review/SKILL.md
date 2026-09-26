@@ -1,6 +1,6 @@
 ---
 name: modified-matt-final-review
-description: "Act as the independent final reviewer of an implemented issue: review its commit, fix what the review found, and close the issue."
+description: "Act as the independent final reviewer of an implemented issue: review its commit, fix what the review found, and close the issue. Use when an issue is done-coding-awaiting-final-review and the user asks for its final review or fix round."
 disable-model-invocation: true
 ---
 
@@ -13,7 +13,8 @@ adversarially yourself.
 lifecycle, the commit message format, and how an issue is closed. This skill does not restate it. If the file is
 missing, stop and tell the user to run `/modified-matt-setup-skills`.
 
-The final reviewer is the role you are acting in and nothing more. Where it conflicts with the project's own
+Read the glossary and the binding ADRs for the paths the change touches, per `.mysdd/docs/agents/domain.md`. ADRs are
+binding. The final reviewer is the role you are acting in and nothing more. Where it conflicts with the project's own
 instructions (`CLAUDE.md`, `AGENTS.md` and the like), say so and ask the user rather than deciding the role wins.
 
 ## Inputs
@@ -32,18 +33,22 @@ If the status is already `done-final-review`, stop and tell the user: there is n
 
 ## Phase 1: review
 
-1. **Review the whole change** against the issue and, when `spec` is not `null`, the spec. The change is `codeCommit`
-   plus every fix commit made for this issue since, from every round:
-   `git log --format=%H --fixed-strings --grep='Issue: <issue path>' <codeCommit>..HEAD -- . ':(exclude).mysdd'` (the
-   pathspec drops the code-free `Closed Issue:` commits). Don't rely on `reviewCodeCommit`: it holds only the latest
-   round. Hand review sub-agents the commands (`git show <sha>` per commit)
-   and the paths; never paste the diff or the spec into their prompts.
+1. **Review the whole change** against the issue and, when `spec` is not `null`, the spec — its Decision log included —
+   and against the binding ADRs. An ADR change inside the diff stands only if the issue's `comments` record the user
+   agreeing to it. When they do, the replacement outranks the matching spec decision
+   (`modified-matt-domain-modeling` § Superseding and removing): check the code against the replacement, not the spec
+   line. The change is `codeCommit` plus every fix commit made for this issue since, from every round:
+   `git log --format=%H --fixed-strings --grep='Issue: <issue path>' <codeCommit>..HEAD -- .
+   ':(exclude).mysdd/features' ':(exclude).mysdd/kanban-boards.json'` (the pathspec drops the code-free
+   `Closed Issue:` commits, not an ADR-only fix). Don't rely on `reviewCodeCommit`: it holds only the latest round. Hand
+   review sub-agents the commands (`git show <sha>` per commit) and the paths; never paste the diff or the spec in.
 2. **Verify, don't assume.** Check each acceptance criterion against what the code actually does. A verification you
    could not run — a live UI check with no way to drive the UI, a test that needs a service you don't have — is a
    **failure**, not a pass. Say what was blocked and why.
 3. **Decide.**
    - A finding is **blocking** when it should stop the change landing: a regression, a requirement missing or wrong, a
-     broken documented standard, a security or data-loss risk. Anything else is a **suggestion**.
+     broken documented standard, a contradiction of a live binding ADR or of a spec decision no agreed
+     supersession replaced, a security or data-loss risk. Anything else is a **suggestion**.
    - **Pass**: every acceptance criterion holds, nothing was blocked, and no blocking finding remains. Append a
      `comments` entry summarising what you verified, with any suggestions, set `status` to `done-final-review`, and make
      the closing commit per `.mysdd/issue-tracker.md` § Closing an issue.
@@ -65,14 +70,18 @@ from the latest review entry in `comments`. If phase 1 passed, there is nothing 
 
 1. **Plan, then stop.** Present the plan for fixing the blocking findings, plus any suggestions you propose to take, and
    wait. Change no code until the user approves that plan in so many words. Copying a prompt is not approval, and
-   neither is marking a step complete in whatever tool drove this session.
+   neither is marking a step complete in whatever tool drove this session. For a decision contradiction, the plan
+   offers both ways out and the user picks: fix the code, or supersede the ADR per `modified-matt-domain-modeling`'s
+   rules. Never edit the spec.
 2. **Implement the approved fixes**, and nothing beyond them. Use `/modified-matt-tdd` where a fix changes behaviour.
 3. **Check before committing.** Run the project's applicable checks (typecheck, tests, lint, build: whatever it
    defines), sending any whole-suite run through a sub-agent that reports failures only. Then review your own changes
    against the findings. If either fails or is blocked, commit nothing: leave the fixes in the tree, append what is
    unresolved to `comments`, leave the status where it is, tell the user what is unresolved, and stop.
-4. **Commit.** Stage the implementation files only — never `.mysdd/`, never `git add -A` — including anything the checks
-   themselves rewrote, such as formatter output, so the commit is exactly what was verified. Read `git status --short`
+4. **Commit.** Stage the implementation files, plus the ADR file(s) the approved plan changed, each by path — never
+   `git add .mysdd/`, never `git add -A` — including anything the checks themselves rewrote, such as formatter output,
+   so the commit is exactly what was verified. A commit touching only ADRs is a valid `CODE REVIEW FIXES: ` commit, not
+   an empty one. Read `git status --short`
    and confirm nothing unrelated was swept in; leave anything else in the tree as you found it. The message follows
    `.mysdd/issue-tracker.md` § Commit message format with the `CODE REVIEW FIXES: ` header. If there turned out to be
    nothing to fix (a finding was only a blocked verification that now runs), there is nothing to commit: never make an
@@ -81,8 +90,9 @@ from the latest review entry in `comments`. If phase 1 passed, there is nothing 
    issue's `reviewCodeCommit`, leaving every other field as it was. With no commit this round, leave `reviewCodeCommit`
    untouched. Never amend the commit to carry its own SHA. If the write fails, report the SHA and the error instead of
    making another commit.
-6. **Close.** Append a `comments` entry summarising the fixes and the checks, set `status` to `done-final-review`, and
-   make the closing commit per § Closing an issue.
+6. **Close.** Append a `comments` entry summarising the fixes and the checks — naming any ADR the user agreed to
+   supersede this round, with its replacement, by number and title — set `status` to `done-final-review`, and make the
+   closing commit per § Closing an issue.
 
 Then report: the `CODE REVIEW FIXES: ` SHA and subject if you made one, the final status, and the closing commit's SHA
 if you made one.

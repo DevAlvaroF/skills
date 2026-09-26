@@ -26,6 +26,9 @@ read them without parsing prose.
 - Comments and conversation history append to the issue's `comments` array, oldest first
 - Every file under `issues/` is strict JSON: no comments, no trailing commas, every field present. Parse it, mutate the
   object, write the whole file back; never append loose text to an issue file
+- Feature directories are disposable: they get archived and deleted, while the glossary and `.mysdd/docs/` stay. So
+  no `CONTEXT.md` and nothing under `.mysdd/docs/` — the glossary, an ADR — names an issue, a `US-NNN`, a spec or a
+  feature directory
 
 ## Ignore policy
 
@@ -37,7 +40,7 @@ travel with the repo. Feature files are in one of two modes, the same for every 
   as the sections below describe.
 - **Local**: the whole Features root is ignored, normally by the single rule `.mysdd/features/` (Git can't re-include a
   file below an ignored directory, so a `!` exception under it has no effect). Specs and issues are written but never
-  staged, and the bookkeeping commits below are skipped.
+  staged: § Committing a Spec and its Issues and § Closing an issue say what happens instead.
 
 Anything else is **unresolved**: rules that ignore some feature files but not others, a feature file tracked by git
 although a rule ignores it, or an ignored protected path. Stop, list the paths, and let the user resolve it;
@@ -190,6 +193,8 @@ Spec: .mysdd/features/<NN>-<feature-slug>/spec.md
 - The whole subject line, prefix included, is ≤72 characters.
 - One `Issue:` trailer per issue in the commit, repo-root-relative and beginning `.mysdd/features/`, in either mode:
   the trailers are addresses, not staged files.
+- A code commit stages implementation files only, never anything under `.mysdd/`. The one exception is an ADR under
+  `.mysdd/docs/adr/` the user agreed to add or supersede for this issue: it goes into the same commit.
 - A `Spec:` trailer only when the issue's `spec` is not `null`, deduped when several issues in one commit share a spec.
 - No tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no emoji badge. The message
   must read the same whichever agent, or human, produced it.
@@ -217,18 +222,21 @@ Spec: .mysdd/features/03-workspace-seats/spec.md
 
 ## Committing a Spec and its Issues
 
-When the issues skill has published a feature's issues in **committed** mode, it records the Spec and those issues in
-one commit of its own. Run the probe (§ Ignore policy) on that spec and those issue files right before staging:
+When the issues skill has published a feature's issues, it records the Spec, those issues and the decisions they rest on
+in one commit of its own. Run the probe (§ Ignore policy) on that spec, those issue files and the documentation files
+below right before staging:
 
 - The subject is `SPEC: <imperative subject>`, ≤72 characters prefix included. An optional body of one to three lines
   may say why. No trailers.
-- Stage only that feature's `spec.md` and the issue JSON files this run created or updated, each by path. Never
-  `git add .mysdd/`, never stage implementation files or another feature's files, and leave unrelated staged or
-  working-tree changes out of the commit.
+- Stage that feature's `spec.md`, the issue JSON files this run created or updated, each `CONTEXT.md` (root or
+  per-context) and `CONTEXT-MAP.md` this run or the spec's design session changed, and each ADR under
+  `.mysdd/docs/adr/` they added or changed, each by path. Stage a glossary file whole, and name any other uncommitted
+  edit it carries in the report. Never stage implementation files, `CLAUDE.md`, `AGENTS.md` or another feature's
+  files, and never `git add .mysdd/`; leave unrelated staged or working-tree changes out of the commit.
+- In **local** mode, stage no spec or issue file. The commit still carries the glossary and ADR changes above, under
+  the same `SPEC: ` subject; when there are none, make no commit.
 - The no-attribution rule in § Commit message format applies.
 - Never make an empty commit, and never amend.
-
-In **local** mode, make no commit.
 
 ## Closing an issue
 
@@ -238,8 +246,8 @@ Run the probe (§ Ignore policy) on the issue file before writing the status and
 - The subject is exactly `Closed Issue: <issue path>`, the path repo-root-relative and beginning `.mysdd/features/`
   (`Closed Issue: .mysdd/features/03-workspace-seats/issues/02-seat-guard.json`). No body, no trailers.
 - Stage only that issue's JSON file, plus any `.mysdd/` board-state file the tooling keeps and has changed (for example
-  `.mysdd/kanban-boards.json`). Never stage implementation files: those belong to the `CODE: ` and `CODE REVIEW FIXES: `
-  commits.
+  `.mysdd/kanban-boards.json`). Never stage implementation files, a `CONTEXT.md` or anything under `.mysdd/docs/`:
+  those belong to the `SPEC: `, `CODE: ` and `CODE REVIEW FIXES: ` commits.
 - The no-attribution rule in § Commit message format applies.
 
 In **local** mode, make no commit: the status change is the whole close.

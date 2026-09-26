@@ -9,7 +9,7 @@ disable-model-invocation: true
 Scaffold the per-repo configuration that the engineering skills assume:
 
 - **Issue tracker**: local JSON issue files under `.mysdd/features/`
-- **Domain docs**: where `CONTEXT.md` and ADRs live, and the consumer rules for reading them
+- **Domain docs**: where `CONTEXT.md` and the scoped, binding ADRs live, and the consumer rules for reading them
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
 
@@ -21,7 +21,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` section in either?
 - `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root
-- `.mysdd/docs/adr/`
+- `.mysdd/docs/adr/`: list each ADR that doesn't open with `---` frontmatter, and its `**Status:**` line if it has one. Those are Section D's
 - `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md`: does this skill's prior output already exist?
 - `.mysdd/features/`: existing feature directories, their `spec.md` files, and every JSON file under `issues/`. If any exist this is an upgrade rather than a first run, so read enough of them to answer Section C
 - Old-layout feature directories directly under `.mysdd/` (`.mysdd/<NN>-<slug>/`). Report each one in Section A: the other skills stop until the user moves it under `.mysdd/features/` and updates its issues' `spec` paths. Setup never moves one
@@ -76,13 +76,22 @@ Present the drift as a per-file list and ask whether to migrate. Never migrate s
 
 Backfilling real `covers` values is not this skill's job. Set them to `[]` and tell the user that re-running `/modified-matt-to-issues` against the spec maps stories to issues properly, reconciling against what is already on disk.
 
+**Section D: Existing ADRs.** Skip this section when every ADR already has frontmatter, or there are none.
+
+An ADR without frontmatter predates it: the skills read it as repo-wide, with its status from its `**Status:**` line. That works, but every session touching any path then pays for it. Load `modified-matt-domain-modeling` for the frontmatter format, then list each one and propose its frontmatter:
+
+- **`status`**, carried over from its `**Status:**` line: `accepted`, `superseded by ADR-NNNN`, or `superseded`. Without a line, propose `accepted`. Anything else is not a mapping to guess — show the line and ask.
+- **`scope`**, optional: the repo-relative globs the decision binds, read from what the ADR states and the code it names. Leave it out when the decision is genuinely repo-wide, and say which ones you left out and why.
+
+The user approves each ADR's frontmatter, or declines it; never add one silently. Adding frontmatter is the whole change: the body, its `**Status:**` line included, stays exactly as it is.
+
 ### 3. Confirm and edit
 
 Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
 - The contents of `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md`
-- Any ignore rule change agreed in Section A, and any migration agreed in Section C, as a per-file list
+- Any ignore rule change agreed in Section A, any migration agreed in Section C, and the frontmatter agreed per ADR in Section D, as a per-file list
 
 For a file that already exists, show the **delta** rather than the whole file: what the current seed adds, changes, or drops relative to what is on disk. A wall of unchanged text buries the one line that actually moved.
 
@@ -115,13 +124,13 @@ The block:
 
 ### Domain docs
 
-[one-line summary of layout: "single-context" or "multi-context"]. See `.mysdd/docs/agents/domain.md`.
+[one-line summary of layout: "single-context" or "multi-context"], with scoped, binding ADRs in `.mysdd/docs/adr/`. See `.mysdd/docs/agents/domain.md`.
 ```
 
 Then write the generated files, using the seed templates in this skill folder as a starting point:
 
 - [issue-tracker-local.md](./issue-tracker-local.md): local file-based issue tracker (JSON issues)
-- [domain.md](./domain.md): domain doc consumer rules + layout
+- [domain.md](./domain.md): domain doc layout, and how to read the glossary and find the binding ADRs
 
 **Upgrade these files in place; do not regenerate them.** For each of `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md`:
 
@@ -129,10 +138,10 @@ Then write the generated files, using the seed templates in this skill folder as
 - If it does, read it and compare against the seed. Apply what the seed adds or changes; leave everything else as the user left it. Sections the file has and the seed doesn't are the user's own additions: keep them unless they contradict a seed section, and say which ones you kept.
 - If the file and the seed are already equivalent, say so and write nothing.
 
-Re-run the step 1 checks with the current inventory and targets before each migration write. Apply whatever migration the user approved in Section C, one file at a time. Re-read each issue, mutate the parsed object, and write the whole file back as strict JSON. Report per file what changed.
+Re-run the step 1 checks with the current inventory and targets before each migration write. Apply whatever migration the user approved in Section C, one file at a time. Re-read each issue, mutate the parsed object, and write the whole file back as strict JSON. Then add the frontmatter approved in Section D, one ADR at a time, re-running the checks with that ADR as a target before each write. Report per file what changed.
 
 ### 5. Done
 
-Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md` directly later, and that re-running this skill upgrades what is there in place — it diffs against the current seeds, re-checks the ignore rules, audits the features, and asks before changing anything. Nothing here was committed: list what the user should commit.
+Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md` directly later, and that re-running this skill upgrades what is there in place — it diffs against the current seeds, re-checks the ignore rules, audits the features and the ADRs, and asks before changing anything. Nothing here was committed: list what the user should commit.
 
-If Section C found drift, close with the follow-ups it left open: issues whose `covers` is now `[]` and wants a `/modified-matt-to-issues` pass, and anything reported but deliberately not migrated.
+If Section C found drift, close with the follow-ups it left open: issues whose `covers` is now `[]` and wants a `/modified-matt-to-issues` pass, and anything reported but deliberately not migrated. If Section D ran, name each ADR that got frontmatter and each the user declined; a declined one stays repo-wide.
