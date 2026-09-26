@@ -193,8 +193,9 @@ entry.
 **Implementation record.** The implement skill's entry for its run. Beside the verification, the review outcome,
 anything left open and any ADR superseded, its body carries a part opening `Deviations and tradeoffs:` that lists each
 deviation from the issue or spec and each deliberate tradeoff, each with its reason, or reads
-`Deviations and tradeoffs: None.` It records what that run decided, never reasoning reconstructed afterwards; an older
-record without that part leaves the reasoning unknown.
+`Deviations and tradeoffs: None.` It records what that run decided, never reasoning reconstructed afterwards. An older
+implementation comment, written before that part existed, is read for the reasons it states unambiguously; where it
+states none, the reasoning is unknown. It is never rewritten to add the part.
 
 **Phase 1 review record.** The independent reviewer's entry for one final review. Its body opens with these lines, in
 this order:

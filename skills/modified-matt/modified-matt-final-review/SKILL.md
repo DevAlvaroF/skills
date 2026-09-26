@@ -107,9 +107,10 @@ from memory of another session, from `HEAD`, or with an empty finding list you a
    record is missing, stale or ambiguous, stop and ask the user; say which it is.
 2. **Older records.** A review written before this contract carries no `Final review, phase 1` label. Read its findings
    from its own numbered list when it is unambiguous which entry is the review, which findings it holds and which code
-   it saw; otherwise ask the user to clarify or to run a new phase 1 review. When the implementation record has no
-   deviations and tradeoffs part, report the implementer's reasoning as unknown: never reconstruct it. Never edit an
-   old record to make it look new.
+   it saw; otherwise ask the user to clarify or to run a new phase 1 review. When no implementation record has a
+   deviations and tradeoffs part, take the implementer's reasoning from their older implementation comment where it
+   states it unambiguously; otherwise report the reasoning as unknown. Never reconstruct it, and never edit an old
+   record to make it look new.
 3. **Decide whether there is anything to triage.**
    - The review is a verified PASS with zero findings: nothing needs fixing. Say so and stop, with no commit, no
      `reviewCodeCommit` and no record. If the status is not `done-final-review`, phase 1's close did not land: say so
