@@ -43,30 +43,55 @@ although a rule ignores it, or an ignored protected path. Stop, list the paths, 
 `/makerkit-custom-setup-skills` can help. No skill ever force-adds (`git add -f`) or untracks (`git rm --cached`) a
 file, and none edits `.git/info/exclude` or a global excludes file.
 
-**The probe.** Before an operation writes or stages a spec or an issue, probe its **targets** — every spec and issue
-path it will write or stage, including files it is about to create — together with the protected paths, then list which
-targets git already tracks:
+**The probe.** Before an operation writes or stages a spec, issue or protected document, rebuild the inventory
+from the repository root. Run these commands **separately**, capture each status, and stop if either fails (only exit
+0 is success). Do not pipe one Git command into another: the consumer's status can hide an inventory failure.
 
 ```sh
-git check-ignore --no-index .mysdd/issue-tracker.md .mysdd/kanban-boards.json .mysdd/docs/CONTEXT.md \
-  .mysdd/docs/agents/domain.md .mysdd/docs/adr/0000-probe.md .mysdd/features/ <targets>
-git ls-files -- <targets>
+git ls-files --cached --others -z -- .mysdd/docs .mysdd/features
+git ls-files --cached -z -- .mysdd/features
 ```
 
-Add any `.mysdd/docs/` file the operation itself will stage. Run the probe again right before each write or stage,
-not once per session, and decide from its exit status:
+The first command inventories tracked, untracked **and ignored** files; use no exclusion options such as
+`--exclude-standard`. Keep tracked-but-missing paths from the index. Parse NUL-delimited paths, deduplicate them, and
+preserve their bytes (including spaces, tabs, newlines and Git pathspec characters); never split lines or shell words.
+The second command supplies the tracked Feature set independently, even when those files are missing on disk.
 
-- **Exit 1**: nothing is ignored. **Committed** mode.
-- **Exit 0**: it prints exactly the ignored paths. If a protected path is among them, stop and tell the user to
-  run `/makerkit-custom-setup-skills`. If `.mysdd/features/` and every target are printed and `git ls-files` prints
-  none of them, **local** mode. Any other mixture is unresolved.
-- **Any other exit** (128 outside a repository, for example): the probe failed. Stop and report the error; a failed
-  probe never means "not ignored".
+Build two separate sets before checking ignoredness:
 
-`--no-index` makes a rule covering a tracked file visible; without it git reports every tracked file as not ignored.
-Use `git check-ignore -v --no-index <path>` only to show the user which file and line is responsible. Never read
-ignoredness from verbose output or its exit status: it also prints a matching `!` negation, and exits 0, for a path
-that the negation keeps included.
+- **Protected documents**: every inventoried path under `.mysdd/docs/`, `.mysdd/issue-tracker.md`,
+  `.mysdd/kanban-boards.json`, and every documentation path the operation proposes to write or stage, including new
+  files. Setup includes its proposed tracker, domain config and instruction-file targets; domain work includes its
+  proposed glossary/ADR targets. A fixed ADR sentinel cannot replace this inventory.
+- **Feature files**: every inventoried path under `.mysdd/features/` plus every spec/issue path the operation proposes
+  to write or stage, including new files. Keep the `.mysdd/features/` root probe separate from these file sets.
+
+Feed the union of both sets and the root probe as NUL-delimited stdin to this command, preserving its output and
+status independently of the inventory/trackedness commands:
+
+```sh
+git check-ignore --no-index --stdin -z
+```
+
+Exit **0** prints ignored paths as NUL-delimited records; exit **1** means none are ignored; any other exit is an
+error: stop and report it. An empty result from a failed Git command never means "not ignored" or "not tracked".
+Then classify the sets separately:
+
+- If **any protected document** is ignored, stop and report the paths; `/makerkit-custom-setup-skills` can help.
+  Protected documents must stay eligible for commit in both Feature modes; never count them as Feature targets.
+- If no Feature file and no Features-root probe is ignored, use **committed** mode.
+- If the Features-root probe and **every Feature file** are ignored, and the tracked Feature set is empty, use
+  **local** mode. Eligible documentation changes still follow their normal commit rules.
+- Any other mixture, including a tracked-but-ignored Feature file, is unresolved. Stop and report it.
+
+Rebuild the inventory and repeat **all** checks immediately before each write or stage, including documentation
+writes, and after any ignore-rule change. Include the current operation's proposed targets each time. Checks from
+setup or an earlier write do not cover new files, changed rules or a failed later command.
+
+`--no-index` makes a rule covering a tracked file visible; without it Git reports every tracked file as not ignored.
+Use `git check-ignore -v --no-index -- <path>` only to show the user which file and line is responsible, and check its
+status too. Never read ignoredness from verbose output or its exit status: it also prints a matching `!` negation,
+and exits 0, for a path that the negation keeps included.
 
 ## Issue shape
 

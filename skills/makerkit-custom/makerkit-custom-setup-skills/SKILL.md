@@ -34,11 +34,12 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `.mysdd/`: do `issue-tracker.md` and `docs/agents/domain.md` — this skill's prior output — already exist? What
   feature directories under `.mysdd/features/`, `spec.md` files, and JSON files under `issues/` are there? If any exist
   this is an upgrade rather than a first run, so read enough of them to answer Section C.
-- Whether git ignores any of it, per [issue-tracker-local.md](./issue-tracker-local.md) § Ignore policy. Run its probe
-  with no targets, then classify every existing feature file, tracked or not, ignored or not:
-  `git ls-files -co -- .mysdd/features | git check-ignore --no-index --stdin` prints the ignored ones (exit 0; exit 1
-  means none; any other exit is an error to report), and `git ls-files -- .mysdd/features` the tracked ones. For each
-  ignored path, `git check-ignore -v --no-index <path>` names the rule's file and line.
+- Whether Git ignores any of it, per [issue-tracker-local.md](./issue-tracker-local.md) § Ignore policy. Run its
+  complete NUL-delimited inventory and independent trackedness check, then its nonverbose ignoredness probe. Include
+  all real documentation and Feature files (tracked, missing, untracked or ignored), the tracker and board paths,
+  and proposed documentation targets as soon as they are known. Check every command's status independently; stop on
+  an inventory or trackedness failure. Classify protected documents separately from Feature files. Use verbose
+  diagnostics only to name an ignored path's responsible rule and line.
 
 ### 2. Present findings and ask
 
@@ -49,18 +50,21 @@ the choice genuinely branches.
 
 **Section A: Issue tracker.** These skills track work as local JSON issue files under
 `.mysdd/features/<NN>-<feature-slug>/issues/`, where `NN` is a two-digit feature sequence number, with specs as markdown
-alongside them. This is fixed — there's no tracker choice to make, so skip straight to writing
-`.mysdd/issue-tracker.md` from the local template without asking.
+alongside them. This is fixed — there's no tracker choice to make, so prepare
+`.mysdd/issue-tracker.md` from the local template without asking. Write only after the policy checks pass.
 
-Then name the mode step 1 found (§ Ignore policy): **committed** when the probe prints nothing and no feature file is
-ignored; **local** when the probe prints `.mysdd/features/` and no protected path, every existing feature file is
-ignored, and none is tracked. Either is fine as it stands. Anything else is unresolved, and the other skills stop on
-it, so resolve it here before continuing. Show each responsible rule with its file and line, and each affected path:
+Then name the mode step 1 found (§ Ignore policy): **committed** when no protected document, Feature file or
+Features-root probe is ignored; **local** when every protected document is included, the Features-root probe and
+all Feature files are ignored, and no Feature file is tracked. Either is fine as it stands. Anything else is
+unresolved, and the other skills stop on it, so resolve it here before continuing. Show each responsible rule with
+its file and line, and each affected path:
 
-- **An ignored protected path, or a partial feature rule** (a broad `.mysdd/` or `.mysdd/*`, even with re-includes, a
-  rule on one feature or its `issues/`). In a committed `.gitignore`, offer to replace the rule with
-  `.mysdd/features/` (local) or to remove it (committed), and let the user pick. A rule in `.git/info/exclude` or the
-  global excludes file isn't committed: never edit either; show the user the file and line to change there.
+- **An ignored protected document, or only some Feature files ignored.** A broad `.mysdd/` or `.mysdd/*` rule,
+  incomplete re-includes, or a rule on one Feature or its `issues/` can cause this. In a committed `.gitignore`, offer
+  to replace the responsible rule with `.mysdd/features/` (local: tracker, docs and board remain committed) or remove
+  it (committed), and let the user pick. A rule in `.git/info/exclude` or the global excludes file isn't committed:
+  never edit either; show the user the file and line to change there. Decide from the effective checks, not the
+  spelling of a rule: working negations may already leave the policy valid.
 - **A tracked feature file under an ignore rule.** Report it and ask whether to drop the rule or untrack the files
   themselves. Never untrack or force-add anything.
 
@@ -68,7 +72,7 @@ A text edit is not proof. After any rule changes, re-run the step 1 checks and c
 the two modes, not assumed from the edit: another rule, a negation or a tracked file can still leave it unresolved.
 Files a removed rule was hiding need a first commit.
 
-**Section B: Domain docs.** Write `.mysdd/docs/agents/domain.md` from the seed without asking. Then show the
+**Section B: Domain docs.** Prepare `.mysdd/docs/agents/domain.md` from the seed without asking. Then show the
 `AGENTS.md` map from step 1, annotating each path with a one-line note on what that subtree owns, taken from that file's
 own opening lines rather than guessed. That is the conventions map the other skills navigate; naming it here is how the
 user sees whether a subtree is undocumented.
@@ -132,6 +136,10 @@ Let them edit before writing.
 
 ### 4. Write
 
+Apply any approved repository ignore-rule correction first. Before each documentation or Feature write, rebuild
+§ Ignore policy's inventory and repeat every check, including all proposed documentation targets from the draft.
+Stop on any failed command or unresolved policy before writing. Repeat these checks before any staging as well.
+
 **Pick the file to edit:**
 
 - If `AGENTS.md` exists at the root, edit it. It is the file both Claude Code and Codex read, and in this repo
@@ -179,9 +187,9 @@ Then write the generated files, creating directories as needed, from the seed te
   contradict a seed section, and say which ones you kept.
 - If the file and the seed are already equivalent, say so and write nothing.
 
-Apply the ignore rule changes agreed in Section A and re-run the step 1 checks; if the result is still unresolved, say
-which paths and stop before the migrations. Apply the Section C migration one file at a time: re-read each issue,
-mutate the parsed object, and write the whole file back as strict JSON. Apply the Section D moves, re-run the probe,
+Re-run the step 1 checks with the current inventory and targets before each migration write. Apply the Section C
+migration one file at a time: re-read each issue, mutate the parsed object, and write the whole file back as strict
+JSON. Apply the Section D moves, re-run the probe,
 and only when it prints no tracker or docs path remove the moved sections from each `AGENTS.md`. Report per file what
 changed. Beyond the `## Agent skills` block, a root file seeded in Section B and the Section D removals, leave every
 `AGENTS.md` alone.
