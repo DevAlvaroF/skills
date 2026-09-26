@@ -24,12 +24,13 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `.mysdd/docs/adr/`
 - `.mysdd/issue-tracker.md` and `.mysdd/docs/agents/domain.md`: does this skill's prior output already exist?
 - `.mysdd/features/`: existing feature directories, their `spec.md` files, and every JSON file under `issues/`. If any exist this is an upgrade rather than a first run, so read enough of them to answer Section C
+- Old-layout feature directories directly under `.mysdd/` (`.mysdd/<NN>-<slug>/`). Report each one in Section A: the other skills stop until the user moves it under `.mysdd/features/` and updates its issues' `spec` paths. Setup never moves one
 - Whether Git ignores any of it, per [issue-tracker-local.md](./issue-tracker-local.md) § Ignore policy. Run its
   complete NUL-delimited inventory and independent trackedness check, then its nonverbose ignoredness probe. Include
-  all real documentation and Feature files (tracked, missing, untracked or ignored), the tracker and board paths,
-  and proposed documentation targets as soon as they are known. Check every command's status independently; stop on
-  an inventory or trackedness failure. Classify protected documents separately from Feature files. Use verbose
-  diagnostics only to name an ignored path's responsible rule and line.
+  every documentation and Feature file its pathspecs select (tracked, missing, untracked or ignored), the tracker and
+  board paths, the Features-root probe, and proposed documentation targets as soon as they are known. Check every
+  command's status independently; stop on an inventory or trackedness failure. Classify protected documents
+  separately from Feature files. Use verbose diagnostics only to name an ignored path's responsible rule and line.
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
 
 ### 2. Present findings and ask

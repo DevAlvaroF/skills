@@ -12,6 +12,9 @@ read them without parsing prose.
   Number a new feature from the directories on disk in `.mysdd/features/` alone: start at `01` and increment the highest
   existing number. When `.mysdd/features/` doesn't exist there are no features yet; the first one is `01`, and writing
   it creates `.mysdd/features/`. Nothing else under `.mysdd/` is a feature
+- A directory directly under `.mysdd/` named like a feature (`.mysdd/01-foo/`) is the old layout. These skills never
+  read, number around or move it: stop, name each one, and tell the user to move it under `.mysdd/features/` and
+  update the `spec` path in each of its issues before continuing
 - The spec is `.mysdd/features/<NN>-<feature-slug>/spec.md` (markdown: it is prose, not an issue)
 - Implementation issues are one JSON file per issue at `.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`,
   never a single combined issues file. The feature directory and issue filenames use independent `NN` sequences; issue
@@ -46,9 +49,14 @@ from the repository root. Run these commands **separately**, capture each status
 0 is success). Do not pipe one Git command into another: the consumer's status can hide an inventory failure.
 
 ```sh
-git ls-files --cached --others -z -- .mysdd/docs .mysdd/features
-git ls-files --cached -z -- .mysdd/features
+git ls-files --cached --others -z -- ':(glob).mysdd/docs/**/*.md' \
+  ':(glob).mysdd/features/*/spec.md' ':(glob).mysdd/features/*/issues/**/*.json'
+git ls-files --cached -z -- ':(glob).mysdd/features/*/spec.md' ':(glob).mysdd/features/*/issues/**/*.json'
 ```
+
+The pathspecs select exactly the files these skills own: markdown under `.mysdd/docs/`, each feature's `spec.md`, and
+its issue JSON (`issues/archive/` included). Any other file there — a `.DS_Store`, an editor swap file, the user's own
+notes — is outside the policy whether or not a rule ignores it; never widen the pathspecs to take it in.
 
 The first command inventories tracked, untracked **and ignored** files; use no exclusion options such as
 `--exclude-standard`. Keep tracked-but-missing paths from the index. Parse NUL-delimited paths, deduplicate them, and
@@ -62,7 +70,10 @@ Build two separate sets before checking ignoredness:
   files. Setup includes its proposed tracker, domain config and instruction-file targets; domain work includes its
   proposed glossary/ADR targets. A fixed ADR sentinel cannot replace this inventory.
 - **Feature files**: every inventoried path under `.mysdd/features/` plus every spec/issue path the operation proposes
-  to write or stage, including new files. Keep the `.mysdd/features/` root probe separate from these file sets.
+  to write or stage, including new files.
+- **Features-root probe**: the literal path `.mysdd/features/`, trailing slash included, kept apart from both sets.
+  Before the directory exists Git matches a directory rule only against the slashed spelling, so
+  `.mysdd/features` would read as not ignored and make a fresh local-mode repo look unresolved.
 
 Feed the union of both sets and the root probe as NUL-delimited stdin to this command, preserving its output and
 status independently of the inventory/trackedness commands:

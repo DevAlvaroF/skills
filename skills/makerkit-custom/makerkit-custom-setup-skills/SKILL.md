@@ -33,13 +33,15 @@ Look at the current repo to understand its starting state. Read whatever exists;
   `## Decisions` section: those are legacy entries for Section D.
 - `.mysdd/`: do `issue-tracker.md` and `docs/agents/domain.md` — this skill's prior output — already exist? What
   feature directories under `.mysdd/features/`, `spec.md` files, and JSON files under `issues/` are there? If any exist
-  this is an upgrade rather than a first run, so read enough of them to answer Section C.
+  this is an upgrade rather than a first run, so read enough of them to answer Section C. Also list any old-layout
+  feature directory directly under `.mysdd/` (`.mysdd/<NN>-<slug>/`) and report it in Section A: the other skills stop
+  until the user moves it under `.mysdd/features/` and updates its issues' `spec` paths. Setup never moves one.
 - Whether Git ignores any of it, per [issue-tracker-local.md](./issue-tracker-local.md) § Ignore policy. Run its
   complete NUL-delimited inventory and independent trackedness check, then its nonverbose ignoredness probe. Include
-  all real documentation and Feature files (tracked, missing, untracked or ignored), the tracker and board paths,
-  and proposed documentation targets as soon as they are known. Check every command's status independently; stop on
-  an inventory or trackedness failure. Classify protected documents separately from Feature files. Use verbose
-  diagnostics only to name an ignored path's responsible rule and line.
+  every documentation and Feature file its pathspecs select (tracked, missing, untracked or ignored), the tracker and
+  board paths, the Features-root probe, and proposed documentation targets as soon as they are known. Check every
+  command's status independently; stop on an inventory or trackedness failure. Classify protected documents
+  separately from Feature files. Use verbose diagnostics only to name an ignored path's responsible rule and line.
 
 ### 2. Present findings and ask
 
