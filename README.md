@@ -8,7 +8,7 @@ project, never both.**
 
 | Flavour | Use it for |
 |---|---|
-| **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — knows its `AGENTS.md` layout, RLS and `.mdoc` docs; keeps vocabulary and binding decisions in the owning `AGENTS.md` (no ADRs, no `CONTEXT.md`) |
+| **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — knows its `AGENTS.md` layout, RLS and `.mdoc` docs; keeps the glossary and scoped, binding ADRs under `.mysdd/docs/`, out of the always-loaded `AGENTS.md` |
 | **Modified Matt Skills** (`modified-matt-*`) | Any other repo |
 
 ---
@@ -66,19 +66,24 @@ install the other one.
 
 ### Where decisions live (Makerkit flavour)
 
-- There are no ADRs and no `CONTEXT.md`.
-- Terms go in a `## Vocabulary` section and standing decisions in a
-  `## Decisions` section of the `AGENTS.md` that owns the code — each created
-  the first time it's needed.
-- Entries stand alone: they never point at an issue, a user story, a spec or
-  anything else under `.mysdd/`, which gets deleted while `AGENTS.md` stays.
-- Decisions are binding. Every skill reads those of every `AGENTS.md` from
-  the code it touches up to the root, and stops to ask rather than
-  contradict one; the final reviewer blocks on an unagreed contradiction.
-  A supersession you agreed to outranks the spec, which is never edited.
-- The grill writes entries; `to-issues` commits them with the spec in the
-  `SPEC:` commit; `implement` and `final-review` commit a supersession with
-  the code that needed it.
+- Terms go in one glossary, `.mysdd/docs/CONTEXT.md`; decisions go one per
+  file in `.mysdd/docs/adr/`. Each is created the first time it's needed.
+  `AGENTS.md` keeps conventions only: it loads into every session, so every
+  term or decision there would be a permanent context cost.
+- Each ADR's `scope` frontmatter lists the paths it binds (none = the whole
+  repo), so a skill reads only the ADRs covering what it touches.
+  `.mysdd/docs/agents/domain.md`, written by setup, holds the reading rules.
+- The docs stand alone: they never point at an issue, a user story, a spec
+  or a feature directory, which get deleted while `.mysdd/docs/` stays.
+- `.mysdd/` is never gitignored; setup checks and offers to remove any rule.
+- Decisions are binding. Every skill stops to ask rather than contradict
+  one; the final reviewer blocks on an unagreed contradiction. A
+  supersession you agreed to outranks the spec, which is never edited.
+- The grill writes terms and ADRs; `to-issues` commits them with the spec in
+  the `SPEC:` commit; `implement` and `final-review` commit a supersession
+  with the code that needed it.
+- Upgrading from the version that kept `## Vocabulary` / `## Decisions` in
+  `AGENTS.md`? Re-run setup: it offers to move them out.
 
 ---
 
@@ -112,9 +117,9 @@ matt_submodule/skills             # upstream mattpocock/skills, for reference
 - Keep the flavour prefix on every skill name.
 - `description` is all the agent sees before loading a skill — write it as
   trigger conditions ("Use when…"), not a summary.
-- Keep `SKILL.md` short; put detail in `references/`. The one deliberate
-  exception is `makerkit-custom-domain-modeling`, which inlines its entry
-  format so every skill that loads it gets the rules in one read.
+- Keep `SKILL.md` short (well under 500 lines) and put detail in reference
+  files linked one level deep from it. State each rule once and point at it
+  rather than copying it into every skill.
 - Stick to frontmatter keys both agents understand: `name`, `description`,
   `license`, `allowed-tools`, `metadata`.
 

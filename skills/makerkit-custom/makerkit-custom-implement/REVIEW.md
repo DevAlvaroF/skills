@@ -3,9 +3,8 @@
 Step 1 of `/makerkit-custom-implement`, run on its own work before the repo's verification steps.
 
 Check the diff against the originating issue / spec: does the code faithfully implement it? Spec fidelity includes the
-spec's Decision log and the `## Decisions` of every `AGENTS.md` owning a touched file — for each touched path, every
-`AGENTS.md` from it up to the repository root. Standards conformance (AGENTS.md rules, code smells) belongs to
-`/reviewer` in step 2 — this step is spec-fidelity only.
+spec's Decision log and the ADRs whose `scope` covers a touched file, per `.mysdd/docs/agents/domain.md`. Standards
+conformance (AGENTS.md rules, code smells) belongs to `/reviewer` in step 2 — this step is spec-fidelity only.
 
 ## Collect the diff
 
@@ -48,13 +47,13 @@ Run this as a sub-agent so a large diff/spec doesn't pollute this skill's own co
 - The diff command from _Collect the diff_ (the command, never the diff itself) and the commit list.
 - The *path* to the spec. Pass the path only and let the sub-agent read it; don't read the spec into this context to
   paste it in.
-- The paths of every `AGENTS.md` from each touched file up to the repository root, for their `## Decisions`.
-- Each `## Decisions` entry the user agreed to supersede in this run, with its replacement, by file and statement.
+- The paths of the binding ADRs: those whose `scope` covers a touched file, per `.mysdd/docs/agents/domain.md`.
+- Each ADR the user agreed to supersede in this run, with its replacement, by number and title.
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that
   wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong;
-  (d) places the diff contradicts the spec's Decision log or a `## Decisions` entry. An agreed supersession listed
-  above is not a finding: its replacement outranks both the old entry and the matching spec decision, so check the
-  diff against the replacement. Quote the spec line or entry for each finding. Under 400 words."
+  (d) places the diff contradicts the spec's Decision log or a binding ADR. An agreed supersession listed above is
+  not a finding: its replacement outranks both the old ADR and the matching spec decision, so check the diff against
+  the replacement. Quote the spec line or ADR for each finding. Under 400 words."
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 

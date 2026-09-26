@@ -28,11 +28,7 @@ project's own documentation:
 - the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
   vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
   description differ, **follow the repo**.
-- the `## Vocabulary` and `## Decisions` sections of **every** `AGENTS.md` from each touched path up to the repository
-  root — the nearest one, every one between it and the root, and the root itself. Use the vocabulary as written.
-  Decisions are binding: when your plan contradicts one, don't silently override it. Flag it — _Contradicts
-  **<entry statement>** in `<path>/AGENTS.md`, but worth reopening because…_ — and ask the user whether to change the
-  plan or supersede the entry.
+- the glossary and the ADRs whose `scope` covers the touched paths, per `.mysdd/docs/agents/domain.md`. ADRs are binding.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
   piece is and how it fits. Read directly, and only for the pieces the feature touches.
 - the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
@@ -98,7 +94,7 @@ Ask the user:
 - Are the test boundaries right: does each issue test at the right boundary, and are any missing or superfluous?
 - Is every user story covered? Skip stories marked `(retired)`. List each other `US-NNN` in the spec that no issue covers, and ask whether it is a deliberate
   deferral or a slice you missed.
-- Does any issue contradict a `## Decisions` entry? Name each one, with its entry and file.
+- Does any issue contradict a binding ADR? Name each one, with the ADR's number and title.
 
 Iterate until the user approves the breakdown.
 
@@ -171,42 +167,37 @@ by the final reviewer, never by this skill.
 ### 6. Record the spec's standing decisions
 
 Skip this step when the run didn't start from a spec. Otherwise call the Skill tool with
-"makerkit-custom-domain-modeling" and apply its rules: the three tests, standalone entries, superseding and removing.
+"makerkit-custom-domain-modeling" and apply its rules: the three tests, docs stand alone, superseding and removing.
 
 1. **Add what's missing.** Walk the spec's Implementation Decisions and Decision log. Each decision that passes the
-   three tests and is not already recorded **or superseded** in the owning `AGENTS.md` becomes a standalone entry there.
-   The "or superseded" part stops a re-run from re-adding a decision that implement or final-review already replaced.
+   three tests and is not already recorded **or superseded** in `.mysdd/docs/adr/` becomes a new ADR, scoped to the
+   paths it binds. The "or superseded" part stops a re-run from re-adding a decision that implement or final-review
+   already replaced.
 2. **Retire what the spec dropped.** Trace provenance through the spec's own history and its issues' `comments` —
-   never through IDs in the entries (they carry none), and never through `AGENTS.md` diffs, since a `SPEC:` commit
-   stages whole files and can carry another spec's entries.
+   never through IDs in the ADRs (they carry none).
    - **Every decision this spec ever made:** the Implementation Decisions and Decision log of each committed version
      (`git log --format=%H -- <spec path>`, then `git show <sha>:<spec path>`), plus each replacement recorded as an
      agreed supersession in the `comments` of its issues, `issues/archive/` included.
-   - **Its live entries:** read every `AGENTS.md` as it stands now, per _Where the model lives_ in
-     `makerkit-custom-domain-modeling`, and match each entry not marked superseded against those decisions by what it
-     states.
-   - **Candidates:** a live entry stating a decision an earlier version made that the current spec no longer carries,
+   - **Its live ADRs:** read every ADR in `.mysdd/docs/adr/` whose `status` isn't superseded, and match each against
+     those decisions by what it states.
+   - **Candidates:** a live ADR stating a decision an earlier version made that the current spec no longer carries,
      unless it is a recorded replacement or another feature's spec still carries it; or, once every issue of this spec
-     has been retired to `issues/archive/`, every live entry of this spec, replacements included. Ask for each
+     has been retired to `issues/archive/`, every live ADR of this spec, replacements included. Ask for each
      candidate: supersede or remove? Recommend removal only when no issue carrying that decision ever got a
      `codeCommit`, so it never reached the code. Never decide for the user.
-   - When `.mysdd/` is gitignored there is no spec history: match only the current spec and the issues' `comments`.
-     That still finds a fully retired spec's entries, but not dropped decisions — say so.
-3. **Collect the files for the commit:** every `AGENTS.md` step 6 changed, plus every one carrying uncommitted
-   `## Vocabulary` or `## Decisions` entries from this spec's design session
-   (`git status --short -- ':(glob)**/AGENTS.md'`). Each file is committed whole, so name any other uncommitted edit it
-   carries.
+3. **Collect the files for the commit:** every ADR step 6 added or changed, plus the uncommitted ADRs and
+   `CONTEXT.md` edits from this spec's design session (`git status --short -- .mysdd/docs`). `CONTEXT.md` is committed
+   whole, so name any other uncommitted edit it carries.
 4. **Show, then write.** List the adds, supersedes, removes and files next to the published issues. Write nothing to
-   an `AGENTS.md` until the user approves.
+   `.mysdd/docs/` until the user approves.
 
 ### 7. Commit the Spec, the issues and the decisions
 
-Once the user approves the published issues and step 6, commit the Spec, the issues and the step-6 `AGENTS.md` files as
+Once the user approves the published issues and step 6, commit the Spec, the issues and the step-6 files as
 `.mysdd/issue-tracker.md` § Committing a Spec and its Issues defines. Follow it exactly — this skill does not restate
-it. Report the commit's SHA and subject, and each `AGENTS.md` it carried. When `.mysdd/` is gitignored, that section's
-`AGENTS.md`-only `SPEC:` commit applies.
+it. Report the commit's SHA and subject, and each ADR and glossary change it carried.
 
 ## Next step
 
-Once the Spec, its issues and its decisions are committed — or, with `.mysdd/` gitignored, once any `AGENTS.md` change
-is committed — the next step is `/makerkit-custom-implement`, taking one issue from the frontier.
+Once the Spec, its issues and its decisions are committed, the next step is `/makerkit-custom-implement`, taking one
+issue from the frontier.

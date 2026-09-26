@@ -10,9 +10,9 @@ test is, where tests go, the anti-patterns, and the rules of the loop. Every sec
 them before and during the loop, not after.
 
 When exploring the codebase, read the nearest `AGENTS.md` to the code under test — the root file is already in your
-context via `CLAUDE.md` — so test names and interface vocabulary match the project's language, its `## Vocabulary`
-especially. Where it and this description differ, **follow the repo**. The `## Decisions` of every `AGENTS.md` from
-the code under test up to the repository root are binding: a test that would pin behaviour contradicting one is a
+context via `CLAUDE.md` — and the glossary in `.mysdd/docs/CONTEXT.md`, so test names and interface vocabulary match the
+project's language. Where they and this description differ, **follow the repo**. The ADRs whose `scope` covers the code
+under test are binding, per `.mysdd/docs/agents/domain.md`: a test that would pin behaviour contradicting one is a
 stop — flag it and ask.
 
 The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, boundaries
