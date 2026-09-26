@@ -12,10 +12,11 @@ and tell the user to run `/makerkit-custom-setup-skills`.
 
 Read each issue you're implementing first (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work
 from its `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. If an issue's `codeCommit` already holds a
-SHA, it has been implemented: any further change to it is a final-review fix round, which belongs to the final
-reviewer, not this skill. Stop for that issue and tell the user. Run the tracker's ignore probe
-(`.mysdd/issue-tracker.md` § Ignore policy) with the issue paths as targets before you start; if it reports an
-unresolved state, list the paths and stop until the user resolves them.
+SHA, it has been implemented: any further change to it is a final-review fix round. That belongs to phase 2 of
+`/makerkit-custom-final-review`, the coder's triage of the review in a fresh session, not to this skill: stop for that
+issue and tell the user. Run the tracker's ignore probe (`.mysdd/issue-tracker.md` § Ignore policy) with the issue
+paths as targets before you start; if it reports an unresolved state, list the paths and stop until the user resolves
+them.
 
 ## Ground yourself first
 
@@ -64,7 +65,7 @@ Once the implementation is done, run the following in order:
 ## Commit the work
 
 Once this skill's own review is done and the suite is green, commit the work. This is part of the job, not an optional
-extra: the issue's `codeCommit` is what points the final reviewer at the change, and it can't be written until the
+extra: the issue's `codeCommit` is what points the final review at the change, and it can't be written until the
 commit exists.
 
 1. **Don't commit an issue you left partly done.** If the work isn't finished, say so, leave the issue open, and stop
@@ -79,8 +80,8 @@ commit exists.
    Never `git add .mysdd/` and never `git add -A`. Then read `git status --short` and confirm nothing unrelated was
    swept in.
 5. **Build the message.** The header is always `CODE: `: this skill only ever makes the first-round commit, on an issue
-   whose `codeCommit` is `null`. `CODE REVIEW FIXES: ` commits belong to the final reviewer. Write the message to the
-   shape in `.mysdd/issue-tracker.md` § Commit message format.
+   whose `codeCommit` is `null`. `CODE REVIEW FIXES: ` commits belong to the final-review skill's phase 2. Write the
+   message to the shape in `.mysdd/issue-tracker.md` § Commit message format.
    That file is the schema of record for the message the same way it is for the issue shape; this skill does not
    restate it.
 6. **One issue, one commit.** With several issues in a run, commit them one at a time in dependency order. Only when
@@ -98,11 +99,14 @@ commit's full SHA and the paths, and leave the issue to the user. Then rewrite e
 (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and issue numbers are independent),
 carrying all four changes together: flip every satisfied entry in
 `acceptanceCriteria` to `"done": true`, set `"status": "done-coding-awaiting-final-review"`, record the SHA in
-`codeCommit`, and append one `comments` entry summarising the run: the verification you ran with its final
-output (the pass/fail summary, not the full log), the review outcome, anything left open, and any ADR the user agreed
-to supersede, with its replacement, by number and title — the final reviewer accepts that change, and
-lets it outrank the spec, only on this record. Never
-write `reviewCodeCommit`: only the final reviewer sets it. The
+`codeCommit`, and append one `comments` entry summarising the run — the implementation record in
+`.mysdd/issue-tracker.md` § Comment records: the verification you ran with its final output (the pass/fail summary, not
+the full log), the review outcome, anything left open, and any ADR the user agreed to supersede, with its replacement,
+by number and title — the final review accepts that change, and lets it outrank the spec, only on this record. The same
+entry carries a `Deviations and tradeoffs:` part: each place the work deviates from the issue or the spec, and each
+deliberate tradeoff you made, with its reason — or `Deviations and tradeoffs: None.` when there were none. The coder
+who later triages the review reads it to weigh each finding. Record only what this run decided; never reconstruct an
+earlier run's reasoning as fact. Never write `reviewCodeCommit`: only the final-review skill's phase 2 sets it. The
 `done-coding-awaiting-final-review` state means the implementation and this skill's own review are complete, but
 independent final review is still pending; this skill must never set `done-final-review`. Rewrite the whole file as
 strict JSON, keeping every other field (`id`, `slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `covers`,

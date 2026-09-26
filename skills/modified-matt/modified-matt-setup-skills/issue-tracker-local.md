@@ -1,7 +1,7 @@
 # Issue tracker: Local Files
 
-This file is the schema of record for the spec, issues, and implement skills. Those skills read the generated
-`.mysdd/issue-tracker.md` rather than carrying their own copy — so a schema change starts here.
+This file is the schema of record for the spec, issues, implement and final-review skills. Those skills read the
+generated `.mysdd/issue-tracker.md` rather than carrying their own copy — so a schema change starts here.
 
 Specs for this repo live as markdown files under `.mysdd/features/`; **issues are JSON files**, so other software can
 read them without parsing prose.
@@ -149,13 +149,14 @@ Implementation issues (written by the issues skill):
 public boundaries this issue's tests hit, confirmed with the user when the issue was drafted; `[]` when the issue has no
 dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this issue satisfies; `[]` when the
 issue satisfies no story directly, and always `[]` when `spec` is `null`. `codeCommit` is the full SHA of the commit
-that implemented the issue, and `reviewCodeCommit` the full SHA of the commit that applied the final reviewer's
-findings; both are single strings or `null`, and both start as `null`. Each has exactly one writer: only the implement
-skill writes `codeCommit`, when it commits; only the final reviewer — a human, or an LLM prompted to act as the final
-reviewer — writes `reviewCodeCommit`, when it commits its fixes. Every skill carries whichever field it doesn't own over
+that implemented the issue, and `reviewCodeCommit` the full SHA of the commit that applied the review fixes the user
+approved; both are single strings or `null`, and both start as `null`. Each has exactly one writer: only the implement
+skill writes `codeCommit`, when it commits; only the coder in phase 2 of the final review — the coder's triage, run
+through `/modified-matt-final-review` by an LLM or by a human acting as the coder — writes `reviewCodeCommit`, when it
+commits approved fixes. The independent reviewer writes neither. Every skill carries whichever field it doesn't own over
 verbatim. A further round of review fixes overwrites `reviewCodeCommit` — the superseded SHA stays reachable through git
 history and the `comments` trail.
-`comments` starts as `[]`.
+`comments` starts as `[]`; § Comment records defines the entries the implement and final-review skills append to it.
 
 The successful local implementation and review lifecycle is:
 
@@ -164,16 +165,98 @@ ready-for-agent -> done-coding-awaiting-final-review -> done-final-review
 ```
 
 `done-coding-awaiting-final-review` means coding, verification, and the implementing agent's own review are complete.
-Only the independent final reviewer — `/modified-matt-final-review`, or a human acting in that role — sets
-`done-final-review`. If final review requires changes, the issue stays at
-`done-coding-awaiting-final-review` — do not return it to `ready-for-agent`, and do not re-run the implement skill on
-it. The final reviewer appends the findings to `comments`, fixes the issues found, produces the `CODE REVIEW FIXES:`
+The final review (`/modified-matt-final-review`, or a human acting in its roles) then runs in two phases, each in a
+fresh session. In **phase 1** the independent reviewer reviews the change and records every finding; it fixes nothing.
+In **phase 2** the coder — the implementing agent's role, not the reviewer's — triages every recorded finding with the
+user. Only the final review sets `done-final-review`, and only in one of two ways:
+
+- phase 1 sets it on a verified PASS with zero findings;
+- phase 2 sets it when its triage is COMPLETE: every finding has a final disposition the user approved (fixed, rejected
+  or deferred), every approved fix is verified, and every required check passes. A triage that rejects or defers every
+  finding, with the user's approval, completes without a code commit.
+
+A PASS that carries suggestions, or a review that needs fixes, leaves the issue at `done-coding-awaiting-final-review`
+until phase 2 completes — do not return it to `ready-for-agent`, and do not re-run the implement skill on it. In phase 2
+the coder applies only the fixes the user approved, produces the `CODE REVIEW FIXES:` commit when there is code to
 commit, and records its SHA in `reviewCodeCommit`; `codeCommit` keeps pointing at the implementation. A fix round is
 visible through `reviewCodeCommit` and the `comments` trail, never through a status change.
 
+## Comment records
+
+Three kinds of `comments` entry carry the work from the implementer to the independent reviewer and on to the coder's
+triage. Each is an ordinary entry — an `author` and a `body`, nothing more — and every identifier below lives in the
+`body` text, never in an added field. A review or triage record is recognised by the label its body opens with, and
+the implementation record by its `Deviations and tradeoffs:` part — never by an entry's `author` or its position in the
+array. Free text may follow the labelled lines. Never edit or remove a record once written: a correction is a new
+entry.
+
+**Implementation record.** The implement skill's entry for its run. Beside the verification, the review outcome,
+anything left open and any ADR superseded, its body carries a part opening `Deviations and tradeoffs:` that lists each
+deviation from the issue or spec and each deliberate tradeoff, each with its reason, or reads
+`Deviations and tradeoffs: None.` It records what that run decided, never reasoning reconstructed afterwards; an older
+record without that part leaves the reasoning unknown.
+
+**Phase 1 review record.** The independent reviewer's entry for one final review. Its body opens with these lines, in
+this order:
+
+- `Final review, phase 1, attempt <N>`, where `N` is one more than the number of phase 1 records already in `comments`
+  (count those records, not every comment).
+- `Reviewed commits: <SHAs>`: the full SHAs of the change reviewed — `codeCommit` and each fix commit since — oldest
+  first, separated by spaces.
+- `Verdict: PASS` or `Verdict: NEEDS FIXES`. PASS means every acceptance criterion was verified to hold, nothing was
+  blocked and no blocking finding remains; it does not mean there are no suggestions.
+- `Findings:` then one numbered line per finding: `BLOCKING` or `SUGGESTION`, the location where one applies, the
+  impact, and the correction asked for. A required verification that could not run is a `BLOCKING` finding that says
+  what was blocked and why, with no invented file or line. Only when there are no findings of either severity does the
+  line read `Findings: None.` instead.
+
+**Phase 2 triage record.** The coder's entry for one triage attempt. Its body opens with these lines, in this order:
+
+- `Final review, phase 2, attempt <K>`, where `K` is one more than the number of phase 2 records already in `comments`.
+- `Answers: phase 1 attempt <N>, reviewed commits <SHAs>`: the phase 1 record this triage answers, and the reviewed
+  SHAs copied from it.
+- `Outcome: COMPLETE`, `Outcome: INCOMPLETE` or `Outcome: BLOCKED`. COMPLETE means every finding has a final
+  disposition the user approved, every approved fix is verified and every required check passes; only a COMPLETE triage
+  closes the issue. INCOMPLETE means approved work is unfinished or a required check fails; BLOCKED means something
+  outside the change stops it, such as a check that cannot run or a decision the user has not made.
+- `Verdicts:` then one line per finding, numbered as in the phase 1 record: `FIXED` with where and how it was verified;
+  `REJECTED` or `DEFERRED` with the reason the user approved; `UNRESOLVED — approved FIX: <what>; blocker: <failure>`
+  for an approved fix that could not be finished; or `UNRESOLVED — no approved disposition` with what is pending, for a
+  finding the user has not decided. An unfinished FIX is never relabelled FIXED, nor turned into a DEFER the user did
+  not approve.
+- `Checks:` the checks run and their results.
+- `Fix commit:` the full SHA of this attempt's `CODE REVIEW FIXES: ` commit, or `Fix commit: None.`
+- `ADRs superseded:` each ADR the user agreed to supersede, with its replacement, by number and title, or
+  `ADRs superseded: None.`
+
+A later attempt answering the same review carries its predecessors' FIXED, REJECTED and DEFERRED verdicts over as they
+stand and works only on what is UNRESOLVED; it never repeats a fix commit.
+
+A PASS with a suggestion, which leaves the issue open, and the triage that answers it and closes it:
+
+```text
+Final review, phase 1, attempt 1
+Reviewed commits: 3f9a1c07d2b84e5f6a1b2c3d4e5f60718293a4b5
+Verdict: PASS
+Findings:
+1. SUGGESTION — src/seats/guard.ts:42. Impact: the revoked-seat branch has no test. Correction: cover it with a test.
+```
+
+```text
+Final review, phase 2, attempt 1
+Answers: phase 1 attempt 1, reviewed commits 3f9a1c07d2b84e5f6a1b2c3d4e5f60718293a4b5
+Outcome: COMPLETE
+Verdicts:
+1. FIXED — src/seats/guard.test.ts; the new revoked-seat test fails without the guard and passes with it.
+Checks: typecheck passed; test suite passed.
+Fix commit: 8c2d4e6f0a1b3c5d7e9f1a2b4c6d8e0f1a3b5c7d
+ADRs superseded: None.
+```
+
 ## Commit message format
 
-Every code commit made for an issue — by the implement skill or by the final reviewer — uses this shape:
+Every code commit made for an issue — by the implement skill or by the coder in the final review's phase 2 — uses
+this shape:
 
 ```text
 CODE: <imperative subject>
@@ -186,10 +269,10 @@ Spec: .mysdd/features/<NN>-<feature-slug>/spec.md
 
 - The header prefix of a code commit is `CODE: ` or `CODE REVIEW FIXES: `. Pick it from the issue's `codeCommit`:
   `null` means this is the implement skill's first-round commit, so `CODE: `; a SHA means the issue has already been
-  implemented and committed and this is the final reviewer's fix commit, so `CODE REVIEW FIXES: `. The header follows
-  `codeCommit`, never `status` — a fix round leaves the status where it is. `SPEC: ` and `Closed Issue: ` are the other
-  subjects, but they are bookkeeping, not code commits: they follow § Committing a Spec and its Issues and § Closing an
-  issue, not this format.
+  implemented and committed and this is the coder's fix commit from the final review's phase 2, so
+  `CODE REVIEW FIXES: `. The header follows `codeCommit`, never `status` — a fix round leaves the status where it is.
+  `SPEC: ` and `Closed Issue: ` are the other subjects, but they are bookkeeping, not code commits: they follow
+  § Committing a Spec and its Issues and § Closing an issue, not this format.
 - The whole subject line, prefix included, is ≤72 characters.
 - One `Issue:` trailer per issue in the commit, repo-root-relative and beginning `.mysdd/features/`, in either mode:
   the trailers are addresses, not staged files.
@@ -211,7 +294,7 @@ Issue: .mysdd/features/03-workspace-seats/issues/02-seat-guard.json
 Spec: .mysdd/features/03-workspace-seats/spec.md
 ```
 
-A commit applying final-review findings on the same issue:
+A commit applying the review fixes the user approved on the same issue:
 
 ```text
 CODE REVIEW FIXES: Seat guard — handle the revoked-seat race
@@ -240,7 +323,8 @@ below right before staging:
 
 ## Closing an issue
 
-When the final reviewer sets `done-final-review` in **committed** mode, it records the close in one commit of its own.
+When the final review sets `done-final-review` — phase 1 on a verified PASS with zero findings, or phase 2 on a
+COMPLETE triage — in **committed** mode, the phase that set it records the close in one commit of its own.
 Run the probe (§ Ignore policy) on the issue file before writing the status and again before staging:
 
 - The subject is exactly `Closed Issue: <issue path>`, the path repo-root-relative and beginning `.mysdd/features/`

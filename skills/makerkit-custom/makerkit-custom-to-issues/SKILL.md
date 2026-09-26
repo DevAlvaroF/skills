@@ -164,7 +164,7 @@ The `status`, `acceptanceCriteria[].done`, `comments`, `codeCommit`, and `review
 from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`; `acceptanceCriteria` entries
 start with `"done": false` and ticking one means flipping it to `true`; `comments` starts as `[]`; `codeCommit` and
 `reviewCodeCommit` both start as `null`; `codeCommit` is written only by the implement skill and `reviewCodeCommit` only
-by the final reviewer, never by this skill.
+by the final-review skill's phase 2 (the coder's triage), never by this skill.
 
 ### 6. Record the spec's standing decisions
 
