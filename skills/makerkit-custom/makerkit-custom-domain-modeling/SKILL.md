@@ -29,6 +29,11 @@ the root file. When a path has no `AGENTS.md` of its own, write to the nearest a
 new file; create one only when the subtree has accumulated enough of its own conventions to justify it, and add it to
 the root file's monorepo table when you do.
 
+**Which files apply.** An `AGENTS.md` owns every path under its directory, so for any path, **every** `AGENTS.md` from
+that path up to the repository root applies: the nearest one, every one between it and the root, and the root itself.
+Work under `apps/web/app/admin/` is bound by `apps/web/app/admin/AGENTS.md`, `apps/web/AGENTS.md` and the root file
+alike. Wherever these skills say "every `AGENTS.md` owning" some code, they mean this whole chain.
+
 ## Entries stand alone
 
 `.mysdd/` is working state that gets archived and deleted; `AGENTS.md` stays. So an entry never points into it: no issue
@@ -49,11 +54,11 @@ When the user uses a term that conflicts with the language already in an `AGENTS
 
 ### Challenge against recorded decisions
 
-Decisions are binding. Read the `## Decisions` of **every** `AGENTS.md` owning code the design touches — for each
-path, the nearest `AGENTS.md` at or above it, plus the root — not only the nearest one. When the design contradicts an
-entry, don't silently override it. Flag it — _Contradicts **<entry statement>** in `<path>/AGENTS.md`, but worth
-reopening because…_ — and ask whether to change the design or supersede the entry. The entry stands until the user
-agrees to supersede it.
+Decisions are binding. Read the `## Decisions` of **every** `AGENTS.md` owning code the design touches — the whole
+chain from each touched path up to the root, per _Which files apply_. When the design contradicts an entry, don't
+silently override it. Flag it — _Contradicts **<entry statement>** in `<path>/AGENTS.md`, but worth reopening
+because…_ — and ask whether to change the design or supersede the entry. The entry stands until the user agrees to
+supersede it.
 
 ### Sharpen fuzzy language
 
@@ -137,3 +142,8 @@ the new entry, and put `_Superseded by: **<new statement>**_` on its own line un
 when the new entry lives elsewhere. If nothing replaces it, say what holds now: `_Superseded: <what holds now>_`.
 
 Remove an entry outright only with the user's agreement, and only when the decision never reached the code.
+
+**An agreed supersession outranks the spec.** Nothing edits a spec to catch up with the code, so once an entry is
+superseded with the user's agreement — during implementation or final review, recorded in the issue's `comments` with
+its replacement — the spec's matching Implementation Decision or Decision log line is history, not a requirement.
+Review the code against the replacement, never against that spec line.

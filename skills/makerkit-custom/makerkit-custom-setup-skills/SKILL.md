@@ -142,8 +142,9 @@ Conventions live in a distribution of `AGENTS.md` files (root + per app/package)
 `AGENTS.md` to the code you're touching. Where the nearest one has a `## Skills` section, invoke the skills it names.
 
 An `AGENTS.md` may carry a `## Vocabulary` section (canonical terms: use them, avoid the listed synonyms) and a
-`## Decisions` section (standing decisions). Decisions are binding: read those of every `AGENTS.md` owning code you
-touch, and flag any plan that contradicts one rather than silently overriding it.
+`## Decisions` section (standing decisions). Decisions are binding: read those of every `AGENTS.md` from the code you
+touch up to the root — not only the nearest — and flag any plan that contradicts one rather than silently overriding
+it.
 ```
 
 Then write `.mysdd/issue-tracker.md`, creating `.mysdd/` if it doesn't exist, from the seed template in this skill

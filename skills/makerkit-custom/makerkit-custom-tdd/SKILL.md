@@ -11,8 +11,9 @@ them before and during the loop, not after.
 
 When exploring the codebase, read the nearest `AGENTS.md` to the code under test — the root file is already in your
 context via `CLAUDE.md` — so test names and interface vocabulary match the project's language, its `## Vocabulary`
-especially. Where it and this description differ, **follow the repo**. The `## Decisions` of every `AGENTS.md` owning
-code under test are binding: a test that would pin behaviour contradicting one is a stop — flag it and ask.
+especially. Where it and this description differ, **follow the repo**. The `## Decisions` of every `AGENTS.md` from
+the code under test up to the repository root are binding: a test that would pin behaviour contradicting one is a
+stop — flag it and ask.
 
 The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, boundaries
 over internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A

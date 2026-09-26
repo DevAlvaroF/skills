@@ -72,9 +72,10 @@ install the other one.
   the first time it's needed.
 - Entries stand alone: they never point at an issue, a user story, a spec or
   anything else under `.mysdd/`, which gets deleted while `AGENTS.md` stays.
-- Decisions are binding. Every skill reads those of each `AGENTS.md` owning
-  the code it touches and stops to ask rather than contradict one; the final
-  reviewer blocks on an unagreed contradiction.
+- Decisions are binding. Every skill reads those of every `AGENTS.md` from
+  the code it touches up to the root, and stops to ask rather than
+  contradict one; the final reviewer blocks on an unagreed contradiction.
+  A supersession you agreed to outranks the spec, which is never edited.
 - The grill writes entries; `to-issues` commits them with the spec in the
   `SPEC:` commit; `implement` and `final-review` commit a supersession with
   the code that needed it.

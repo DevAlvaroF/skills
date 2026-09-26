@@ -20,9 +20,9 @@ and tell the user to run `/makerkit-custom-setup-skills`.
 - the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
   vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
   description differ, **follow the repo**.
-- the `## Vocabulary` and `## Decisions` sections of **every** `AGENTS.md` owning code this work touches — for each
-  touched path, the nearest `AGENTS.md` at or above it, plus the root — not only the nearest one. Use the vocabulary
-  as written. Decisions are binding: when your plan contradicts one, don't silently override it. Flag it — _Contradicts
+- the `## Vocabulary` and `## Decisions` sections of **every** `AGENTS.md` from each touched path up to the repository
+  root — the nearest one, every one between it and the root, and the root itself. Use the vocabulary as written.
+  Decisions are binding: when your plan contradicts one, don't silently override it. Flag it — _Contradicts
   **<entry statement>** in `<path>/AGENTS.md`, but worth reopening because…_ — and ask the user whether to change the
   plan or supersede the entry.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that

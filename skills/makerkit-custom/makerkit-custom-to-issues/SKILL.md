@@ -28,9 +28,9 @@ project's own documentation:
 - the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
   vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
   description differ, **follow the repo**.
-- the `## Vocabulary` and `## Decisions` sections of **every** `AGENTS.md` owning code this work touches — for each
-  touched path, the nearest `AGENTS.md` at or above it, plus the root — not only the nearest one. Use the vocabulary
-  as written. Decisions are binding: when your plan contradicts one, don't silently override it. Flag it — _Contradicts
+- the `## Vocabulary` and `## Decisions` sections of **every** `AGENTS.md` from each touched path up to the repository
+  root — the nearest one, every one between it and the root, and the root itself. Use the vocabulary as written.
+  Decisions are binding: when your plan contradicts one, don't silently override it. Flag it — _Contradicts
   **<entry statement>** in `<path>/AGENTS.md`, but worth reopening because…_ — and ask the user whether to change the
   plan or supersede the entry.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
@@ -176,19 +176,22 @@ Skip this step when the run didn't start from a spec. Otherwise call the Skill t
 1. **Add what's missing.** Walk the spec's Implementation Decisions and Decision log. Each decision that passes the
    three tests and is not already recorded **or superseded** in the owning `AGENTS.md` becomes a standalone entry there.
    The "or superseded" part stops a re-run from re-adding a decision that implement or final-review already replaced.
-2. **Retire what the spec dropped.** Trace this spec's earlier entries through git, never through IDs in the entries
-   (entries carry none):
-   - `git log --format='%H %s' -E --grep='^SPEC: ' -- <spec path>` finds this spec's earlier `SPEC:` commits.
-   - `git log --format='%H %s' -F --grep='Spec: <spec path>' -- ':(glob)**/AGENTS.md'` finds code commits that changed
-     a decision on the spec's behalf.
-   - Read each commit's `AGENTS.md` hunks with `git show --format= <sha> -- ':(glob)**/AGENTS.md'`. `SPEC:` commits
-     stage whole files, so count only the entries that match the spec as it stood at that commit
-     (`git show <sha>:<spec path>`).
-   - A live entry traced this way is a candidate when the current spec no longer carries its decision, or when every
-     issue of this spec has been retired to `issues/archive/`. Ask for each candidate: supersede or remove? Recommend
-     removal only when no issue that implemented it ever got a `codeCommit`, so it never reached the code. Never decide
-     for the user.
-   - When `.mysdd/` is gitignored there is no spec history to trace: say so and skip this half.
+2. **Retire what the spec dropped.** Trace provenance through the spec's own history and its issues' `comments` —
+   never through IDs in the entries (they carry none), and never through `AGENTS.md` diffs, since a `SPEC:` commit
+   stages whole files and can carry another spec's entries.
+   - **Every decision this spec ever made:** the Implementation Decisions and Decision log of each committed version
+     (`git log --format=%H -- <spec path>`, then `git show <sha>:<spec path>`), plus each replacement recorded as an
+     agreed supersession in the `comments` of its issues, `issues/archive/` included.
+   - **Its live entries:** read every `AGENTS.md` as it stands now, per _Where the model lives_ in
+     `makerkit-custom-domain-modeling`, and match each entry not marked superseded against those decisions by what it
+     states.
+   - **Candidates:** a live entry stating a decision an earlier version made that the current spec no longer carries,
+     unless it is a recorded replacement or another feature's spec still carries it; or, once every issue of this spec
+     has been retired to `issues/archive/`, every live entry of this spec, replacements included. Ask for each
+     candidate: supersede or remove? Recommend removal only when no issue carrying that decision ever got a
+     `codeCommit`, so it never reached the code. Never decide for the user.
+   - When `.mysdd/` is gitignored there is no spec history: match only the current spec and the issues' `comments`.
+     That still finds a fully retired spec's entries, but not dropped decisions — say so.
 3. **Collect the files for the commit:** every `AGENTS.md` step 6 changed, plus every one carrying uncommitted
    `## Vocabulary` or `## Decisions` entries from this spec's design session
    (`git status --short -- ':(glob)**/AGENTS.md'`). Each file is committed whole, so name any other uncommitted edit it

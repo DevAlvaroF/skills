@@ -13,8 +13,8 @@ review technique. Run the review itself with whichever review skill is loaded al
 lifecycle, the commit message format, and how an issue is closed. This skill does not restate it. If the file is
 missing, stop and tell the user to run `/makerkit-custom-setup-skills`.
 
-Read the root `AGENTS.md` (already in context via `CLAUDE.md`) and **every** `AGENTS.md` owning code the change
-touches: for each touched path, the nearest `AGENTS.md` at or above it. Their `## Decisions` are binding. The final
+Read **every** `AGENTS.md` owning code the change touches: for each touched path, every `AGENTS.md` from it up to the
+repository root, the root itself already in context via `CLAUDE.md`. Their `## Decisions` are binding. The final
 reviewer is the role you are acting in and nothing more. Where it conflicts with those instructions, say so and ask the
 user rather than deciding the role wins.
 
@@ -36,7 +36,9 @@ If the status is already `done-final-review`, stop and tell the user: there is n
 
 1. **Review the whole change** against the issue and, when `spec` is not `null`, the spec — its Decision log included —
    and against the `## Decisions` of every owning `AGENTS.md`. A `## Decisions` change inside the diff stands only if
-   the issue's `comments` record the user agreeing to it. The change is `codeCommit` plus every fix commit made for this
+   the issue's `comments` record the user agreeing to it. When they do, the replacement outranks the matching spec
+   decision (`makerkit-custom-domain-modeling` § Superseding and removing): check the code against the replacement,
+   not the spec line. The change is `codeCommit` plus every fix commit made for this
    issue since, from every round:
    `git log --format=%H --fixed-strings --grep='Issue: <issue path>' <codeCommit>..HEAD -- . ':(exclude).mysdd'` (the
    pathspec drops the code-free `Closed Issue:` commits). Don't rely on `reviewCodeCommit`: it holds only the latest
@@ -47,8 +49,8 @@ If the status is already `done-final-review`, stop and tell the user: there is n
    **failure**, not a pass. Say what was blocked and why.
 3. **Decide.**
    - A finding is **blocking** when it should stop the change landing: a regression, a requirement missing or wrong, a
-     broken documented standard, a contradiction of a recorded `## Decisions` entry or the spec's Decision log, a
-     security or data-loss risk. Anything else is a **suggestion**.
+     broken documented standard, a contradiction of a live `## Decisions` entry or of a spec decision no agreed
+     supersession replaced, a security or data-loss risk. Anything else is a **suggestion**.
    - **Pass**: every acceptance criterion holds, nothing was blocked, and no blocking finding remains. Append a
      `comments` entry summarising what you verified, with any suggestions, set `status` to `done-final-review`, and make
      the closing commit per `.mysdd/issue-tracker.md` § Closing an issue.
@@ -89,8 +91,9 @@ from the latest review entry in `comments`. If phase 1 passed, there is nothing 
    issue's `reviewCodeCommit`, leaving every other field as it was. With no commit this round, leave `reviewCodeCommit`
    untouched. Never amend the commit to carry its own SHA. If the write fails, report the SHA and the error instead of
    making another commit.
-6. **Close.** Append a `comments` entry summarising the fixes and the checks, set `status` to `done-final-review`, and
-   make the closing commit per § Closing an issue.
+6. **Close.** Append a `comments` entry summarising the fixes and the checks — naming any `## Decisions` entry the user
+   agreed to supersede this round, with its replacement, by file and statement — set `status` to `done-final-review`,
+   and make the closing commit per § Closing an issue.
 
 Then report: the `CODE REVIEW FIXES: ` SHA and subject if you made one, the final status, and the closing commit's SHA
 if you made one.
