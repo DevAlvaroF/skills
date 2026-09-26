@@ -20,8 +20,15 @@ without parsing prose.
 - Comments and conversation history append to the issue's `comments` array, oldest first
 - Every file under `issues/` is strict JSON: no comments, no trailing commas, every field present. Parse it, mutate the
   object, write the whole file back; never append loose text to an issue file
-- `.mysdd/` is committed, never gitignored. If `git check-ignore -q .mysdd/issue-tracker.md` succeeds, stop and tell the
-  user to run `/makerkit-custom-setup-skills`
+- `.mysdd/` is committed, never gitignored. Before writing under it, run the ignore probe; if it prints anything, stop
+  and tell the user to run `/makerkit-custom-setup-skills`. It names a sample of every path the skills write, so it
+  catches rules on directories not created yet, and `--no-index` stops a tracked file from hiding a rule:
+
+  ```sh
+  git check-ignore -v --no-index .mysdd/issue-tracker.md .mysdd/docs/CONTEXT.md \
+    .mysdd/docs/agents/domain.md .mysdd/docs/adr/0000-probe.md \
+    .mysdd/00-probe/spec.md .mysdd/00-probe/issues/00-probe.json
+  ```
 - Feature directories are disposable: they get archived and deleted, while `.mysdd/docs/` stays. So nothing under
   `.mysdd/docs/` — the glossary, an ADR — names an issue, a `US-NNN`, a spec or a feature directory
 

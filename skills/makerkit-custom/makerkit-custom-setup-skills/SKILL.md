@@ -16,9 +16,8 @@ Scaffold the per-repo configuration that the engineering skills assume:
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then
 write.
 
-The root `AGENTS.md` points at both generated files, so Claude Code and Codex find them. Never write config into
-`docs/`: in a Makerkit repo that is upstream product documentation (`.mdoc` files). Don't seed `CONTEXT.md` or `adr/`;
-`makerkit-custom-domain-modeling` creates them lazily. `.mysdd/` is always committed, never gitignored.
+The root `AGENTS.md` points at both generated files. Never write config into `docs/`, Makerkit's upstream `.mdoc`
+product docs. Don't seed `CONTEXT.md` or `adr/`; domain-modeling creates them lazily. `.mysdd/` is never gitignored.
 
 ## Process
 
@@ -34,8 +33,8 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `.mysdd/`: do `issue-tracker.md` and `docs/agents/domain.md` — this skill's prior output — already exist? What
   feature directories, `spec.md` files, and JSON files under `issues/` are there? If any exist this is an upgrade rather
   than a first run, so read enough of them to answer Section C.
-- Whether git ignores any of it: `git check-ignore -v .mysdd/docs .mysdd/issue-tracker.md`, then
-  `git ls-files -oi --exclude-standard -- .mysdd | git check-ignore -v --stdin` for anything else under it.
+- Whether git ignores any of it: the ignore probe in [issue-tracker-local.md](./issue-tracker-local.md) § Conventions,
+  then `git ls-files -oi --exclude-standard -- .mysdd | git check-ignore -v --stdin` for other existing files.
 
 ### 2. Present findings and ask
 
@@ -98,7 +97,8 @@ section. An earlier version of these skills kept terms and decisions there; they
 `makerkit-custom-domain-modeling` for the formats and propose, per entry: a term → `CONTEXT.md`; a decision → an ADR
 scoped to that `AGENTS.md`'s directory (no `scope` for the root file); a superseded decision → an ADR whose `status`
 says so. Flag any entry pointing into `.mysdd/` (an issue, a `US-NNN`, a spec or feature path) for the user to reword;
-never rewrite one silently. Once the moves are agreed, the moved sections come out of each `AGENTS.md`.
+never rewrite one silently. Moved sections come out of an `AGENTS.md` only once the probe prints nothing: a decision
+never leaves a tracked file for an ignored one.
 
 ### 3. Confirm and edit
 
@@ -164,8 +164,8 @@ Then write the generated files, creating directories as needed, from the seed te
 - If the file and the seed are already equivalent, say so and write nothing.
 
 Remove the ignore rules agreed in Section A. Apply the Section C migration one file at a time: re-read each issue,
-mutate the parsed object, and write the whole file back as strict JSON. Apply the Section D moves, then remove only the
-moved sections from each `AGENTS.md`. Report per file what changed. Beyond the `## Agent skills` block, a root file
+mutate the parsed object, and write the whole file back as strict JSON. Apply the Section D moves, re-run the probe,
+and only when it prints nothing remove the moved sections from each `AGENTS.md`. Report per file what changed. Beyond the `## Agent skills` block, a root file
 seeded in Section B and the Section D removals, leave every `AGENTS.md` alone.
 
 ### 5. Done

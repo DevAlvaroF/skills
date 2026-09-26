@@ -15,9 +15,14 @@ committed and outlives the feature directories beside it. `AGENTS.md` files hold
 - **`.mysdd/docs/CONTEXT.md`**, the glossary.
 - **The binding ADRs** in `.mysdd/docs/adr/`: every ADR with no `scope` (or `scope` of `"/"`), plus every ADR with a
   `scope` entry matching a path you will touch. Skip any whose `status` begins `superseded`; read those only when
-  reconciling decisions. `head -n 8 .mysdd/docs/adr/*.md` shows every ADR's frontmatter in one read, so pick the binding
-  set from that and open only those in full. A bracketed segment such as `[locale]` is a literal route segment, not a
-  glob character class.
+  reconciling decisions. This prints every ADR's whole frontmatter in one read, however long its `scope`, so pick the
+  binding set from it and open only those in full:
+
+  ```sh
+  awk 'FNR==1{print "== " FILENAME; fm=0} /^---$/{fm++; next} fm==1' .mysdd/docs/adr/*.md
+  ```
+
+  A bracketed segment such as `[locale]` is a literal route segment, not a glob character class.
 
 If any of these don't exist, **proceed silently**. Don't flag their absence and don't suggest creating them upfront:
 `makerkit-custom-domain-modeling` creates them lazily when terms or decisions actually get resolved.
