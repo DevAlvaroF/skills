@@ -425,13 +425,14 @@ the close.
   that reason. Each plan answers to its own ignore rules, whatever the Feature mode (§ Ignore policy).
 - **The commit.** The subject is exactly `ATTEMPT PLANS: step 7 <issue path> attempt <K>`, the path repo-root-relative
   and `K` the phase 2 attempt number. No body, no `Issue:` trailer and no attribution, so the final review's change
-  selection never counts it as code. It holds only the eligible plans, each rechecked just before. Either add each
-  untracked path with `git --literal-pathspecs add -- <path>` and commit with
-  `git --literal-pathspecs commit --only -- <paths>` (without literal mode `[a].md` also matches `a.md`), or commit
-  through a temporary index seeded from `HEAD`'s tree with a checked ref update, then add to the user's index exactly
-  the committed paths it lacks (`git update-index -z --index-info`), touching no other entry, so they don't read as
-  staged deletions. Never stage a directory or run `git add -A`; unrelated staged work is preserved. Then verify its
-  parent, changed paths, modes and blobs, with no deletions. With no eligible plan there is no commit.
+  selection never counts it as code. It holds only the eligible plans, each rechecked just before. Add each path
+  with `git --literal-pathspecs add -- <path>`, which also replaces a draft already staged, and commit with
+  `git --literal-pathspecs commit --only -- <paths>` (without literal mode `[a].md` also matches `a.md`). That is the
+  only route: `commit --only` leaves the user's index holding what it committed, where a temporary index would leave
+  a staged draft or, stopped before its repair, a staged deletion for the user's next commit to make. Never stage a
+  directory or run `git add -A`; unrelated staged work is preserved. Then verify its parent, changed paths, modes and
+  blobs, with no deletions, and that the user's index now holds those same modes and blobs. With no eligible plan
+  there is no commit.
 - Never force-add, edit an ignore rule, untrack a file, make an empty commit, amend, push or roll back. If `HEAD` moved
   or verification fails, stop and report the actual state.
 - **Retries.** A saved COMPLETE record or a landed close commit is not proof the plans were committed. A retry of the

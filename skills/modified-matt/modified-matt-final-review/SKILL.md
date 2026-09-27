@@ -266,19 +266,18 @@ it and ask, never override it.
    to add. An ignored plan, tracked or not, stays uncommitted with that reason. Each plan answers to its own rules: an
    ignored bound plan or local mode decides nothing here.
 4. **Commit only the eligible plans.** Note `HEAD` and recheck that each file is still the version you inspected. Then
-   either add each untracked path on its own (`git --literal-pathspecs add -- <path>`) and commit with
-   `git --literal-pathspecs commit --only -- <paths>`, which updates those index entries itself — without literal
-   mode, `[a].md` also matches `a.md` — or commit through a temporary index seeded from `HEAD`'s tree with a ref
-   update checked against the noted `HEAD`, then add to the user's index exactly the committed paths it lacks
-   (`git update-index -z --index-info` with just those mode, blob and path records), touching no other entry:
-   otherwise they read as staged deletions the user's next commit would make. Never stage a directory or run
-   `git add -A`; unrelated staged work stays as it was. The subject is exactly
-   `ATTEMPT PLANS: step 7 <issue path> attempt <K>`, with the repo-relative issue path and `K` this phase 2 attempt
-   number; no body, no `Issue:` trailer and no attribution, so the change selection's `Issue:` grep never counts it as
-   code. Then verify it: its parent is the `HEAD` you noted, and it adds or modifies exactly the selected paths, with
-   their modes and blobs, deleting nothing. If `HEAD` moved or verification fails, stop and report the actual state.
-   Never force-add, edit an ignore rule, untrack a file, make an empty commit, amend, push, roll back or retry
-   blindly. With no eligible plan, make no commit.
+   add each path on its own (`git --literal-pathspecs add -- <path>`), which also replaces a draft already staged,
+   and commit with `git --literal-pathspecs commit --only -- <paths>` — without literal mode, `[a].md` also matches
+   `a.md`. That is the only route: `commit --only` leaves the user's index holding what it committed, where a
+   temporary index would leave a staged draft behind, or a staged deletion if the run stopped before repairing the
+   user's index; either way the user's next commit would undo the plan. Never stage a directory or run `git add -A`;
+   unrelated staged work stays as it was. The subject is exactly `ATTEMPT PLANS: step 7 <issue path> attempt <K>`,
+   with the repo-relative issue path and `K` this phase 2 attempt number; no body, no `Issue:` trailer and no
+   attribution, so the change selection's `Issue:` grep never counts it as code. Then verify it: its parent is the
+   `HEAD` you noted, it adds or modifies exactly the selected paths, with their modes and blobs, deleting nothing,
+   and the user's index now holds those same modes and blobs for them. If `HEAD` moved or verification fails, stop
+   and report the actual state. Never force-add, edit an ignore rule, untrack a file, make an empty commit, amend,
+   push, roll back or retry blindly. With no eligible plan, make no commit.
 5. **Record the result.** Step 9's record carries `Attempt plans:` beside `Fix commit:`, its value a JSON array with
    one object per listed plan: `path` (repo-relative), `provenance` (how its creation was verified), `blob` (its final
    Git blob, or `null` when unreadable), and either `commit` (the planning commit's full SHA) or `reason` (why it stays
