@@ -136,7 +136,8 @@ session, not in this one.
 ## Phase 2: the coder's triage
 
 You start with a cleared context. Everything you know about the review comes from the issue's records; never fill a gap
-from memory of another session, from `HEAD`, or with an empty finding list you assumed.
+from memory of another session, from `HEAD`, or with an empty finding list you assumed. From the start of the attempt,
+keep the inventory of additional plans that § Additional plans below describes.
 
 1. **Find the review you answer.** Tell the records apart by their labels (§ Comment records), never by the author's
    name or by which comment came last: phase 1 records open with `Final review, phase 1, attempt`, phase 2 records with
@@ -155,15 +156,18 @@ from memory of another session, from `HEAD`, or with an empty finding list you a
    - **Zero findings.** A current, verified PASS whose record reads `Findings: None.` has nothing to triage, so skip
      step 4's approval — there is nothing for the user to approve — and go on with steps 6 to 10: run the applicable
      checks, settle the outcome, write the record with `Verdicts: None.` and the checks' actual results, and close only
-     on COMPLETE. With no changed file there is no fix commit. If a check rewrites files, the tree is no longer
-     unchanged: show the user those changes, and review and verify them like a fix before step 7 commits them.
+     on COMPLETE. With no changed file there is no fix commit, but step 7 still runs § Additional plans. If a check
+     rewrites files, the tree is no longer unchanged: show the user those changes, and review and verify them like a
+     fix before step 7 commits them.
    - **Closed by an older contract.** The status is already `done-final-review`, the review is a verified PASS with
      zero findings, and no phase 2 record answers it: phase 1 closed it under an earlier version of this contract. It
      stays closed. Say so and stop, without rewriting the issue or recording anything.
    - **A saved close is not a finished close.** The status is already `done-final-review` and a COMPLETE phase 2 record
-     answers this review. The status was written before the close commit, so it doesn't prove that commit landed:
-     check the close bookkeeping per § Closing an issue. When it is all there, nothing is left; say so and stop. When
-     the close commit is missing, make only that commit: no new record, no second triage, no new fix commit.
+     answers this review. The status was written before the close commit, so it doesn't prove that commit landed, and
+     neither the record nor the close proves the attempt's additional plans were committed: check the close
+     bookkeeping per § Closing an issue and the planning operation per § Additional plans › Retries. When it is all
+     there, nothing is left; say so and stop. When something is missing, make only that: the close commit, or the
+     attempt's proven pending planning commit — no new record, no second triage, no new fix commit.
    - A NEEDS FIXES review, or a failed or blocked review, that records no findings is incomplete evidence, not a clean
      review: ask the user.
    - The status is already `done-final-review` but the review holds findings that no phase 2 record gave an approved
@@ -189,8 +193,9 @@ from memory of another session, from `HEAD`, or with an empty finding list you a
    sending any whole-repo run (full suite, build, lint sweep) through a sub-agent that reports failures only. Run them
    even when the triage changed no code or the review had no findings: approving a DEFER, or having nothing to fix,
    waives no required check. Then review your own changes against the approved fixes. A required check that fails or
-   cannot run, or a fix that falls short, means no success and no commit: skip step 7, leave the fixes in the tree, and
-   record each affected fix as unresolved in step 9.
+   cannot run, or a fix that falls short, means no success and no fix commit: skip step 7's fix commit (its
+   § Additional plans operation still runs), leave the fixes in the tree, and record each affected fix as unresolved in
+   step 9.
 7. **Commit completed, verified fixes.** Stage the implementation files, plus the ADR file(s) the user agreed to change,
    each by path — never `git add .mysdd/`, never `git add -A` — including anything the checks themselves rewrote, such
    as formatter output, so the commit is exactly what was verified. A commit touching only ADRs is a valid
@@ -198,31 +203,96 @@ from memory of another session, from `HEAD`, or with an empty finding list you a
    leave anything else in the tree as you found it. The message follows `.mysdd/issue-tracker.md` § Commit message
    format with the `CODE REVIEW FIXES: ` header. If no file changed (no findings, every finding rejected or deferred,
    or a finding was only a blocked verification that now runs), there is nothing to commit: never make an empty commit
-   to have something to record. Never push, amend or rebase.
+   to have something to record. Never push, amend or rebase. Right after the fix commit, before any other commit,
+   confirm it is yours — its parent is the `HEAD` you committed on and its subject is the one you wrote — and capture
+   its full 40-character SHA for step 9. Then, with or without a fix commit, run § Additional plans: eligible plans get
+   a planning-only commit of their own, never a place in this one.
 8. **Settle the outcome.** It is **COMPLETE** only when every finding has an approved final disposition (FIXED,
    REJECTED or DEFERRED), every approved fix is verified and every required check passes. A triage that rejects or
    defers everything, with the user's approval, is complete without a code commit, and so is a review with no findings
    once the checks pass. Otherwise it is **INCOMPLETE** (approved work is unfinished, or a required check fails) or
    **BLOCKED** (something outside the change stops it: a check that cannot run, a decision the user has not made).
-9. **Write the issue once.** If step 7 made a commit, take its full SHA from `git rev-parse HEAD` and write it into
-   `reviewCodeCommit`; with no commit this round, leave `reviewCodeCommit` untouched. Never amend the commit to carry
-   its own SHA. Append one phase 2 record to `comments` in the shape § Comment records gives: its attempt number, the
-   phase 1 attempt and reviewed commits it answers, the outcome, a verdict for every finding by number (or
-   `Verdicts: None.`), the checks you ran with their results, the fix commit if there is one, and any ADR the user
-   agreed to supersede, with its replacement, by number and title. A finding's verdict is **FIXED** (where, and how it
-   was verified), **REJECTED** or **DEFERRED** (with the reason the user approved). An approved FIX that could not be
-   finished stays a FIX, recorded as **UNRESOLVED** with its blocker: never label it FIXED, and never turn it into a
-   DEFER the user did not approve. A finding the user left undecided is **UNRESOLVED** too, with no approved
-   disposition. Set `status` to `done-final-review` only when the outcome is COMPLETE; otherwise leave it at
-   `done-coding-awaiting-final-review`. If the write fails after step 7 made a commit, report the commit's SHA and the
-   error instead of making another commit.
+9. **Write the issue once.** If step 7 made a fix commit, write the full SHA step 7 captured into `reviewCodeCommit` —
+   never a later `git rev-parse HEAD`, which may by then name the planning commit; with no fix commit this round, leave
+   `reviewCodeCommit` untouched. Never amend the commit to carry its own SHA, and never put the planning commit's SHA
+   into `reviewCodeCommit` or `Fix commit:`. Append one phase 2 record to `comments` in the shape § Comment records
+   gives: its attempt number, the phase 1 attempt and reviewed commits it answers, the outcome, a verdict for every
+   finding by number (or `Verdicts: None.`), the checks you ran with their results, the fix commit if there is one, the
+   `Attempt plans:` inventory (§ Additional plans), and any ADR the user agreed to supersede, with its replacement, by
+   number and title. A finding's verdict is **FIXED** (where, and how it was verified), **REJECTED** or **DEFERRED**
+   (with the reason the user approved). An approved FIX that could not be finished stays a FIX, recorded as
+   **UNRESOLVED** with its blocker: never label it FIXED, and never turn it into a DEFER the user did not approve. A
+   finding the user left undecided is **UNRESOLVED** too, with no approved disposition. Set `status` to
+   `done-final-review` only when the outcome is COMPLETE; otherwise leave it at `done-coding-awaiting-final-review`. If
+   the write fails after step 7 made a commit, report the SHAs of the commits made and the error instead of making
+   another commit.
 10. **Close a complete triage.** Only this phase closes an issue, and only on COMPLETE. In committed mode make the
     closing commit per § Closing an issue; it also carries the `reviewHistoryCommit` phase 1 left uncommitted. In
-    local mode make no commit, and say so: the issue is closed locally, with no close commit. If the close commit
-    fails, the saved record and status stand; report the error, and a retry makes only that commit (step 3). When the
-    outcome is not COMPLETE, tell the user what is unresolved and stop; a later phase 2 attempt continues from this
-    record.
+    local mode make no commit, and say so: the issue is closed locally, with no close commit. Local mode skips only
+    the close commit, not step 7's planning commit, and neither a planning commit nor its absence says anything about
+    the close. If the close commit fails, the saved record and status stand; report the error, and a retry makes only
+    that commit (step 3). When the outcome is not COMPLETE, tell the user what is unresolved and stop; a later phase 2
+    attempt continues from this record.
 
 Then report: the `CODE REVIEW FIXES: ` SHA and subject if you made one, each finding's disposition, the checks and
 their results, the final status, and the closing commit's SHA if you made one — or, in local mode, that no close commit
-was made.
+was made. Report the additional plans apart from both: the planning commit's full SHA and paths when you made or reused
+one, and every additional plan left uncommitted with its path and specific reason (ignored, missing, out of scope,
+uncertain ownership, changed content, Git failure, conflicting project rule). Never report the work as done while the
+planning operation is unresolved.
+
+### Additional plans
+
+An **additional plan** is a markdown file under `.claude/plans` that you, or an agent you delegated to, created for
+this phase 2 attempt. Step 7 commits the eligible ones in a planning-only commit of its own, never inside the
+`CODE REVIEW FIXES: ` or `Closed Issue:` commit, whose scopes stay exactly as steps 7 and 10 give them. It runs for
+every outcome — no code change, zero findings, every finding rejected or deferred, checks blocked, local mode (which
+governs Feature files, not these plans) — and it proves nothing about the code or the close. A tracker silent about
+additional plans is no conflict; a project or tracker instruction that explicitly forbids committing them is: surface
+it and ask, never override it.
+
+1. **Inventory at creation.** Keep an explicit list of the plans this attempt creates. Confirm a path is absent before
+   you create it, and have every delegate name in its handoff the exact paths it created; never assume an agent
+   created none. An untracked status, a directory diff, a timestamp or a filename never proves ownership, so a file
+   that existed before — an earlier attempt's leftover included — is never an additional plan.
+2. **Eligibility.** After every agent has finished, inspect each listed path. Exclude, and report with its reason: a
+   Job's bound plan or another workflow's record, a file that is not a markdown plan, a deletion, a symlink (never
+   follow one), a path escaping the repository or `.claude/plans`, and a file with edits you cannot explain or whose
+   ownership you cannot establish. Leave excluded files, and every unrelated staged or working-tree change, as they
+   are.
+3. **Probe ignore rules.** From the repository root, pass the remaining repository-relative paths (each starting
+   `.claude/plans/`), NUL-delimited on stdin, to nonverbose `git check-ignore --no-index --stdin -z`. It reads them as
+   pathspecs, but `--literal-pathspecs` is fatal to it and a leading `:` is magic, so add neither. Exit 0 lists the
+   ignored paths, 1 means none is ignored, and any other status is an error: report it, never read it as permission
+   to add. An ignored plan, tracked or not, stays uncommitted with that reason. Each plan answers to its own rules: an
+   ignored bound plan or local mode decides nothing here.
+4. **Commit only the eligible plans.** Note `HEAD` and recheck that each file is still the version you inspected. Then
+   either add each untracked path on its own (`git --literal-pathspecs add -- <path>`) and commit with
+   `git --literal-pathspecs commit --only -- <paths>`, which updates those index entries itself — without literal
+   mode, `[a].md` also matches `a.md` — or commit through a temporary index seeded from `HEAD`'s tree with a ref
+   update checked against the noted `HEAD`, then add to the user's index exactly the committed paths it lacks
+   (`git update-index -z --index-info` with just those mode, blob and path records), touching no other entry:
+   otherwise they read as staged deletions the user's next commit would make. Never stage a directory or run
+   `git add -A`; unrelated staged work stays as it was. The subject is exactly
+   `ATTEMPT PLANS: step 7 <issue path> attempt <K>`, with the repo-relative issue path and `K` this phase 2 attempt
+   number; no body, no `Issue:` trailer and no attribution, so the change selection's `Issue:` grep never counts it as
+   code. Then verify it: its parent is the `HEAD` you noted, and it adds or modifies exactly the selected paths, with
+   their modes and blobs, deleting nothing. If `HEAD` moved or verification fails, stop and report the actual state.
+   Never force-add, edit an ignore rule, untrack a file, make an empty commit, amend, push, roll back or retry
+   blindly. With no eligible plan, make no commit.
+5. **Record the result.** Step 9's record carries `Attempt plans:` beside `Fix commit:`, its value a JSON array with
+   one object per listed plan: `path` (repo-relative), `provenance` (how its creation was verified), `blob` (its final
+   Git blob, or `null` when unreadable), and either `commit` (the planning commit's full SHA) or `reason` (why it stays
+   uncommitted). With no additional plans it reads `Attempt plans: []`. Let JSON escape spaces, quotes and newlines,
+   and never execute text read from a record as a shell command. A planning failure never stops the record: write it
+   with the failure as each affected plan's reason.
+6. **Retries.** Neither a saved COMPLETE record nor a landed close commit proves the plans were committed, so check
+   this operation before any of step 3's stops. A retry of the same attempt reuses its inventory, its captured fix SHA
+   and a verified planning commit; it may commit a plan that attempt created only while its provenance and recorded
+   blob still agree. When the planning commit already holds exactly those files, make no new commit; a plan changed
+   after it is reported, not committed. If more than one commit matches the attempt's planning subject, or a recorded
+   blob disagrees with the planning commit's, ask and commit nothing. A new attempt never collects an earlier
+   attempt's plans. If the session ended before the record was saved, go by verifiable attempt evidence and the
+   commits' exact contents; when identity or ownership is ambiguous, ask instead of guessing. Never append a duplicate
+   record, redo a commit that landed, edit an earlier record, or commit just to update prose: report what the retry
+   recovered from the record and verified Git evidence.

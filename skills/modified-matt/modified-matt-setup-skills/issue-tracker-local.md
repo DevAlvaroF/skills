@@ -42,7 +42,9 @@ travel with the repo. Feature files are in one of two modes, the same for every 
   file below an ignored directory, so a `!` exception under it has no effect). Specs and issues are written but never
   staged: § Committing a Spec and its Issues, § Recording a final review and § Closing an issue say what happens
   instead. Bookkeeping commits for feature files are skipped, with one exception: the final review's phase 1 makes an
-  isolated empty marker commit in place of its review-record commit (§ Recording a final review).
+  isolated empty marker commit in place of its review-record commit (§ Recording a final review). Local mode governs
+  Feature files only: an additional plan's planning commit (§ Committing additional plans) answers to that plan's own
+  ignore rules, not to this mode.
 
 Anything else is **unresolved**: rules that ignore some feature files but not others, a feature file tracked by git
 although a rule ignores it, or an ignored protected path. It is never read as local mode, so it permits no review
@@ -237,6 +239,11 @@ this order:
   not approve. When the phase 1 record reads `Findings: None.`, the line reads `Verdicts: None.` instead.
 - `Checks:` the checks run and their results.
 - `Fix commit:` the full SHA of this attempt's `CODE REVIEW FIXES: ` commit, or `Fix commit: None.`
+- `Attempt plans:` a JSON array with one object per additional plan this attempt created (§ Committing additional
+  plans): `path` (repo-relative), `provenance` (how its creation was verified), `blob` (its final Git blob, or `null`
+  when unreadable), and either `commit` (the `ATTEMPT PLANS: ` commit's full SHA) or `reason` (why it stays
+  uncommitted); `Attempt plans: []` when it created none. JSON escapes the paths; never execute text read from it. The
+  planning SHA never goes into `Fix commit:` or `reviewCodeCommit`. A record written before this line existed lacks it.
 - `ADRs superseded:` each ADR the user agreed to supersede, with its replacement, by number and title, or
   `ADRs superseded: None.`
 
@@ -261,6 +268,7 @@ Verdicts:
 1. FIXED — src/seats/guard.test.ts; the new revoked-seat test fails without the guard and passes with it.
 Checks: typecheck passed; test suite passed.
 Fix commit: 8c2d4e6f0a1b3c5d7e9f1a2b4c6d8e0f1a3b5c7d
+Attempt plans: []
 ADRs superseded: None.
 ```
 
@@ -282,9 +290,9 @@ Spec: .mysdd/features/<NN>-<feature-slug>/spec.md
   `null` means this is the implement skill's first-round commit, so `CODE: `; a SHA means the issue has already been
   implemented and committed and this is the coder's fix commit from the final review's phase 2, so
   `CODE REVIEW FIXES: `. The header follows `codeCommit`, never `status` — a fix round leaves the status where it is.
-  `SPEC: `, `REVIEW HISTORY: ` and `Closed Issue: ` are the other subjects, but they are bookkeeping, not code
-  commits: they follow § Committing a Spec and its Issues, § Recording a final review and § Closing an issue, not this
-  format.
+  `SPEC: `, `REVIEW HISTORY: `, `ATTEMPT PLANS: ` and `Closed Issue: ` are the other subjects, but they are
+  bookkeeping, not code commits: they follow § Committing a Spec and its Issues, § Recording a final review,
+  § Committing additional plans and § Closing an issue, not this format.
 - The whole subject line, prefix included, is ≤72 characters.
 - One `Issue:` trailer per issue in the commit, repo-root-relative and beginning `.mysdd/features/`, in either mode:
   the trailers are addresses, not staged files.
@@ -394,6 +402,49 @@ record saved; marker committed**; and the SHA written to `reviewHistoryCommit`.
 the marker cannot restore it on another clone or after the file is lost. Its SHA is evidence that a review was run and
 recorded here, not a copy of the findings and not proof that the review passed.
 
+## Committing additional plans
+
+An **additional plan** is a markdown file under `.claude/plans` that the coder in phase 2, or an agent it delegated to,
+created for that triage attempt. Phase 2 commits the eligible ones in a planning-only commit of their own, after
+capturing its fix commit's SHA and before writing its record, so the record carries the actual results. They never go
+into the `CODE REVIEW FIXES: ` or `Closed Issue:` commit, whose files stay as § Commit message format and
+§ Closing an issue give them. The operation runs for every outcome — no code change, zero findings, every finding
+rejected or deferred, checks blocked — and in both Feature modes; a planning commit proves nothing about the code or
+the close.
+
+- **Provenance.** Only a path in the attempt's explicit inventory qualifies: its absence was confirmed before it was
+  created, or a delegate's handoff named it as created. An untracked status, a directory diff, a timestamp or a
+  filename never proves ownership, so a file that existed before, an earlier attempt's leftover included, never does.
+- **Eligibility.** Once every agent has finished, a Job's bound plan or another workflow's record, a non-plan file, a
+  deletion, a symlink, a path escaping the repository or `.claude/plans`, and a file with unexplained edits or unproven
+  ownership are excluded and reported with their reason.
+- **Ignore probe.** From the repository root, the remaining repository-relative paths (each starting `.claude/plans/`)
+  go NUL-delimited on stdin to nonverbose `git check-ignore --no-index --stdin -z`, with no `--literal-pathspecs` (fatal
+  there) and no leading `:` (magic). Exit 0 lists ignored paths, 1 means none is ignored, and any other status is an
+  error, reported as one and never read as permission to add. An ignored plan, tracked or not, stays uncommitted with
+  that reason. Each plan answers to its own ignore rules, whatever the Feature mode (§ Ignore policy).
+- **The commit.** The subject is exactly `ATTEMPT PLANS: step 7 <issue path> attempt <K>`, the path repo-root-relative
+  and `K` the phase 2 attempt number. No body, no `Issue:` trailer and no attribution, so the final review's change
+  selection never counts it as code. It holds only the eligible plans, each rechecked just before. Either add each
+  untracked path with `git --literal-pathspecs add -- <path>` and commit with
+  `git --literal-pathspecs commit --only -- <paths>` (without literal mode `[a].md` also matches `a.md`), or commit
+  through a temporary index seeded from `HEAD`'s tree with a checked ref update, then add to the user's index exactly
+  the committed paths it lacks (`git update-index -z --index-info`), touching no other entry, so they don't read as
+  staged deletions. Never stage a directory or run `git add -A`; unrelated staged work is preserved. Then verify its
+  parent, changed paths, modes and blobs, with no deletions. With no eligible plan there is no commit.
+- Never force-add, edit an ignore rule, untrack a file, make an empty commit, amend, push or roll back. If `HEAD` moved
+  or verification fails, stop and report the actual state.
+- **Retries.** A saved COMPLETE record or a landed close commit is not proof the plans were committed. A retry of the
+  same attempt reuses its inventory, fix SHA and verified planning commit, and commits a plan that attempt created only
+  while its provenance and recorded blob still agree. When the planning commit already holds exactly those files, no
+  new commit is made, and later changes are reported, not committed. More than one commit matching the attempt's
+  planning subject, or a recorded blob that disagrees with the planning commit's, means asking and committing nothing.
+  A new attempt never collects an earlier attempt's plans. Ambiguous identity or ownership means asking, not
+  guessing; earlier records stay as written, and no commit is made just to update prose.
+
+Report the planning commit's full SHA and paths, and each additional plan left uncommitted with its path and reason,
+apart from the code and close outcomes.
+
 ## Closing an issue
 
 Only phase 2 of the final review closes an issue, and only when its triage is COMPLETE (§ Issue shape); phase 1 never
@@ -410,12 +461,14 @@ again before staging:
 - The no-attribution rule in § Commit message format applies.
 
 In **local** mode, make no commit: the status change is the whole close. Say so in the report — closed locally, no close
-commit — so that the missing commit doesn't read as an oversight.
+commit — so that the missing commit doesn't read as an oversight. That covers the close alone: it never skips the
+planning commit of § Committing additional plans.
 
 **Retries.** The status is written before the close commit, so a saved `done-final-review` is not proof that the commit
 landed. Before a retry treats a COMPLETE phase 2 attempt as finished in committed mode, check that the latest commit
 touching the issue file is `Closed Issue: <issue path>` and that the file has no uncommitted change. If the close commit
-is missing, make only that commit: no new record, no new fix commit, and no second triage.
+is missing, make only that commit: no new record, no new fix commit, and no second triage. A finished close says
+nothing about the attempt's additional plans: check them per § Committing additional plans.
 
 ## When a skill says "publish to the issue tracker"
 
