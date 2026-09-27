@@ -89,9 +89,10 @@ the other skills run against it. Check each feature directory for drift from the
 in [issue-tracker-local.md](./issue-tracker-local.md):
 
 - **Missing fields.** An issue lacking `spec`, `blockedBy`, `testBoundaries`, `covers`, `codeCommit`,
-  `reviewCodeCommit`, or `comments` predates that field. These are additive and safe to backfill: `spec` to that
-  feature's `spec.md` when one exists and `null` when it doesn't, `codeCommit` and `reviewCodeCommit` to `null` (never
-  guess a SHA for work that predates the field), the rest to `[]`.
+  `reviewCodeCommit`, `reviewHistoryCommit`, or `comments` predates that field. These are additive and safe to
+  backfill: `spec` to that feature's `spec.md` when one exists and `null` when it doesn't, `codeCommit`,
+  `reviewCodeCommit` and `reviewHistoryCommit` to `null` (never guess a SHA for work that predates the field), the rest
+  to `[]`.
 - **Legacy `testSeams`.** An issue carrying `testSeams` instead of `testBoundaries` predates the rename. Same field,
   same values: rename the key in place and carry the array over verbatim. Never drop the entries.
 - **Unknown `status`.** Any value outside `ready-for-agent` / `done-coding-awaiting-final-review` / `done-final-review`
@@ -107,8 +108,8 @@ in [issue-tracker-local.md](./issue-tracker-local.md):
   those fields in the same pass.
 
 Present the drift as a per-file list and ask whether to migrate. Never migrate silently, and never touch live state
-while doing it: `status`, `acceptanceCriteria[].done`, `comments`, `codeCommit`, and `reviewCodeCommit` hold work that
-exists nowhere else, and `git diff` can only undo what was already committed.
+while doing it: `status`, `acceptanceCriteria[].done`, `comments`, `codeCommit`, `reviewCodeCommit`, and
+`reviewHistoryCommit` hold work that exists nowhere else, and `git diff` can only undo what was already committed.
 
 Backfilling real `covers` values is not this skill's job. Set them to `[]` and tell the user that re-running
 `/makerkit-custom-to-issues` against the spec maps stories to issues properly, reconciling against what is already on

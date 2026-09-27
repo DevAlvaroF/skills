@@ -77,7 +77,9 @@ install the other one.
   ignore the whole root with the one rule `.mysdd/features/`; the skills
   then write specs and issues but never stage them, skip the `SPEC:` and
   `Closed Issue:` bookkeeping commits for them, and still name their paths
-  in `Issue:` / `Spec:` trailers.
+  in `Issue:` / `Spec:` trailers. The one exception is the final review's
+  `REVIEW HISTORY:` record: in local mode it becomes an isolated empty
+  marker commit, so the review still shows in history without its text.
 - Anything in between — a rule on one feature or its issues, a broad
   `.mysdd/` rule, a tracked file under an ignore rule — stops the skills
   until you resolve it. Setup reports each rule by file and line and can

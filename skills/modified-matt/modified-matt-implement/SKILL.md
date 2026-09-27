@@ -90,14 +90,17 @@ by number and title — the final review accepts that change, and lets it outran
 entry carries a `Deviations and tradeoffs:` part: each place the work deviates from the issue or the spec, and each
 deliberate tradeoff you made, with its reason — or `Deviations and tradeoffs: None.` when there were none. The coder
 who later triages the review reads it to weigh each finding. Record only what this run decided; never reconstruct an
-earlier run's reasoning as fact. Never write `reviewCodeCommit`: only the final-review skill's phase 2 sets it. The
+earlier run's reasoning as fact. Never write `reviewCodeCommit` or `reviewHistoryCommit`: only the final-review skill
+sets them, `reviewCodeCommit` in phase 2 and `reviewHistoryCommit` in phase 1 after it commits its review record. The
 `done-coding-awaiting-final-review` state means the implementation and this skill's own review are complete, but
 independent final review is still pending; this skill must never set `done-final-review`. Rewrite the whole file as
 strict JSON, keeping every other field (`id`, `slug`, `title`, `spec`, `whatToBuild`, `blockedBy`, `covers`,
-`reviewCodeCommit`, `comments`) intact — `comments` holds review history that exists nowhere else, so dropping or
-emptying it loses it permanently, and dropping either commit field loses the only pointer from the issue to the code. `testBoundaries` is the one field you may change: add a boundary the user agreed during implementation, never
-remove one. Re-read each file after writing to confirm it still parses. If writing the issue fails after the commit
-succeeded, report the commit's full SHA and the error instead of committing again.
+`reviewCodeCommit`, `reviewHistoryCommit`, `comments`) intact, both review fields carried over verbatim — `comments`
+holds review history that exists nowhere else, so dropping or emptying it loses it permanently, and dropping a commit
+field loses the only pointer from the issue to that commit. `testBoundaries` is the one field you may change: add a
+boundary the user agreed during implementation, never remove one. Re-read each file after writing to confirm it still
+parses. If writing the issue fails after the commit succeeded, report the commit's full SHA and the error instead of
+committing again.
 
 If an issue is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
 outstanding. Never tick a criterion you did not verify.

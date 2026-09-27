@@ -134,8 +134,9 @@ is non-empty, reconcile — never regenerate.
 
 1. **Identity is `slug`, never the number.** Match each entry in the approved breakdown to an existing file by its
    `slug`. Numbers are addresses, not identities.
-2. **On a slug match, preserve — never reset.** Carry `status`, `comments`, `codeCommit`, and `reviewCodeCommit` over
-   verbatim — the two commit fields are the only pointer from the issue to the code that implemented it. For each
+2. **On a slug match, preserve — never reset.** Carry `status`, `comments`, `codeCommit`, `reviewCodeCommit`, and
+   `reviewHistoryCommit` over verbatim — the commit fields are the only pointers from the issue to the code that
+   implemented it, the fixes its review asked for and the commit that recorded that review. For each
    `acceptanceCriteria` entry, match on `text` and keep that entry's existing `done` value; never flip a `true` back to
    `false`. Update only `title`, `whatToBuild`, `blockedBy`, `testBoundaries`, `covers`, `spec`, and criteria genuinely
    added or removed by text.
@@ -159,12 +160,14 @@ is non-empty, reconcile — never regenerate.
 exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field present on
 every issue.
 
-The `status`, `acceptanceCriteria[].done`, `comments`, `codeCommit`, and `reviewCodeCommit` values shown there are
-**seed values for a newly created issue only**. On an issue that already exists they are live state: carry them over
-from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`; `acceptanceCriteria` entries
-start with `"done": false` and ticking one means flipping it to `true`; `comments` starts as `[]`; `codeCommit` and
-`reviewCodeCommit` both start as `null`; `codeCommit` is written only by the implement skill and `reviewCodeCommit` only
-by the final-review skill's phase 2 (the coder's triage), never by this skill.
+The `status`, `acceptanceCriteria[].done`, `comments`, `codeCommit`, `reviewCodeCommit`, and `reviewHistoryCommit`
+values shown there are **seed values for a newly created issue only**. On an issue that already exists they are live
+state: carry them over from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`;
+`acceptanceCriteria` entries start with `"done": false` and ticking one means flipping it to `true`; `comments` starts
+as `[]`; `codeCommit`, `reviewCodeCommit` and `reviewHistoryCommit` all start as `null`. `codeCommit` is written only
+by the implement skill, `reviewCodeCommit` only by the final-review skill's phase 2 (the coder's triage), and
+`reviewHistoryCommit` only by its phase 1 (the independent reviewer, after committing its review record) — never by
+this skill.
 
 ### 6. Record the spec's standing decisions
 

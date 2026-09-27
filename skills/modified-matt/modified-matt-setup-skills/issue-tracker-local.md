@@ -40,10 +40,13 @@ travel with the repo. Feature files are in one of two modes, the same for every 
   as the sections below describe.
 - **Local**: the whole Features root is ignored, normally by the single rule `.mysdd/features/` (Git can't re-include a
   file below an ignored directory, so a `!` exception under it has no effect). Specs and issues are written but never
-  staged: § Committing a Spec and its Issues and § Closing an issue say what happens instead.
+  staged: § Committing a Spec and its Issues, § Recording a final review and § Closing an issue say what happens
+  instead. Bookkeeping commits for feature files are skipped, with one exception: the final review's phase 1 makes an
+  isolated empty marker commit in place of its review-record commit (§ Recording a final review).
 
 Anything else is **unresolved**: rules that ignore some feature files but not others, a feature file tracked by git
-although a rule ignores it, or an ignored protected path. Stop, list the paths, and let the user resolve it;
+although a rule ignores it, or an ignored protected path. It is never read as local mode, so it permits no review
+marker either: stop before writing anything, list the paths, and let the user resolve it;
 `/modified-matt-setup-skills` can help. No skill ever force-adds (`git add -f`) or untracks (`git rm --cached`) a file,
 and none edits `.git/info/exclude` or a global excludes file.
 
@@ -127,6 +130,7 @@ Implementation issues (written by the issues skill):
     "US-003"
   ],
   "codeCommit": null,
+  "reviewHistoryCommit": null,
   "reviewCodeCommit": null,
   "acceptanceCriteria": [
     {
@@ -149,13 +153,15 @@ Implementation issues (written by the issues skill):
 public boundaries this issue's tests hit, confirmed with the user when the issue was drafted; `[]` when the issue has no
 dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this issue satisfies; `[]` when the
 issue satisfies no story directly, and always `[]` when `spec` is `null`. `codeCommit` is the full SHA of the commit
-that implemented the issue, and `reviewCodeCommit` the full SHA of the commit that applied the review fixes the user
-approved; both are single strings or `null`, and both start as `null`. Each has exactly one writer: only the implement
-skill writes `codeCommit`, when it commits; only the coder in phase 2 of the final review — the coder's triage, run
-through `/modified-matt-final-review` by an LLM or by a human acting as the coder — writes `reviewCodeCommit`, when it
-commits approved fixes. The independent reviewer writes neither. Every skill carries whichever field it doesn't own over
-verbatim. A further round of review fixes overwrites `reviewCodeCommit` — the superseded SHA stays reachable through git
-history and the `comments` trail.
+that implemented the issue; `reviewHistoryCommit` the full SHA of the commit that recorded the latest phase 1 review
+(§ Recording a final review); and `reviewCodeCommit` the full SHA of the commit that applied the review fixes the user
+approved. Each is a single string or `null`, and each starts as `null`. Each has exactly one writer: only the implement
+skill writes `codeCommit`, when it commits; only the independent reviewer in phase 1 of the final review writes
+`reviewHistoryCommit`, after its review-record commit lands; only the coder in phase 2 of the final review — the
+coder's triage, run through `/modified-matt-final-review` by an LLM or by a human acting as the coder — writes
+`reviewCodeCommit`, when it commits approved fixes. Every skill carries the fields it doesn't own over verbatim. A later
+review overwrites `reviewHistoryCommit`, and a further round of review fixes overwrites `reviewCodeCommit` — the
+superseded SHAs stay reachable through git history and the `comments` trail.
 `comments` starts as `[]`; § Comment records defines the entries the implement and final-review skills append to it.
 
 The successful local implementation and review lifecycle is:
@@ -168,18 +174,22 @@ ready-for-agent -> done-coding-awaiting-final-review -> done-final-review
 The final review (`/modified-matt-final-review`, or a human acting in its roles) then runs in two phases, each in a
 fresh session. In **phase 1** the independent reviewer reviews the change and records every finding; it fixes nothing.
 In **phase 2** the coder — the implementing agent's role, not the reviewer's — triages every recorded finding with the
-user. Only the final review sets `done-final-review`, and only in one of two ways:
+user. Phase 1 never changes `status`, whatever its verdict: it records the review and commits that record
+(§ Recording a final review). **Only phase 2 sets `done-final-review`**, and only when its triage is COMPLETE: every
+finding has a final disposition the user approved (fixed, rejected or deferred), every approved fix is verified, and
+every required check passes. Phase 2 runs even when the review has zero findings, because the checks still have to pass
+before the issue closes; with nothing to triage, it skips only the user's approval of an empty triage. A triage that
+rejects or defers every finding, with the user's approval, completes without a code commit, and so does a review with
+zero findings when the checks change nothing.
 
-- phase 1 sets it on a verified PASS with zero findings;
-- phase 2 sets it when its triage is COMPLETE: every finding has a final disposition the user approved (fixed, rejected
-  or deferred), every approved fix is verified, and every required check passes. A triage that rejects or defers every
-  finding, with the user's approval, completes without a code commit.
+An issue that an earlier version of this contract closed in phase 1, on a verified PASS with zero findings, stays
+closed: it is not reopened, and its records are not rewritten to fit this lifecycle.
 
-A PASS that carries suggestions, or a review that needs fixes, leaves the issue at `done-coding-awaiting-final-review`
-until phase 2 completes — do not return it to `ready-for-agent`, and do not re-run the implement skill on it. In phase 2
-the coder applies only the fixes the user approved, produces the `CODE REVIEW FIXES:` commit when there is code to
-commit, and records its SHA in `reviewCodeCommit`; `codeCommit` keeps pointing at the implementation. A fix round is
-visible through `reviewCodeCommit` and the `comments` trail, never through a status change.
+Every review leaves the issue at `done-coding-awaiting-final-review` until phase 2 completes — do not return it to
+`ready-for-agent`, and do not re-run the implement skill on it. In phase 2 the coder applies only the fixes the user
+approved, produces the `CODE REVIEW FIXES:` commit when there is code to commit, and records its SHA in
+`reviewCodeCommit`; `codeCommit` keeps pointing at the implementation. A fix round is visible through
+`reviewCodeCommit` and the `comments` trail, never through a status change.
 
 ## Comment records
 
@@ -224,7 +234,7 @@ this order:
   `REJECTED` or `DEFERRED` with the reason the user approved; `UNRESOLVED — approved FIX: <what>; blocker: <failure>`
   for an approved fix that could not be finished; or `UNRESOLVED — no approved disposition` with what is pending, for a
   finding the user has not decided. An unfinished FIX is never relabelled FIXED, nor turned into a DEFER the user did
-  not approve.
+  not approve. When the phase 1 record reads `Findings: None.`, the line reads `Verdicts: None.` instead.
 - `Checks:` the checks run and their results.
 - `Fix commit:` the full SHA of this attempt's `CODE REVIEW FIXES: ` commit, or `Fix commit: None.`
 - `ADRs superseded:` each ADR the user agreed to supersede, with its replacement, by number and title, or
@@ -272,8 +282,9 @@ Spec: .mysdd/features/<NN>-<feature-slug>/spec.md
   `null` means this is the implement skill's first-round commit, so `CODE: `; a SHA means the issue has already been
   implemented and committed and this is the coder's fix commit from the final review's phase 2, so
   `CODE REVIEW FIXES: `. The header follows `codeCommit`, never `status` — a fix round leaves the status where it is.
-  `SPEC: ` and `Closed Issue: ` are the other subjects, but they are bookkeeping, not code commits: they follow
-  § Committing a Spec and its Issues and § Closing an issue, not this format.
+  `SPEC: `, `REVIEW HISTORY: ` and `Closed Issue: ` are the other subjects, but they are bookkeeping, not code
+  commits: they follow § Committing a Spec and its Issues, § Recording a final review and § Closing an issue, not this
+  format.
 - The whole subject line, prefix included, is ≤72 characters.
 - One `Issue:` trailer per issue in the commit, repo-root-relative and beginning `.mysdd/features/`, in either mode:
   the trailers are addresses, not staged files.
@@ -322,20 +333,89 @@ below right before staging:
 - The no-attribution rule in § Commit message format applies.
 - Never make an empty commit, and never amend.
 
+## Recording a final review
+
+Phase 1 of the final review never changes `status`. It records its review in the issue and commits that record in a
+commit of its own, so that anyone coming back later can tell from `git log` alone that the review happened, and so that
+tooling has a commit to point at. Run the probe (§ Ignore policy) on the issue file before writing the record and again
+before committing, then:
+
+1. **Save the record.** Append the phase 1 record (§ Comment records), write the whole file, and re-read it to confirm
+   it parses and holds the record.
+2. **Commit it.** Note `HEAD` first: the new commit's parent must be that commit. The message is
+
+   ```text
+   REVIEW HISTORY: Record final review attempt <N>
+
+   Issue: .mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json
+   ```
+
+   where `<N>` is the record's phase 1 attempt number. No body and no other trailer; the no-attribution rule in
+   § Commit message format applies.
+
+   - In **committed** mode the commit holds exactly the whole issue file and nothing else. Staging the file and then
+     running a plain `git commit` is not enough: the user's index may already hold other staged work, and that commit
+     would sweep it in. Commit by explicit path instead — `git commit --only -- <issue path>`, after adding that one
+     path if Git does not track it yet — or through an isolated index, then confirm the commit changed exactly that
+     path. The file sits under `.mysdd/features/`, so the final review's change computation leaves the commit out of
+     the reviewed change.
+   - In **local** mode, positively established by the probe, there is nothing to stage, so make an **empty marker** in
+     place of the record commit. Build it without touching the user's index: seed a temporary index from the current
+     `HEAD` tree (`GIT_INDEX_FILE=<temp> git read-tree HEAD`), commit through that index with `--allow-empty`, check
+     that the new commit's tree equals its parent's, and remove the temporary index. A plain `git commit --allow-empty`
+     is never the marker: it commits whatever the user has staged. The marker touches no path, so the change
+     computation leaves it out too.
+   - The marker exists only for a positively established local mode. It is never a fallback for an unresolved ignore
+     state, a failed hook, a permission or Git error, or a record that failed to save: each of those stops the phase
+     and is reported as it is. No review commit force-adds, edits an ignore rule, amends or pushes.
+3. **Record its SHA.** Identify the commit just created — its parent is the `HEAD` noted in step 2, its subject names
+   this attempt and its `Issue:` trailer this issue — and read its full 40-character SHA. If `HEAD` is not that commit
+   (another agent committed in the meantime) or the commit cannot be verified, stop and report rather than guess. Write the SHA into
+   `reviewHistoryCommit`, re-read the file, and leave that one change uncommitted. A commit cannot contain its own SHA,
+   so never amend to carry it: in committed mode the next commit of the issue file — normally phase 2's
+   `Closed Issue:` commit — carries it. In local mode it stays on disk only.
+
+Report the three outcomes separately: the record saved; the record committed with its SHA — in local mode, **local
+record saved; marker committed**; and the SHA written to `reviewHistoryCommit`.
+
+**Retries.** Each step's success stands on its own, and a retry does only what is unfinished:
+
+- A failed commit does not undo a saved record. The retry commits the record already saved, under the same attempt
+  number, and never appends a second record for the same review.
+- In committed mode, when a `REVIEW HISTORY:` commit for this attempt and issue already holds the saved record, reuse
+  its verified SHA. Make no new commit, and never an empty marker merely because nothing is left to commit.
+- After the commit succeeded, a failed SHA write retries only that write, with the commit already identified: no new
+  record, commit or marker.
+- A later session that cannot identify the already-created commit unambiguously — none matches this attempt and issue,
+  or more than one does — stops and asks. Never substitute `HEAD`, which another agent may have moved, and never invent
+  a SHA.
+
+**What a local marker proves.** The marker carries no review text. The record lives only in the ignored issue file, so
+the marker cannot restore it on another clone or after the file is lost. Its SHA is evidence that a review was run and
+recorded here, not a copy of the findings and not proof that the review passed.
+
 ## Closing an issue
 
-When the final review sets `done-final-review` — phase 1 on a verified PASS with zero findings, or phase 2 on a
-COMPLETE triage — in **committed** mode, the phase that set it records the close in one commit of its own.
-Run the probe (§ Ignore policy) on the issue file before writing the status and again before staging:
+Only phase 2 of the final review closes an issue, and only when its triage is COMPLETE (§ Issue shape); phase 1 never
+does. Phase 2 sets `done-final-review` in the same write as its phase 2 record and then, in **committed** mode, records
+the close in one commit of its own. Run the probe (§ Ignore policy) on the issue file before writing the status and
+again before staging:
 
 - The subject is exactly `Closed Issue: <issue path>`, the path repo-root-relative and beginning `.mysdd/features/`
   (`Closed Issue: .mysdd/features/03-workspace-seats/issues/02-seat-guard.json`). No body, no trailers.
 - Stage only that issue's JSON file, plus any `.mysdd/` board-state file the tooling keeps and has changed (for example
   `.mysdd/kanban-boards.json`). Never stage implementation files, a `CONTEXT.md` or anything under `.mysdd/docs/`:
   those belong to the `SPEC: `, `CODE: ` and `CODE REVIEW FIXES: ` commits.
+- The issue file carries phase 1's uncommitted `reviewHistoryCommit` into this commit.
 - The no-attribution rule in § Commit message format applies.
 
-In **local** mode, make no commit: the status change is the whole close.
+In **local** mode, make no commit: the status change is the whole close. Say so in the report — closed locally, no close
+commit — so that the missing commit doesn't read as an oversight.
+
+**Retries.** The status is written before the close commit, so a saved `done-final-review` is not proof that the commit
+landed. Before a retry treats a COMPLETE phase 2 attempt as finished in committed mode, check that the latest commit
+touching the issue file is `Closed Issue: <issue path>` and that the file has no uncommitted change. If the close commit
+is missing, make only that commit: no new record, no new fix commit, and no second triage.
 
 ## When a skill says "publish to the issue tracker"
 
