@@ -9,9 +9,9 @@ user; just synthesize what you already know. If the design conversation isn't in
 ask the user to point you at it rather than inventing a decision log. Beyond confirming the test boundaries in step 2,
 the one thing to stop and ask about is a contradiction with a binding ADR that the conversation never resolved.
 
-**Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
-numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
-and tell the user to run `/modified-matt-setup-skills`.
+**Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for spec, then
+those sections in full. The file is the contract. This skill does not restate it. If the file is missing, stop and tell
+the user to run `/modified-matt-setup-skills`.
 
 **Check its contract before any write.** `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'`
 must print 1, and this skill expects `Tracker contract: 3`. Otherwise stop, write nothing, and say which side is behind:

@@ -47,20 +47,8 @@ commits them with the spec.
 ## Ground yourself first
 
 **Before the first round**, read the project's own documentation so you never spend a question on something the repo
-already answers:
-
-- every `AGENTS.md` from the repo root down to each directory the work touches, in order — `AGENTS.md`, then
-  `apps/web/AGENTS.md`, then `apps/web/app/[locale]/admin/AGENTS.md` and so on — including each one's `## Skills` and
-  any verification it adds. The root file is already loaded; read the rest directly, because not every agent loads
-  nested files. Add the vendored Next.js docs for anything Next.js. They're small and targeted. Where they and this
-  description differ, **follow the repo**.
-- the glossary and the ADRs whose `scope` covers the touched paths, per `.mysdd/docs/agents/domain.md`. ADRs are binding.
-- the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
-  piece is and how it fits. Read directly, and only for the pieces the feature touches.
-- the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
-  upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
-  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Per the frontier
-  rule above, don't block round one on it: only the questions downstream of its answer wait for it to report.
+already answers, as `.mysdd/docs/agents/domain.md` § Ground yourself first lists it. Per the frontier rule above, don't
+block round one on the docs sub-agent: only the questions downstream of its answer wait for it to report.
 
 Understanding the architecture is a first step, not a question. Ask the user only what the docs genuinely don't answer —
 and when a question survives that reading, say what you checked, so they can see it's a real gap rather than a shortcut.

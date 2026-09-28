@@ -196,8 +196,8 @@ reaches Done once the file says `done-final-review` and steps 5–7 are marked.
 **Without prompt-kanban**, invoke the skills in the same order:
 `/modified-matt-grill-with-docs`, then `/modified-matt-to-spec` in that
 session, `/modified-matt-to-issues`, `/modified-matt-implement`, and
-`/modified-matt-final-review` — phase 1 unless you name phase 2, which you run
-in a fresh coder session. Step 3 is the app's prompt around your review skill;
+`/modified-matt-final-review` — it infers the phase from the Issue and asks
+you to confirm; phase 2 runs in a fresh coder session. Step 3 is the app's prompt around your review skill;
 by hand, ask any reviewer to edit `spec.md` in place.
 
 ### Where Makerkit differs

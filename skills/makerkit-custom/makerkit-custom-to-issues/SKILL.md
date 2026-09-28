@@ -9,9 +9,9 @@ disable-model-invocation: true
 Break a plan, spec, or conversation into a set of **issues**: tracer-bullet vertical slices, each declaring the issues
 that **block** it.
 
-**Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
-numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
-and tell the user to run `/makerkit-custom-setup-skills`.
+**Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for issues, then
+those sections in full. The file is the contract. This skill does not restate it. If the file is missing, stop and tell
+the user to run `/makerkit-custom-setup-skills`.
 
 **Check its contract before any write.** `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'`
 must print 1, and this skill expects `Tracker contract: 3`. Otherwise stop, write nothing, and say which side is behind:
@@ -32,20 +32,8 @@ an argument, read the file's full contents.
 ### 2. Explore the codebase
 
 **Before starting**, if you haven't already explored the codebase to understand the state of the code, read the
-project's own documentation:
-
-- every `AGENTS.md` from the repo root down to each directory the work touches, in order — `AGENTS.md`, then
-  `apps/web/AGENTS.md`, then `apps/web/app/[locale]/admin/AGENTS.md` and so on — including each one's `## Skills` and
-  any verification it adds. The root file is already loaded; read the rest directly, because not every agent loads
-  nested files. Add the vendored Next.js docs for anything Next.js. They're small and targeted. Where they and this
-  description differ, **follow the repo**.
-- the glossary and the ADRs whose `scope` covers the touched paths, per `.mysdd/docs/agents/domain.md`. ADRs are binding.
-- the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
-  piece is and how it fits. Read directly, and only for the pieces the feature touches.
-- the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
-  upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
-  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Don't block on
-  it: draft the slices that don't depend on its answer while it works.
+project's own documentation as `.mysdd/docs/agents/domain.md` § Ground yourself first lists it. Don't block on the docs
+sub-agent: draft the slices that don't depend on its answer while it works.
 
 Issue titles and descriptions should use the glossary's vocabulary.
 

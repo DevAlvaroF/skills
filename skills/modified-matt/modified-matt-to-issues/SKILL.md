@@ -9,9 +9,9 @@ disable-model-invocation: true
 Break a plan, spec, or conversation into a set of **issues**: tracer-bullet vertical slices, each declaring the issues
 that **block** it.
 
-**Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
-numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
-and tell the user to run `/modified-matt-setup-skills`.
+**Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for issues, then
+those sections in full. The file is the contract. This skill does not restate it. If the file is missing, stop and tell
+the user to run `/modified-matt-setup-skills`.
 
 **Check its contract before any write.** `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'`
 must print 1, and this skill expects `Tracker contract: 3`. Otherwise stop, write nothing, and say which side is behind:

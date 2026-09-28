@@ -2,8 +2,7 @@
 
 How the engineering skills consume this repo's glossary and decisions. Both live under `.mysdd/docs/`, which is
 committed and outlives the feature directories under `.mysdd/features/`. `AGENTS.md` files hold conventions, never
-terms or decisions: read every one from the repo root down to each directory you touch, in order — the root is already
-loaded; read the rest directly, because not every agent loads nested files.
+terms or decisions; the first bullet of § Ground yourself first says which to read.
 
 ```
 .mysdd/docs/
@@ -11,6 +10,25 @@ loaded; read the rest directly, because not every agent loads nested files.
 ├── adr/0001-<slug>.md    one decision per file, scoped to the paths it binds
 └── agents/domain.md      this file
 ```
+
+## Ground yourself first
+
+Grill, to-spec, to-issues and implement send you here before they start. Read the project's own documentation:
+
+- every `AGENTS.md` from the repo root down to each directory the work touches, in order — `AGENTS.md`, then
+  `apps/web/AGENTS.md`, then `apps/web/app/[locale]/admin/AGENTS.md` and so on — including each one's `## Skills` and
+  any verification it adds. The root file is already loaded; read the rest directly, because not every agent loads
+  nested files. Add the vendored Next.js docs for anything Next.js. They're small and targeted. Where they and the skill
+  you are running differ, **follow the repo**.
+- the glossary and the ADRs whose `scope` covers the touched paths, per § Before exploring, read these. ADRs are
+  binding.
+- the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
+  piece is and how it fits. Read directly, and only for the pieces the feature touches.
+- the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
+  upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
+  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work.
+
+The skill that sent you here says what to do while the docs sub-agent works.
 
 ## Before exploring, read these
 
