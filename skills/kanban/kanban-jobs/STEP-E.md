@@ -92,7 +92,7 @@ status is an error, reported as one and never taken as leave to add. An ignored 
 **The commit.** Note `HEAD` and recheck each file's version just before. Add each path on its own with
 `git --literal-pathspecs add -- <path>`, then commit them with `git --literal-pathspecs commit --only -- <paths>` —
 never a directory, a pattern, `git add -A` or the user's staged work. `commit --only` leaves the user's index holding
-what it committed, where a temporary index would leave a staged draft behind, or a staged deletion if the run stopped
+what it committed, where a separate index would leave a staged draft behind, or a staged deletion if the run stopped
 before repairing the index. The subject is exactly `ATTEMPT PLANS: step E <jobId> attempt <N>`, with no body, trailer
 or attribution. Then verify the commit's parent is the `HEAD` you noted, that it adds or changes only those paths, with
 their modes and blobs and no deletion, and that the user's index now holds those same modes and blobs for them. Never

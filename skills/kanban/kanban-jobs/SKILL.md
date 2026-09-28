@@ -145,7 +145,7 @@ saving, commit the whole plan file — its planning content and every Job Record
    is not, and anything else is an error to report, never permission to commit.
 2. If Git does not track it yet, add it: `git --literal-pathspecs add -- <plan path>`.
 3. Commit it: `git --literal-pathspecs commit --only -m "<subject>" -- <plan path>`. A plain `git commit` would sweep in
-   whatever else the user had staged; a temporary index would leave the old plan in their index for their next commit
+   whatever else the user had staged; a separate index would leave the old plan in their index for their next commit
    to revert; and without literal mode a path holding `[`, `*` or `?` also matches its neighbours.
 4. Verify the commit contains only the plan and that the user's other staged work is still staged.
 
@@ -153,11 +153,20 @@ The subject is `REVIEW HISTORY: Record step <B|D> attempt <N>` for a review and 
 <N>` for a fix, `<N>` being your entry's attempt number, with no body, trailers or attribution. If this attempt's exact
 entry is already committed, reuse that commit rather than making another, and never make an empty commit instead.
 
-**An ignored plan.** A review (B, D) commits an **empty marker** in its place, so the review still leaves a trace:
-seed a temporary index from `HEAD`'s tree, commit through that index with `--allow-empty` under the same subject,
-verify the new commit's tree equals its parent's, and leave the user's own index and staged work untouched. The
-temporary index names no path and changes no tree, so it can leave nothing behind for the user's next commit. If
-`HEAD` moves under you or the result cannot be verified, stop without rolling anything back. The marker holds no
-review text; report "local record saved; marker committed". It is only for a plan Git positively reports as ignored —
-never a fallback for an unclear ignore state, permissions, hooks, a Git error or a failed save. A fix (E) makes no
-marker: it keeps its entry saved locally and says plainly that no history commit was made.
+**An ignored plan.** A review (B, D) commits an **empty marker** in its place, so the review still leaves a trace.
+Run exactly these commands, from the repository root, with the same subject:
+
+```sh
+parent=$(git rev-parse --verify HEAD)                 # noted before anything else
+tree=$(git rev-parse "$parent^{tree}")
+new=$(git commit-tree "$tree" -p "$parent" -m "<subject>")
+git update-ref -m "<subject>" HEAD "$new" "$parent"   # refuses if HEAD moved
+```
+
+The marker's tree is its parent's by construction, and `update-ref` publishes it only while `HEAD` still names that
+parent, so it can never land on another agent's commit and revert it; the user's index is never touched. If
+`update-ref` refuses, stop and report it: never retry onto the new `HEAD` without deciding again. Hooks don't run,
+which is acceptable for a commit that carries no content. The marker holds no review text; report "local record saved;
+marker committed". It is only for a plan Git positively reports as ignored — never a fallback for an unclear ignore
+state, permissions, hooks, a Git error or a failed save. A fix (E) makes no marker: it keeps its entry saved locally
+and says plainly that no history commit was made.

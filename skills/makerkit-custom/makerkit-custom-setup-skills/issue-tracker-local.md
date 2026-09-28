@@ -41,9 +41,9 @@ every feature:
   file below an ignored directory, so a `!` exception under it has no effect). Specs and issues are written but never
   staged: § Committing a Spec and its Issues, § Recording a final review and § Closing an issue say what happens
   instead. Bookkeeping commits for feature files are skipped, with one exception: the final review's phase 1 makes an
-  isolated empty marker commit in place of its review-record commit (§ Recording a final review). Local mode governs
-  Feature files only: an additional plan's planning commit (§ Committing additional plans) answers to that plan's own
-  ignore rules, not to this mode.
+  empty marker commit, published by a checked ref update, in place of its review-record commit (§ Recording a final
+  review). Local mode governs Feature files only: an additional plan's planning commit (§ Committing additional plans)
+  answers to that plan's own ignore rules, not to this mode.
 
 Anything else is **unresolved**: rules that ignore some feature files but not others, a feature file tracked by git
 although a rule ignores it, or an ignored protected path. It is never read as local mode, so it permits no review
@@ -364,15 +364,24 @@ before committing, then:
      would sweep it in. Commit by literal path instead: `git --literal-pathspecs add -- <issue path>` first only if Git
      does not track the file yet, then `git --literal-pathspecs commit --only -- <issue path>` (without literal mode a
      path holding `[`, `*` or `?` also matches its neighbours). That is the only route: `commit --only` leaves the
-     user's index holding what it committed, where a temporary index would leave the old version staged for the user's
-     next commit to revert. Then confirm the commit changed exactly that path. The file sits under `.mysdd/features/`,
-     so the final review's change computation leaves the commit out of the reviewed change.
+     user's index holding what it committed, where committing through a separate index would leave the old version
+     staged for the user's next commit to revert. Then confirm the commit changed exactly that path. The file sits
+     under `.mysdd/features/`, so the final review's change computation leaves the commit out of the reviewed change.
    - In **local** mode, positively established by the probe, there is nothing to stage, so make an **empty marker** in
-     place of the record commit. Build it without touching the user's index: seed a temporary index from the current
-     `HEAD` tree (`GIT_INDEX_FILE=<temp> git read-tree HEAD`), commit through that index with `--allow-empty`, check
-     that the new commit's tree equals its parent's, and remove the temporary index. A plain `git commit --allow-empty`
-     is never the marker: it commits whatever the user has staged. The marker touches no path, so the change
-     computation leaves it out too.
+     place of the record commit with exactly these commands, from the repository root:
+
+     ```sh
+     parent=$(git rev-parse --verify HEAD)                 # noted before anything else
+     tree=$(git rev-parse "$parent^{tree}")
+     new=$(git commit-tree "$tree" -p "$parent" -m "REVIEW HISTORY: Record final review attempt <N>" -m "Issue: <issue path>")
+     git update-ref -m "REVIEW HISTORY: Record final review attempt <N>" HEAD "$new" "$parent"   # refuses if HEAD moved
+     ```
+
+     The marker's tree is its parent's by construction, and `update-ref` publishes it only while `HEAD` still names that
+     parent, so it can never land on another agent's commit and revert it; the user's index is never touched. If
+     `update-ref` refuses, stop and report it: never retry onto the new `HEAD` without deciding again. Hooks don't run,
+     which is acceptable for a commit that carries no content. A plain `git commit --allow-empty` is never the marker:
+     it commits whatever the user has staged. The marker touches no path, so the change computation leaves it out too.
    - The marker exists only for a positively established local mode. It is never a fallback for an unresolved ignore
      state, a failed hook, a permission or Git error, or a record that failed to save: each of those stops the phase
      and is reported as it is. No review commit force-adds, edits an ignore rule, amends or pushes.
@@ -430,7 +439,7 @@ the close.
   review's change selection never counts it as code. It holds only the eligible plans, each rechecked just before. Add
   each path with `git --literal-pathspecs add -- <path>`, which also replaces a draft already staged, and commit with
   `git --literal-pathspecs commit --only -- <paths>` (without literal mode `[a].md` also matches `a.md`). That is the
-  only route: `commit --only` leaves the user's index holding what it committed, where a temporary index would leave a
+  only route: `commit --only` leaves the user's index holding what it committed, where a separate index would leave a
   staged draft or, stopped before its repair, a staged deletion for the user's next commit to make. Never stage a
   directory or run `git add -A`; unrelated staged work is preserved. Then verify its parent, changed paths, modes and
   blobs, with no deletions, and that the user's index now holds those same modes and blobs. With no eligible plan there
