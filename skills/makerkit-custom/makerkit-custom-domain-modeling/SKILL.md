@@ -66,9 +66,9 @@ patterns and from the code itself.
 When a term is resolved, write it into `CONTEXT.md` right there. Don't batch these up: capture them as they happen. The
 glossary says what a thing **is**; don't turn it into a spec or a scratch pad.
 
-### Record decisions sparingly
+### Offer ADRs sparingly
 
-Only write an ADR when all three are true:
+Only offer to create an ADR when all three are true:
 
 1. **Hard to reverse**: the cost of changing your mind later is meaningful
 2. **Surprising without context**: a future reader will look at the code and wonder "why did they do it this way?"

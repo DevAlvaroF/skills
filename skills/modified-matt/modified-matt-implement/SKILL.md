@@ -4,7 +4,7 @@ description: "Implement, verify, commit and advance one or more issues from the 
 disable-model-invocation: true
 ---
 
-Implement the work described by the user in the spec or issues.
+Implement the issues the user names, working from each issue and the spec it came from.
 
 **Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop

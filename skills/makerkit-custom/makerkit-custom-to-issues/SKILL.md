@@ -184,7 +184,8 @@ Skip this step when the run didn't start from a spec. Otherwise call the Skill t
    never through IDs in the ADRs (they carry none).
    - **Every decision this spec ever made:** the Implementation Decisions and Decision log of each committed version
      (`git log --format=%H -- <spec path>`, then `git show <sha>:<spec path>`), plus each replacement recorded as an
-     agreed supersession in the `comments` of its issues, `issues/archive/` included.
+     agreed supersession in the `comments` of its issues, `issues/archive/` included. In **local** mode the spec has
+     no history, so use the current spec and those `comments` alone, and say that the trace was that narrow.
    - **Its live ADRs:** read every ADR in `.mysdd/docs/adr/` whose `status` isn't superseded, and match each against
      those decisions by what it states.
    - **Candidates:** a live ADR stating a decision an earlier version made that the current spec no longer carries,
@@ -198,7 +199,7 @@ Skip this step when the run didn't start from a spec. Otherwise call the Skill t
    `CONTEXT.md` edits from this spec's design session (`git status --short -- .mysdd/docs`). `CONTEXT.md` is committed
    whole, so name any other uncommitted edit it carries.
 4. **Show, then write.** List the adds, supersedes, removes and files next to the published issues. Write nothing to
-   `.mysdd/docs/` until the user approves.
+   `.mysdd/docs/` until the user approves, and run the ignore probe with each ADR as a target before writing it.
 
 ### 7. Commit the Spec, the issues and the decisions
 

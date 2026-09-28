@@ -62,5 +62,5 @@ Ask: "What's the public interface, and which boundaries should we test?"
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or
   add speculative features.
 - **One slice at a time.** One boundary, one test, one minimal implementation per cycle.
-- **Refactoring is not part of the loop.** The review stage always assesses the diff for refactor-worthy smells and
-  applies the safe ones, not the red → green implementation cycle.
+- **Refactoring is not part of the loop.** Standards and smells are checked after it, by the repo's verification steps
+  (the root `AGENTS.md` § Verification) that `/makerkit-custom-implement` runs, not in the red → green cycle.

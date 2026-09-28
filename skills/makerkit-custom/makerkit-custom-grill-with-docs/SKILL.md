@@ -1,6 +1,6 @@
 ---
 name: makerkit-custom-grill-with-docs
-description: A relentless interview to sharpen a plan or design, which also records terms into .mysdd/docs/CONTEXT.md and decisions as ADRs as we go. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+description: A relentless interview to sharpen a plan or design, which also records terms into .mysdd/docs/CONTEXT.md and offers ADRs for decisions as we go. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
 disable-model-invocation: true
 ---
 
