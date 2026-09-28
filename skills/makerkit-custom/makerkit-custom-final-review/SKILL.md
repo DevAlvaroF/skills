@@ -18,8 +18,10 @@ two phases, run by two different agents in two different sessions:
 
 This skill owns the lifecycle of both phases: what to read, when to write the issue, and which commits to make. It does
 not own the review technique. In phase 1, run the review itself, on the change phase 1 step 1 names, with whichever
-review skill is loaded alongside this one (the repo's `/reviewer`, `/rls-review` and the like); if none is, review
-adversarially yourself.
+review skill is loaded alongside this one (the repo's `/reviewer`, `/rls-review` and the like). If none is, run
+`/makerkit-custom-implement`'s [REVIEW.md](../makerkit-custom-implement/REVIEW.md) yourself on the same commits: its
+Standards fallback with the smell baseline, and its Spec pass scoped to this issue. Skip its _Assess refactors_ step:
+phase 1 fixes nothing.
 
 **Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: the issue JSON shape, the status
 lifecycle, the comment records the two phases write, how phase 1 commits its record, the commit message format, and how
@@ -46,9 +48,19 @@ role wins.
 ## Inputs
 
 The user passes the issue path (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`), and may name the agent
-that implemented it, the commit, and which phase to run. With no phase named, run phase 1 and stop. Phase 2 never
-continues phase 1's session: if the user asks the session that ran phase 1 to go on fixing, tell them phase 2 is run by
-the coder in a fresh session.
+that implemented it, the commit, and which phase to run. With no phase named, infer it from the issue, taking the first
+case that fits:
+
+- `status` is `done-final-review`: phase 2, whose step 3 says what is left.
+- The latest phase 1 record's bookkeeping is unfinished (§ Phase 1): phase 1, to finish it.
+- The issue holds no review yet: phase 1.
+- The latest phase 1 record still describes the change (phase 2 step 1) and no COMPLETE phase 2 record answers it:
+  phase 2.
+
+Anything else, such as a stale review or an older record without labels, is ambiguous: ask. Say which phase you
+inferred and the role it gives you, and write nothing until the user confirms. Phase 2 never continues phase 1's
+session: if the user asks the session that ran phase 1 to go on fixing, tell them phase 2 is run by the coder in a
+fresh session.
 
 Read the issue and take from it:
 
