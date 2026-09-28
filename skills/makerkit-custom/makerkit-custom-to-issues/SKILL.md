@@ -47,6 +47,8 @@ project's own documentation:
   `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. Don't block on
   it: draft the slices that don't depend on its answer while it works.
 
+Issue titles and descriptions should use the glossary's vocabulary.
+
 Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the
 easy change."
 
@@ -60,7 +62,8 @@ Break the work into **tracer bullet** issues.
   slice of one layer
 - A completed slice is demoable or verifiable on its own
 - Each slice is sized to fit in a single fresh context window. You can't measure tokens directly, so use the file count
-  as the proxy: a slice that looks like it will create or edit more than ~10 files is too big — split it
+  as the proxy: a slice that looks like it will create or edit more than ~10 files is too big — split it along
+  behaviour, never by layer. A slice crossing migration, policy, types, action, page and tests is still one slice
 - Any prefactoring should be done first
 
 </vertical-slice-rules>

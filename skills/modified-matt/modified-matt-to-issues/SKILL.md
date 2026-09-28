@@ -48,7 +48,8 @@ Break the work into **tracer bullet** issues.
   slice of one layer
 - A completed slice is demoable or verifiable on its own
 - Each slice is sized to fit in a single fresh context window. You can't measure tokens directly, so use the file count
-  as the proxy: a slice that looks like it will create or edit more than ~10 files is too big — split it
+  as the proxy: a slice that looks like it will create or edit more than ~10 files is too big — split it along
+  behaviour, never by layer
 - Any prefactoring should be done first
 
 </vertical-slice-rules>

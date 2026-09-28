@@ -17,14 +17,18 @@ loaded; read the rest directly, because not every agent loads nested files.
 - **`.mysdd/docs/CONTEXT.md`**, the glossary.
 - **The binding ADRs** in `.mysdd/docs/adr/`: every ADR with no `scope` (or `scope` of `"/"`), plus every ADR with a
   `scope` entry matching a path you will touch. Skip any whose `status` begins `superseded`; read those only when
-  reconciling decisions. This prints every ADR's whole frontmatter in one read, however long its `scope`, so pick the
-  binding set from it and open only those in full:
+  reconciling decisions. An ADR with no frontmatter is repo-wide, and its status is its `**Status:**` line (`accepted`
+  when there is none). This prints every ADR's whole frontmatter in one read, however long its `scope`, or a legacy
+  ADR's `**Status:**` line. Pick the binding set from it and open only those in full:
 
   ```sh
-  awk 'FNR==1{print "== " FILENAME; fm=0} /^---$/{fm++; next} fm==1' .mysdd/docs/adr/*.md
+  awk 'FNR == 1 { print "== " FILENAME; fm = hdr = ($0 == "---"); seen = 0; next }
+       fm { if ($0 == "---") fm = 0; else print; next }
+       !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }' .mysdd/docs/adr/*.md
   ```
 
-  A bracketed segment such as `[locale]` is a literal route segment, not a glob character class.
+  Only a `---` on an ADR's first line opens frontmatter, so a horizontal rule further down a legacy ADR is never
+  mistaken for it. A bracketed segment such as `[locale]` is a literal route segment, not a glob character class.
 
 If any of these don't exist, **proceed silently**. Don't flag their absence and don't suggest creating them upfront:
 `makerkit-custom-domain-modeling` creates them lazily when terms or decisions actually get resolved.

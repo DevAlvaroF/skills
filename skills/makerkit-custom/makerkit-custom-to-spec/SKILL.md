@@ -42,7 +42,7 @@ and this skill expects `Tracker contract: 2`. Otherwise stop, write nothing, and
 ## Process
 
 1. Explore the repo to understand the current state of the codebase, if you haven't already (see
-   `## Ground yourself first`).
+   `## Ground yourself first`). Use the glossary's vocabulary throughout the spec.
 
 2. Sketch out the boundaries at which you're going to test the feature. Existing boundaries should be preferred to new
    ones. Use the highest boundary possible. If new boundaries are needed, propose them at the highest point you can. The
@@ -146,6 +146,6 @@ Confirm each of these. Any "no" is a fix, not a caveat: don't publish until it's
 - Testing Decisions names prior art: actual similar tests in this codebase, not a description of what one would look
   like
 - The decision log is a redacted summary in your own words, carrying no secrets, credentials, PII, or raw transcript
-- No Implementation Decision contradicts a binding ADR, unless the user agreed and that ADR's `status` already reads
-  `superseded`
+- No Implementation Decision contradicts a live binding ADR. An ADR the user agreed to supersede already reads
+  `superseded`, and the Decision log names it
 - No file paths or code snippets anywhere, except a prototype-derived snippet that encodes a decision prose can't

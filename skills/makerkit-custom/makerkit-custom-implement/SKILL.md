@@ -60,17 +60,23 @@ same file. Don't split any part that depends on the docs sub-agent's answer unti
 split without overlapping files, don't force it: implement it here, one piece after another. The review, the commit and
 advancing the issues stay in this context.
 
+Run typechecking regularly and single test files regularly — those are short, and you need their output in hand to
+drive the next cycle. Run the full test suite once at the end, as one of step 2's whole-repo runs, through the sub-agent
+that step describes.
+
 Once the implementation is done, run the following in order:
 
-1. **Review the work against the spec** — run the review in [REVIEW.md](./REVIEW.md). This step belongs to this skill and sits *outside* the repo's
-   verification list; run it whether or not the repo mentions anything like it.
+1. **Review the work** — run the review in [REVIEW.md](./REVIEW.md): spec fidelity always, standards only as its
+   fallback. This step belongs to this skill and sits *outside* the repo's verification list; run it whether or not the
+   repo mentions anything like it.
 2. **The repo's verification steps**, from the root `AGENTS.md` § Verification, in the order given there, plus any
    verification a nested `AGENTS.md` in the chain adds. If that section is renamed, missing, or differs from this
    description, **follow the repo** — and say out loud which list you actually ran. Where one of those steps is a
    whole-repo run — the full test suite, a build, a lint sweep — **run it through a sub-agent**: its output is mostly
    noise this context never needs. Ask the sub-agent to run the repo's exact command and report only the failures (test
    or rule name, file, and the assertion or error line) under 200 words, plus an overall pass/fail verdict. Fix any
-   failures here, then send it back to re-run.
+   failures here, then send it back to re-run. Weigh the repo review skill's findings per [REVIEW.md](./REVIEW.md)
+   § 5 Assess refactors.
 3. **Commit the work, then advance the issues** — in that order, per _Commit the work_ and _Advance the issues_
    below. The commit comes first because the issue records its SHA.
 
