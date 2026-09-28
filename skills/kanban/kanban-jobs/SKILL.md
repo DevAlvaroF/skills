@@ -87,22 +87,30 @@ committed and whether its commit's SHA was saved, or which failed; never put tha
 Commit on the current branch, whichever it is. Never force-add, change ignore rules, untrack a file, amend, rebase or
 push. Identify your commit by its parent (the `HEAD` you noted first) and subject, never by a later `HEAD`.
 
+**The route**, for every commit that carries files, single-quotes each path (zsh otherwise globs `[locale]` or
+`(group)`):
+
+1. A merge, cherry-pick, revert or rebase in progress (`git status`): stop and report. A detached `HEAD`: commit there
+   and say so.
+2. Note the staged paths that aren't yours: `git diff --cached --name-only`.
+3. `git --literal-pathspecs add -- '<path>'` each path that exists; a deleted, `git rm`ed or `git mv`ed path gets no
+   `add`, and a rename commits both its paths.
+4. `git --literal-pathspecs commit --only -m "<subject>" -- '<paths>'`, so no staged work is swept in. Nothing to
+   commit means no commit, never an empty one.
+5. Verify `git diff-tree --no-commit-id --name-only -r HEAD` lists exactly your paths, that
+   `git --literal-pathspecs diff --cached --quiet HEAD -- '<those paths>'` succeeds, and that every noted path is still
+   staged.
+6. If a hook (lint-staged, a formatter) added paths or left the index disagreeing, name what it added and
+   `git --literal-pathspecs reset -q -- '<path>'` each such path not noted; for a noted one, stop and report.
+
 **Code commits (C, E):** the step's prefix and an imperative subject, at most 72 characters in all, and optionally one
 to three lines of why. No `Co-Authored-By`, no tool or model attribution. Stage this step's changes by path, never the
-Job's plan or unrelated changes: `git --literal-pathspecs add -- <path>` each, then
-`git --literal-pathspecs commit --only -- <paths>`, checked as step 4 below checks the plan. Nothing to commit means no
-commit, never an empty one. Straight after it, read its full SHA and confirm its subject.
+Job's plan or unrelated changes, by the route. Straight after it, read its full SHA and confirm its subject.
 
-**History commits (B, D, E)** commit the whole plan file, alone:
-
-1. `git check-ignore --no-index -q -- <plan path>`: 0 is ignored, 1 is not, anything else an error to report.
-2. If Git does not track it yet: `git --literal-pathspecs add -- <plan path>`.
-3. `git --literal-pathspecs commit --only -m "<subject>" -- <plan path>`: a plain commit sweeps in staged work, and
-   literal mode stops `[`, `*` or `?` matching other paths.
-4. Verify the commit contains only the plan and that the user's other staged work is still staged.
-
-The subject is `REVIEW HISTORY: Record step <B|D> attempt <N>` or `JOB HISTORY: Record step E attempt <N>`, with no
-body. If this attempt's exact entry is already committed, reuse that commit.
+**History commits (B, D, E)** commit the whole plan file, alone, by the route, when
+`git check-ignore --no-index -q -- '<plan path>'` exits 1; 0 means ignored, anything else is an error to report. The
+subject is `REVIEW HISTORY: Record step <B|D> attempt <N>` or `JOB HISTORY: Record step E attempt <N>`, with no body.
+If this attempt's exact entry is already committed, reuse that commit.
 
 **An ignored plan (B, D)** gets an **empty marker** under the same subject, so the review leaves a trace:
 

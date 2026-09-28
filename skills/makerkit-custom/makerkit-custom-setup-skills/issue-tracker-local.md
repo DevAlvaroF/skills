@@ -331,13 +331,23 @@ Spec: .mysdd/features/03-workspace-seats/spec.md
 ```
 
 **The commit route.** Every commit here that carries files — code, `SPEC: `, `REVIEW HISTORY: `, `ATTEMPT PLANS: `,
-`Closed Issue: ` — goes on the current branch, whichever it is, the same way. Add each path with
-`git --literal-pathspecs add -- <path>`, then commit with `git --literal-pathspecs commit --only -- <paths>`. Literal
-mode stops a path holding `[`, `*` or `?`, such as a `[locale]` segment, from also matching its neighbours. `--only`
-commits exactly those paths and leaves the user's index holding what it committed, so the user's other staged work is
-neither swept in nor lost; a plain `git commit` would sweep it in, and committing through a separate index would leave
-the old version staged for the user's next commit to revert. Then verify the commit holds exactly those paths and that
-the user's other staged work is still staged. Never stage a directory or run `git add -A`.
+`Closed Issue: ` — goes on the current branch the same way, with every path single-quoted in every command: zsh
+otherwise globs or rejects a `[locale]` or `(group)` segment. Never stage a directory or run `git add -A`.
+
+1. If `git status` reports a merge, cherry-pick, revert or rebase in progress, stop and report: the commit would fail
+   or land inside it. On a detached `HEAD`, commit there and say so in the report.
+2. Note the staged paths that aren't yours: `git diff --cached --name-only`.
+3. `git --literal-pathspecs add -- '<path>'` each path that exists in the working tree, which also replaces a draft
+   already staged. A path deleted, or removed by `git rm` or `git mv`, gets no `add`; a rename commits both its paths.
+4. `git --literal-pathspecs commit --only -- '<paths>'`. Literal mode stops `[`, `*` or `?` matching neighbours;
+   `--only` leaves the user's other staged work staged, not swept in. Nothing to commit means no commit, never an
+   empty one.
+5. Verify that `git diff-tree --no-commit-id --name-only -r HEAD` lists exactly your paths, that the user's index
+   equals the commit for every path it lists (`git --literal-pathspecs diff --cached --quiet HEAD -- '<paths>'`), and
+   that every noted path is still staged.
+6. A hook (lint-staged, a formatter) that changed the commit adds paths or leaves the index disagreeing, for the
+   user's next commit to revert. Name every path it added. Bring each such path the user hadn't staged to `HEAD` with
+   `git --literal-pathspecs reset -q -- '<path>'`; if one was noted, stop and report.
 
 ## Committing a Spec and its Issues
 
@@ -378,9 +388,8 @@ before committing, then:
    § Commit message format applies.
 
    - In **committed** mode the commit holds exactly the whole issue file and nothing else, by the route in
-     § Commit message format: staging the file and running a plain `git commit` would sweep in the user's other staged
-     work. The file sits under `.mysdd/features/`, so the final review's change computation leaves the commit out of
-     the reviewed change.
+     § Commit message format. The file sits under `.mysdd/features/`, so the final review's change computation leaves
+     the commit out of the reviewed change.
    - In **local** mode, positively established by the probe, there is nothing to stage, so make an **empty marker** in
      place of the record commit with exactly these commands, from the repository root:
 
@@ -450,14 +459,9 @@ the close.
   answers to its own ignore rules, whatever the Feature mode (§ Ignore policy).
 - **The commit.** The subject is exactly `ATTEMPT PLANS: final review <issue path> attempt <K>`, the path
   repo-root-relative and `K` the phase 2 attempt number. No body, no `Issue:` trailer and no attribution, so the final
-  review's change selection never counts it as code. It holds only the eligible plans, each rechecked just before. Add
-  each path with `git --literal-pathspecs add -- <path>`, which also replaces a draft already staged, and commit with
-  `git --literal-pathspecs commit --only -- <paths>` (without literal mode `[a].md` also matches `a.md`). That is the
-  only route: `commit --only` leaves the user's index holding what it committed, where a separate index would leave a
-  staged draft or, stopped before its repair, a staged deletion for the user's next commit to make. Never stage a
-  directory or run `git add -A`; unrelated staged work is preserved. Then verify its parent, changed paths, modes and
-  blobs, with no deletions, and that the user's index now holds those same modes and blobs. With no eligible plan there
-  is no commit.
+  review's change selection never counts it as code. It holds only the eligible plans, each rechecked just before,
+  committed by the route in § Commit message format. Verify too that its parent is the `HEAD` noted before it and that
+  it deletes nothing. With no eligible plan there is no commit.
 - Never force-add, edit an ignore rule, untrack a file, make an empty commit, amend, push or roll back. If `HEAD` moved
   or verification fails, stop and report the actual state.
 - **Retries.** A saved COMPLETE record or a landed close commit is not proof the plans were committed. A retry of the

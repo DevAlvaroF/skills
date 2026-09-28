@@ -75,11 +75,9 @@ and `JOB HISTORY` commits, since it proves nothing about the code.
 - **Ignore probe.** From the repository root, pass the paths NUL-delimited on stdin to nonverbose
   `git check-ignore --no-index --stdin -z`, without `--literal-pathspecs` (fatal there) or a leading `:` (magic). Exit
   0 names the ignored ones, which stay uncommitted; 1 means none; anything else is an error, never leave to add.
-- **The commit.** Note `HEAD` and recheck each file, `git --literal-pathspecs add -- <path>` each one, then
-  `git --literal-pathspecs commit --only -- <paths>` — never a directory, a pattern or `git add -A` — under exactly
-  `ATTEMPT PLANS: step E <jobId> attempt <N>`, with no body. Verify its parent is the noted `HEAD`, that it adds or
-  changes only those paths, with no deletion, and that the user's index now holds those same modes and blobs for them.
-  No eligible plan, no commit. If `HEAD` moves or verification fails, stop and report.
+- **The commit.** Note `HEAD` and recheck each file, then commit them by the route (SKILL.md § Commits) under exactly
+  `ATTEMPT PLANS: step E <jobId> attempt <N>`, with no body. Verify too that its parent is the noted `HEAD` and that it
+  deletes nothing. No eligible plan, no commit. If `HEAD` moves or verification fails, stop and report.
 - **Order.** Capture and verify the full SHA of any code commit this attempt made before the planning commit, which
   would otherwise be the `HEAD` a later lookup finds; then the planning commit, your entry, and the plan commit. Never
   write the planning SHA into a `code-fix` line. A failed planning commit is recorded as each plan's reason.
