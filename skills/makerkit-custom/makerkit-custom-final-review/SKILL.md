@@ -17,8 +17,9 @@ two phases, run by two different agents in two different sessions:
   PASS with zero findings: it is the only phase that closes, and the checks still have to pass first.
 
 This skill owns the lifecycle of both phases: what to read, when to write the issue, and which commits to make. It does
-not own the review technique. In phase 1, run the review itself with whichever review skill is loaded alongside this
-one (the repo's `/reviewer`, `/rls-review` and the like); if none is, review adversarially yourself.
+not own the review technique. In phase 1, run the review itself, on the change phase 1 step 1 names, with whichever
+review skill is loaded alongside this one (the repo's `/reviewer`, `/rls-review` and the like); if none is, review
+adversarially yourself.
 
 **Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: the issue JSON shape, the status
 lifecycle, the comment records the two phases write, how phase 1 commits its record, the commit message format, and how
@@ -43,10 +44,12 @@ a mismatch, write nothing: name the conflict and ask the user to update the trac
 `/makerkit-custom-setup-skills` does), rather than letting this skill, the prompt that drove it or the tracker win
 silently.
 
-Read the nearest `AGENTS.md` to the code the change touches (the root file is already in context via `CLAUDE.md`), and
-the glossary and the ADRs whose `scope` covers the touched paths, per `.mysdd/docs/agents/domain.md`. ADRs are binding.
-The phase's role (independent reviewer, or coder) is the role you are acting in and nothing more. Where it conflicts
-with those instructions, say so and ask the user rather than deciding the role wins.
+Read every `AGENTS.md` from the repo root down to each directory the change touches, in order, including each one's
+`## Skills` and any verification it adds — the root file is already loaded; read the rest directly, because not every
+agent loads nested files — and the glossary and the ADRs whose `scope` covers the touched paths, per
+`.mysdd/docs/agents/domain.md`. ADRs are binding. The phase's role (independent reviewer, or coder) is the role you are
+acting in and nothing more. Where it conflicts with those instructions, say so and ask the user rather than deciding the
+role wins.
 
 ## Inputs
 
@@ -90,8 +93,10 @@ under a new attempt number.
    agreeing to it. When they do, the replacement outranks the matching spec decision
    (`makerkit-custom-domain-modeling` § Superseding and removing): check the code against the replacement, not the spec
    line. Read the implementer's recorded deviations and tradeoffs, where the implementation record has them, as the
-   implementer's stated reasons, not as proof. Hand review sub-agents the commands (`git show <sha>` per commit of the
-   change) and the paths; never paste the diff or the spec in.
+   implementer's stated reasons, not as proof. A loaded review skill is run on exactly the change's commits: hand it
+   their SHAs and a `git show <sha>` command for each, and override its default diff (`git diff HEAD`,
+   `git show HEAD`) — a review of any other diff is not this review. Hand review sub-agents the same commands and the
+   paths; never paste the diff or the spec in.
 2. **Verify, don't assume.** Check each acceptance criterion against what the code actually does. A verification you
    could not run — a live UI check with no way to drive the UI, a test that needs a service you don't have — is a
    **failure**, not a pass. Say what was blocked and why.
@@ -179,24 +184,24 @@ keep the inventory of additional plans that § Additional plans below describes.
    rules. Approving a verdict is not approval to supersede a binding decision; that needs the user's own agreement to
    the supersession. Never edit the spec. A finding the user leaves undecided keeps the triage from completing.
 5. **Implement the approved fixes**, and nothing beyond them. Use `/makerkit-custom-tdd` where a fix changes behaviour.
-6. **Check.** Run the repo's verification steps from the root `AGENTS.md` § Verification, in the order given there,
-   sending any whole-repo run (full suite, build, lint sweep) through a sub-agent that reports failures only. Run them
-   even when the triage changed no code or the review had no findings: approving a DEFER, or having nothing to fix,
-   waives no required check. Then review your own changes against the approved fixes. A required check that fails or
-   cannot run, or a fix that falls short, means no success and no fix commit: skip step 7's fix commit (its
-   § Additional plans operation still runs), leave the fixes in the tree, and record each affected fix as unresolved in
-   step 9.
-7. **Commit completed, verified fixes.** Stage the implementation files, plus the ADR file(s) the user agreed to change,
-   each by path — never `git add .mysdd/`, never `git add -A` — including anything the checks themselves rewrote, such
-   as formatter output, so the commit is exactly what was verified. A commit touching only ADRs is a valid
-   `CODE REVIEW FIXES: ` commit, not an empty one. Read `git status --short` and confirm nothing unrelated was swept in;
-   leave anything else in the tree as you found it. The message follows `.mysdd/issue-tracker.md` § Commit message
-   format with the `CODE REVIEW FIXES: ` header. If no file changed (no findings, every finding rejected or deferred,
-   or a finding was only a blocked verification that now runs), there is nothing to commit: never make an empty commit
-   to have something to record. Never push, amend or rebase. Right after the fix commit, before any other commit,
-   confirm it is yours — its parent is the `HEAD` you committed on and its subject is the one you wrote — and capture
-   its full 40-character SHA for step 9. Then, with or without a fix commit, run § Additional plans: eligible plans get
-   a planning-only commit of their own, never a place in this one.
+6. **Check.** Run the repo's verification steps from the root `AGENTS.md` § Verification, in the order given there, plus
+   any a nested `AGENTS.md` in the chain adds, sending any whole-repo run (full suite, build, lint sweep) through a
+   sub-agent that reports failures only. Run them even when the triage changed no code or the review had no findings:
+   approving a DEFER, or having nothing to fix, waives no required check. Then review your own changes against the
+   approved fixes. A required check that fails or cannot run, or a fix that falls short, means no success and no fix
+   commit: skip step 7's fix commit (its § Additional plans operation still runs), leave the fixes in the tree, and
+   record each affected fix as unresolved in step 9.
+7. **Commit completed, verified fixes**, on the current branch, whichever it is. Stage the implementation files, plus
+   the ADR file(s) the user agreed to change, each by path — never `git add .mysdd/`, never `git add -A` — including
+   anything the checks themselves rewrote, such as formatter output, so the commit is exactly what was verified. A
+   commit touching only ADRs is a valid `CODE REVIEW FIXES: ` commit, not an empty one. Read `git status --short` and
+   confirm nothing unrelated was swept in; leave anything else in the tree as you found it. The message follows
+   `.mysdd/issue-tracker.md` § Commit message format with the `CODE REVIEW FIXES: ` header. If no file changed (no
+   findings, every finding rejected or deferred, or a finding was only a blocked verification that now runs), there is
+   nothing to commit: never make an empty commit to have something to record. Never push, amend or rebase. Right after
+   the fix commit, before any other commit, confirm it is yours — its parent is the `HEAD` you committed on and its
+   subject is the one you wrote — and capture its full 40-character SHA for step 9. Then, with or without a fix commit,
+   run § Additional plans: eligible plans get a planning-only commit of their own, never a place in this one.
 8. **Settle the outcome.** It is **COMPLETE** only when every finding has an approved final disposition (FIXED,
    REJECTED or DEFERRED), every approved fix is verified and every required check passes. A triage that rejects or
    defers everything, with the user's approval, is complete without a code commit, and so is a review with no findings

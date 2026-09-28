@@ -9,11 +9,11 @@ TDD is the red → green loop. This skill is the reference that makes that loop 
 test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult
 them before and during the loop, not after.
 
-When exploring the codebase, read the nearest `AGENTS.md` to the code under test — the root file is already in your
-context via `CLAUDE.md` — and the glossary in `.mysdd/docs/CONTEXT.md`, so test names and interface vocabulary match the
-project's language. Where they and this description differ, **follow the repo**. The ADRs whose `scope` covers the code
-under test are binding, per `.mysdd/docs/agents/domain.md`: a test that would pin behaviour contradicting one is a
-stop — flag it and ask.
+When exploring the codebase, read every `AGENTS.md` from the repo root down to the directory under test, in order — the
+root file is already loaded; read the rest directly, because not every agent loads nested files — and the glossary in
+`.mysdd/docs/CONTEXT.md`, so test names and interface vocabulary match the project's language. Where they and this
+description differ, **follow the repo**. The ADRs whose `scope` covers the code under test are binding, per
+`.mysdd/docs/agents/domain.md`: a test that would pin behaviour contradicting one is a stop — flag it and ask.
 
 The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, boundaries
 over internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A

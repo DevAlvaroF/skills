@@ -3,7 +3,8 @@
 You are the coder. Your recording key is `code`: the live line is `kanban-commit <jobId> code: <full SHA>` and a
 demoted one `Superseded commit <jobId> code: <old value>`.
 
-1. **Implement the plan**, run the project's applicable checks, and review your own change against the plan.
+1. **Implement the plan**, run the project's applicable checks, and review your own change against the plan. A question
+   under the plan's `Open questions` heading with no answer from the user beside it is still open: ask, never decide it.
 2. **Commit the code only when the attempt is COMPLETE** — the work is done and every required check passes — under a
    subject starting `CODE: ` (SKILL.md § Commits, code commits). If the work is incomplete, or a required check fails
    or cannot run, make no code commit. Then, or if the code commit fails, record the attempt as INCOMPLETE or BLOCKED,

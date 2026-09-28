@@ -2,7 +2,8 @@
 
 How the engineering skills consume this repo's glossary and decisions. Both live under `.mysdd/docs/`, which is
 committed and outlives the feature directories under `.mysdd/features/`. `AGENTS.md` files hold conventions, never
-terms or decisions.
+terms or decisions: read every one from the repo root down to each directory you touch, in order — the root is already
+loaded; read the rest directly, because not every agent loads nested files.
 
 ```
 .mysdd/docs/

@@ -274,8 +274,8 @@ ADRs superseded: None.
 
 ## Commit message format
 
-Every code commit made for an issue — by the implement skill or by the coder in the final review's phase 2 — uses
-this shape:
+Every code commit made for an issue — by the implement skill or by the coder in the final review's phase 2 — goes on
+the current branch, whichever it is, and uses this shape:
 
 ```text
 CODE: <imperative subject>

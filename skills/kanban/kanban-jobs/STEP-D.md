@@ -13,7 +13,9 @@ You are the reviewer, in a fresh session. Your recording key is `code-review`: t
    may have overwritten earlier fixes — report the mismatch and ask instead of substituting `HEAD` or claiming a
    complete review. If a recorded code SHA holds only bookkeeping, report the mismatch rather than silently dropping it
    and claiming full coverage.
-2. **Review adversarially.** Inspect each commit individually, in its current code context, against the plan. Break
+2. **Review adversarially.** Inspect each commit individually, in its current code context, against the plan. A loaded
+   review skill is run on exactly these commits: hand it their SHAs and a `git show <sha>` command for each, and
+   override its default diff (`git diff HEAD`, `git show HEAD`) — a review of any other diff is not this review. Break
    confidence in it: find what does not do what the plan said, what it broke on the way, and what it decided without
    saying so. Change no source code; you may write disposable verification artifacts.
 3. **Decide.** A finding is BLOCKING when it is a regression, an unmet plan requirement, a broken documented project

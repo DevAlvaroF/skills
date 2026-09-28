@@ -49,8 +49,10 @@ commits them with the spec.
 **Before the first round**, read the project's own documentation so you never spend a question on something the repo
 already answers:
 
-- the nearest `AGENTS.md` to the area in question — the root file is already in your context via `CLAUDE.md` — plus the
-  vendored Next.js docs for anything Next.js. Read these directly; they're small and targeted. Where they and this
+- every `AGENTS.md` from the repo root down to each directory the work touches, in order — `AGENTS.md`, then
+  `apps/web/AGENTS.md`, then `apps/web/app/[locale]/admin/AGENTS.md` and so on — including each one's `## Skills` and
+  any verification it adds. The root file is already loaded; read the rest directly, because not every agent loads
+  nested files. Add the vendored Next.js docs for anything Next.js. They're small and targeted. Where they and this
   description differ, **follow the repo**.
 - the glossary and the ADRs whose `scope` covers the touched paths, per `.mysdd/docs/agents/domain.md`. ADRs are binding.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that

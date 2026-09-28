@@ -59,28 +59,27 @@ commit exists.
    connection strings or URLs with embedded credentials, `.env`-style assignments of a secret-looking name, and pasted
    customer data or PII. If you find any, stop: do not commit, tell the user exactly what you found and where, and let
    them redact the spec first.
-3. **Check the branch.** If `HEAD` is the repo's default branch, stop and ask the user before committing.
-4. **Stage the implementation files**, plus the ADR file(s) the user agreed to change for this issue, each by path.
-   Never `git add .mysdd/` and never `git add -A`. Then read `git status --short` and confirm nothing unrelated was
-   swept in.
-5. **Build the message.** The header is always `CODE: `: this skill only ever makes the first-round commit, on an issue
+3. **Commit on the current branch, whichever it is.** Stage the implementation files, plus the ADR file(s) the user
+   agreed to change for this issue, each by path. Never `git add .mysdd/` and never `git add -A`. Then read
+   `git status --short` and confirm nothing unrelated was swept in.
+4. **Build the message.** The header is always `CODE: `: this skill only ever makes the first-round commit, on an issue
    whose `codeCommit` is `null`. `CODE REVIEW FIXES: ` commits belong to the final-review skill's phase 2. Write the
    message to the shape in `.mysdd/issue-tracker.md` § Commit message format.
    That file is the schema of record for the message the same way it is for the issue shape; this skill does not
    restate it.
-6. **One issue, one commit.** With several issues in a run, commit them one at a time in dependency order. Only when
+5. **One issue, one commit.** With several issues in a run, commit them one at a time in dependency order. Only when
    the work genuinely cannot be separated: one commit carrying an `Issue:` trailer per issue, and the same SHA recorded
    on each of them.
-7. **Capture each commit's SHA as it lands.** Straight after each commit, before the next one, read its full
+6. **Capture each commit's SHA as it lands.** Straight after each commit, before the next one, read its full
    40-character SHA and confirm its subject and `Issue:` trailer(s) are the ones you wrote. Keep an explicit
    issue → SHA mapping for the run: by the time the issues are updated, `HEAD` names only the last commit, so reading
    it then would give every earlier issue the wrong SHA.
-8. **Never push, never amend, never rebase.** One commit forward, nothing rewritten.
+7. **Never push, never amend, never rebase.** One commit forward, nothing rewritten.
 
 ## Advance the issues
 
 Updating the issues you implemented is part of the job, not an optional extra. Run it **after** the commits, so the
-SHAs exist, and take each issue's SHA from the mapping _Commit the work_ step 7 kept — never from `HEAD` at update
+SHAs exist, and take each issue's SHA from the mapping _Commit the work_ step 6 kept — never from `HEAD` at update
 time.
 
 Re-run the ignore probe on the issue paths first. If it now reports an unresolved state, write nothing: report the

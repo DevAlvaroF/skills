@@ -73,9 +73,10 @@ checks were blocked and why, deviations from the plan and open work.
 level-four heading with "#", "kanban-commit" or "Superseded commit": quote such text inline in backticks instead. The
 record is read line by line, and those starts are what it reads as headings and recordings.
 
-**The user's answers.** When the user answers a question the plan leaves open, write the answer into the plan beside
-the question, marked as the user's, in the same write as your entry. The next step runs in a fresh session and sees
-only the plan: an answer kept in your entry alone reads to it as a question still open, or as your guess.
+**The user's answers.** When the user answers a question the plan leaves open, write the answer into the planning
+content beside the question, marked as the user's, in the same write as your entry — never inside an entry, because
+entries are never edited. The next step runs in a fresh session and sees only the plan: an answer kept in your entry
+alone reads to it as a question still open, or as your guess.
 
 **One writer.** Only you, the coordinating session, write to the plan, after any agents you delegated to have
 finished. Make each change from a fresh read as one write, then reread the plan to verify it; if it changed under you
