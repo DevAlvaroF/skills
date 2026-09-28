@@ -101,7 +101,8 @@ commit. Identify your commit by its parent (the `HEAD` you noted first) and subj
    `git --literal-pathspecs diff --cached --quiet HEAD -- '<those paths>'` succeeds, and that every noted path is still
    staged.
 6. If a hook (lint-staged, a formatter) added paths or left the index disagreeing, name what it added and
-   `git --literal-pathspecs reset -q -- '<path>'` each such path not noted; for a noted one, stop and report.
+   `git --literal-pathspecs reset -q -- '<path>'` each path it added or left disagreeing that isn't noted; for a noted
+   one, stop and report.
 
 **Code commits (C, E):** the step's prefix and an imperative subject, at most 72 characters in all, and optionally one
 to three lines of why. Stage this step's changes by path, never the Job's plan or unrelated changes, by the route.

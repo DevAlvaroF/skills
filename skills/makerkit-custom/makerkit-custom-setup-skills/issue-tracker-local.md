@@ -353,15 +353,15 @@ otherwise globs or rejects a `[locale]` or `(group)` segment. Never stage a dire
 2. Note the staged paths that aren't yours: `git diff --cached --name-only`.
 3. `git --literal-pathspecs add -- '<path>'` each path that exists in the working tree, which also replaces a draft
    already staged. A path deleted, or removed by `git rm` or `git mv`, gets no `add`; a rename commits both its paths.
-4. `git --literal-pathspecs commit --only -- '<paths>'`. Literal mode stops `[`, `*` or `?` matching neighbours;
-   `--only` leaves the user's other staged work staged, not swept in. Nothing to commit means no commit, never an
-   empty one.
+4. `git --literal-pathspecs commit --only -m "<subject>" -- '<paths>'`, adding one `-m "<paragraph>"` before `--` for
+   each further paragraph of the message. Literal mode stops `[`, `*` or `?` matching neighbours; `--only` leaves the
+   user's other staged work staged, not swept in. Nothing to commit means no commit, never an empty one.
 5. Verify that `git diff-tree --no-commit-id --name-only -r HEAD` lists exactly your paths, that the user's index
    equals the commit for every path it lists (`git --literal-pathspecs diff --cached --quiet HEAD -- '<paths>'`), and
    that every noted path is still staged.
 6. A hook (lint-staged, a formatter) that changed the commit adds paths or leaves the index disagreeing, for the
-   user's next commit to revert. Name every path it added. Bring each such path the user hadn't staged to `HEAD` with
-   `git --literal-pathspecs reset -q -- '<path>'`; if one was noted, stop and report.
+   user's next commit to revert. Name every path it added. Bring each path it added or left disagreeing to `HEAD` with
+   `git --literal-pathspecs reset -q -- '<path>'`, unless the user had staged it (a noted path): then stop and report.
 
 ## Committing a Spec and its Issues
 
@@ -420,8 +420,8 @@ before committing, then:
      `update-ref` refuses, stop and report it: never retry onto the new `HEAD` without deciding again. `commit-tree`
      runs no hooks, which is acceptable for a commit that carries no content, and ignores `commit.gpgsign`, hence `-S`:
      if signing fails, nothing is published; stop and report it, never retry unsigned. A plain
-     `git commit --allow-empty` is never the marker: it commits whatever the user has staged. The marker touches no path,
-     so the change computation leaves it out too.
+     `git commit --allow-empty` is never the marker: it commits whatever the user has staged. The marker touches no
+     path, so the change computation leaves it out too.
    - The marker exists only for a positively established local mode. It is never a fallback for an unresolved ignore
      state, a failed hook, a permission or Git error, or a record that failed to save: each of those stops the phase
      and is reported as it is. No review commit force-adds, edits an ignore rule, amends or pushes.
