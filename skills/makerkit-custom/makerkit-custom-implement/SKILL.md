@@ -59,8 +59,8 @@ Once the implementation is done, run the following in order:
    through a sub-agent**: its output is mostly noise this context never needs. Ask the sub-agent to run the repo's exact
    command and report only the failures (test or rule name, file, and the assertion or error line) under 200 words, plus
    an overall pass/fail verdict. Fix any failures here, then send it back to re-run.
-3. **Commit the work, then advance the issues** — in that order, per _Commit the work_ and _Advance or close the
-   issues_ below. The commit comes first because the issue records its SHA.
+3. **Commit the work, then advance the issues** — in that order, per _Commit the work_ and _Advance the issues_
+   below. The commit comes first because the issue records its SHA.
 
 ## Commit the work
 
@@ -87,19 +87,24 @@ commit exists.
 6. **One issue, one commit.** With several issues in a run, commit them one at a time in dependency order. Only when
    the work genuinely cannot be separated: one commit carrying an `Issue:` trailer per issue, and the same SHA recorded
    on each of them.
-7. **Never push, never amend, never rebase.** One commit forward, nothing rewritten.
+7. **Capture each commit's SHA as it lands.** Straight after each commit, before the next one, read its full
+   40-character SHA and confirm its subject and `Issue:` trailer(s) are the ones you wrote. Keep an explicit
+   issue → SHA mapping for the run: by the time the issues are updated, `HEAD` names only the last commit, so reading
+   it then would give every earlier issue the wrong SHA.
+8. **Never push, never amend, never rebase.** One commit forward, nothing rewritten.
 
-## Advance or close the issues
+## Advance the issues
 
-Updating the issues you implemented is part of the job, not an optional extra. Run it **after** the commit, so the SHA
-exists: `git rev-parse HEAD` gives you the full SHA of the commit you just made.
+Updating the issues you implemented is part of the job, not an optional extra. Run it **after** the commits, so the
+SHAs exist, and take each issue's SHA from the mapping _Commit the work_ step 7 kept — never from `HEAD` at update
+time.
 
 Re-run the ignore probe on the issue paths first. If it now reports an unresolved state, write nothing: report the
 commit's full SHA and the paths, and leave the issue to the user. Then rewrite each committed issue **once**
 (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`; the directory and issue numbers are independent),
 carrying all four changes together: flip every satisfied entry in
-`acceptanceCriteria` to `"done": true`, set `"status": "done-coding-awaiting-final-review"`, record the SHA in
-`codeCommit`, and append one `comments` entry summarising the run — the implementation record in
+`acceptanceCriteria` to `"done": true`, set `"status": "done-coding-awaiting-final-review"`, record that issue's own SHA
+from the mapping in `codeCommit`, and append one `comments` entry summarising the run — the implementation record in
 `.mysdd/issue-tracker.md` § Comment records: the verification you ran with its final output (the pass/fail summary, not
 the full log), the review outcome, anything left open, and any ADR the user agreed to supersede, with its replacement,
 by number and title — the final review accepts that change, and lets it outrank the spec, only on this record. The same
@@ -121,7 +126,7 @@ committing again.
 If an issue is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
 outstanding. Never tick a criterion you did not verify.
 
-Then report, per issue: the commit SHA and its subject line, which issues you advanced or closed, and which you left
-open with a one-line reason for each. In committed mode the issue file is now dirty in the working tree and
-deliberately outside the commit — say so, and leave it to the user rather than amending the commit to chase its own
+Then report, per issue: the commit SHA and its subject line (the issue → SHA mapping), which issues you advanced, and
+which you left open with a one-line reason for each. In committed mode the issue file is now dirty in the working tree
+and deliberately outside the commit — say so, and leave it to the user rather than amending the commit to chase its own
 SHA. In local mode it is ignored and stays out of every commit.

@@ -110,10 +110,12 @@ under a new attempt number.
 5. **Commit the review record**, following `.mysdd/issue-tracker.md` § Recording a final review, which owns the message,
    the isolation and the retry rules. The commit is what lets the user, coming back later, see that the review
    happened.
-   - In committed mode, commit the issue file alone, by explicit path (`git commit --only -- <issue path>`) or through
-     an isolated index. Staging it and running a plain `git commit` would also commit whatever else the user had
-     staged. The subject is `REVIEW HISTORY: Record final review attempt <N>`, with an `Issue: <issue path>` trailer
-     and no attribution. Confirm the commit changed exactly that path.
+   - In committed mode, commit the issue file alone: stage it with `git --literal-pathspecs add -- <issue path>` only
+     if Git does not track it yet, then commit with `git --literal-pathspecs commit --only -- <issue path>`. Staging it
+     and running a plain `git commit` would also commit whatever else the user had staged, and a temporary index would
+     leave the old version in the user's index for their next commit to revert. The subject is
+     `REVIEW HISTORY: Record final review attempt <N>`, with an `Issue: <issue path>` trailer and no attribution.
+     Confirm the commit changed exactly that path.
    - In a local mode the probe positively established, there is nothing to stage: make the isolated empty marker the
      tracker describes — a temporary index seeded from `HEAD`, `--allow-empty`, and a check that the new commit's tree
      equals its parent's. A plain `git commit --allow-empty` would sweep in the user's staged work. The marker is not a

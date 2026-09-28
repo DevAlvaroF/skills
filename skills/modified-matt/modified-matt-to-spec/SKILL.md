@@ -6,8 +6,8 @@ disable-model-invocation: true
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the
 user; just synthesize what you already know. If the design conversation isn't in this session's context, say so and
-ask the user to point you at it rather than inventing a decision log. The one thing to stop and ask about is a
-contradiction with a binding ADR that the conversation never resolved.
+ask the user to point you at it rather than inventing a decision log. Beyond confirming the test boundaries in step 2,
+the one thing to stop and ask about is a contradiction with a binding ADR that the conversation never resolved.
 
 **Read `.mysdd/issue-tracker.md` before you write anything.** It is the contract: directory layout, feature and issue
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop

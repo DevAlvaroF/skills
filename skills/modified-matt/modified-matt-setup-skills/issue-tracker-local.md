@@ -363,10 +363,12 @@ before committing, then:
 
    - In **committed** mode the commit holds exactly the whole issue file and nothing else. Staging the file and then
      running a plain `git commit` is not enough: the user's index may already hold other staged work, and that commit
-     would sweep it in. Commit by explicit path instead — `git commit --only -- <issue path>`, after adding that one
-     path if Git does not track it yet — or through an isolated index, then confirm the commit changed exactly that
-     path. The file sits under `.mysdd/features/`, so the final review's change computation leaves the commit out of
-     the reviewed change.
+     would sweep it in. Commit by literal path instead: `git --literal-pathspecs add -- <issue path>` first only if Git
+     does not track the file yet, then `git --literal-pathspecs commit --only -- <issue path>` (without literal mode a
+     path holding `[`, `*` or `?` also matches its neighbours). That is the only route: `commit --only` leaves the
+     user's index holding what it committed, where a temporary index would leave the old version staged for the user's
+     next commit to revert. Then confirm the commit changed exactly that path. The file sits under `.mysdd/features/`,
+     so the final review's change computation leaves the commit out of the reviewed change.
    - In **local** mode, positively established by the probe, there is nothing to stage, so make an **empty marker** in
      place of the record commit. Build it without touching the user's index: seed a temporary index from the current
      `HEAD` tree (`GIT_INDEX_FILE=<temp> git read-tree HEAD`), commit through that index with `--allow-empty`, check
@@ -377,11 +379,12 @@ before committing, then:
      state, a failed hook, a permission or Git error, or a record that failed to save: each of those stops the phase
      and is reported as it is. No review commit force-adds, edits an ignore rule, amends or pushes.
 3. **Record its SHA.** Identify the commit just created — its parent is the `HEAD` noted in step 2, its subject names
-   this attempt and its `Issue:` trailer this issue — and read its full 40-character SHA. If `HEAD` is not that commit
-   (another agent committed in the meantime) or the commit cannot be verified, stop and report rather than guess. Write the SHA into
-   `reviewHistoryCommit`, re-read the file, and leave that one change uncommitted. A commit cannot contain its own SHA,
-   so never amend to carry it: in committed mode the next commit of the issue file — normally phase 2's
-   `Closed Issue:` commit — carries it. In local mode it stays on disk only.
+   this attempt and its `Issue:` trailer this issue — and read its full 40-character SHA. Identify it by those facts,
+   never by whatever `HEAD` is by then: another agent may have committed in the meantime. If no commit or more than one
+   matches, or it cannot be verified, stop and report rather than guess. Write the SHA into `reviewHistoryCommit`,
+   re-read the file, and leave that one change uncommitted. A commit cannot contain its own SHA, so never amend to carry
+   it: in committed mode the next commit of the issue file — normally phase 2's `Closed Issue:` commit — carries it. In
+   local mode it stays on disk only.
 
 Report the three outcomes separately: the record saved; the record committed with its SHA — in local mode, **local
 record saved; marker committed**; and the SHA written to `reviewHistoryCommit`.
@@ -455,8 +458,10 @@ again before staging:
 
 - The subject is exactly `Closed Issue: <issue path>`, the path repo-root-relative and beginning `.mysdd/features/`
   (`Closed Issue: .mysdd/features/03-workspace-seats/issues/02-seat-guard.json`). No body, no trailers.
-- Stage only that issue's JSON file, plus any `.mysdd/` board-state file the tooling keeps and has changed (for example
-  `.mysdd/kanban-boards.json`). Never stage implementation files, a `CONTEXT.md` or anything under `.mysdd/docs/`:
+- Commit only that issue's JSON file, plus any `.mysdd/` board-state file the tooling keeps and has changed (for example
+  `.mysdd/kanban-boards.json`), by literal path: `git --literal-pathspecs add -- <path>` first for any of them Git does
+  not track yet, then `git --literal-pathspecs commit --only -- <issue path> [board file]`. The user's other staged work
+  stays staged and out of the commit. Never stage implementation files, a `CONTEXT.md` or anything under `.mysdd/docs/`:
   those belong to the `SPEC: `, `CODE: ` and `CODE REVIEW FIXES: ` commits.
 - The issue file carries phase 1's uncommitted `reviewHistoryCommit` into this commit.
 - The no-attribution rule in § Commit message format applies.

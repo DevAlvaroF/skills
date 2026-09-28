@@ -90,12 +90,14 @@ Iterate until the user approves the breakdown.
 
 ### 5. Publish the issues
 
-**Inspect before you write.** List `issues/*.json` in the target feature directory first. Then run the ignore probe
-(`.mysdd/issue-tracker.md` § Ignore policy) with the spec and every issue file this run will create or update as its
-targets. If it reports an unresolved state, write nothing: list the paths and let the user resolve them.
+**Inspect before you write.** List `issues/*.json` and `issues/archive/*.json` in the target feature directory first.
+Then run the ignore probe (`.mysdd/issue-tracker.md` § Ignore policy) with the spec and every issue file this run will
+create or update as its targets. If it reports an unresolved state, write nothing: list the paths and let the user
+resolve them.
 
-- **Absent or empty** → first publish. Create the issues as described below, numbering from `01` in dependency order
-  (blockers first).
+- **No live issue** (`issues/*.json` absent or empty) → first publish. Create the issues as described below, in
+  dependency order (blockers first), numbering from `01` — or, when `issues/archive/` holds retired issues, from one
+  past their highest number, which is never reused.
 - **Non-empty** → **reconciliation mode**. Write nothing until the whole reconciliation is resolved and shown to the
   user; see *Reconciling with existing issues* below.
 
@@ -191,6 +193,12 @@ Skip this step when the run didn't start from a spec. Otherwise call the Skill t
    `.mysdd/docs/` until the user approves, and run the ignore probe with each ADR as a target before writing it.
 
 ### 7. Commit the Spec, the issues and the decisions
+
+**Scan for secrets first.** In committed mode this is the spec's first commit, and a secret in history outlives any
+later redaction. Before staging, read the spec and the issue files and scan them for secret-shaped strings: API keys and
+tokens, `sk-`/`ghp_`/`AKIA`-style prefixes, private key blocks, connection strings or URLs with embedded credentials,
+`.env`-style assignments of a secret-looking name, and pasted customer data or PII. If you find any, stop: commit
+nothing, tell the user exactly what you found and where, and let them redact it first.
 
 Once the user approves the published issues and step 6, commit the Spec, the issues and the step-6 files as
 `.mysdd/issue-tracker.md` § Committing a Spec and its Issues defines, re-running its probe first. Follow it exactly —
