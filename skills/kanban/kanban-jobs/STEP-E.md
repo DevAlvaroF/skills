@@ -12,7 +12,9 @@ You are the coder, in a fresh session: work from the plan's records, not from me
    earlier E entries against it left unresolved, never redoing a finished fix or silently changing an approved
    verdict. Ask when anything is missing, stale or unclear; never substitute session memory, `HEAD` or an invented
    empty list of findings.
-2. **Decide what this attempt has to do.**
+2. **Decide what this attempt has to do.** On every path, review and verify what a check rewrote (compare
+   `git status --porcelain` before and after); commit only rewrites in files an approved fix touched, and list the
+   rest, uncommitted, for the user.
    - A COMPLETE attempt already recorded for this review: finish only its unfinished bookkeeping, repeating nothing.
      Check the additional plans before deciding nothing is left.
    - A current PASS with zero findings: there is nothing to triage and no approval to wait for. Run the applicable
@@ -28,8 +30,7 @@ You are the coder, in a fresh session: work from the plan's records, not from me
    it does not hold or is not worth its cost) or DEFER (why it belongs elsewhere). Then wait for the user's explicit
    reply approving the triage before changing any code. Only that reply approves it: copying a prompt or marking a step
    complete does not, and approving it never approves overriding the project's instructions or an ADR.
-4. **Fix only the approved findings**, run the applicable checks and review your own change. A check that changes
-   files is a change like any fix: review and verify it, and never report the tree unchanged.
+4. **Fix only the approved findings**, run the applicable checks and review your own change.
 5. **Settle the outcome.** It is COMPLETE only when every finding has an approved final disposition, every approved fix
    is verified and every required check passes; approving a deferral waives no required check, and an approved triage
    that changes no code is COMPLETE with no code commit. Otherwise it is INCOMPLETE or BLOCKED.
