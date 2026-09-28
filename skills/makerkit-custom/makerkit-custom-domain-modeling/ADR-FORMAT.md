@@ -7,6 +7,8 @@ history is what remembers a removed one.
 
 ## Template
 
+The example is a Supabase-kit decision:
+
 ```md
 ---
 status: accepted
@@ -54,8 +56,8 @@ The three tests in `SKILL.md` decide. Decisions that typically pass them:
 - **Boundary and scope decisions**, including the explicit no-s: "feature tables reference accounts by `account_id`
   only".
 - **Deliberate deviations from the documented path**: anything against a rule in an `AGENTS.md` or the Makerkit docs —
-  the admin client instead of the RLS-backed one, a route handler where a server action is idiomatic. These stop the
-  next engineer "fixing" something deliberate.
+  on the Supabase kit, the admin client instead of the RLS-backed one; a route handler where a server action is
+  idiomatic. These stop the next engineer "fixing" something deliberate.
 - **Constraints not visible in the code**: compliance requirements, contractual response times, a partner API's limits.
 - **Rejected alternatives when the rejection is non-obvious**, so nobody suggests them again in six months.
 

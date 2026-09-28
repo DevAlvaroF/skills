@@ -42,8 +42,8 @@ Look for the originating spec, in this order:
 
 ### 2. Identify the standards sources
 
-Only when the Standards fallback runs. The sources are every `AGENTS.md` from the repo root down to each directory the
-work touches, the chain [SKILL.md](./SKILL.md) § Ground yourself first reads.
+Only when the Standards fallback runs. The sources are the `AGENTS.md` files `.mysdd/docs/agents/domain.md` § Ground
+yourself first lists for the paths the work touches, the routed ones included.
 
 On top of whatever the repo documents, the Standards fallback always carries the **smell baseline** below: a fixed set
 of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:

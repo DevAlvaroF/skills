@@ -52,14 +52,15 @@ When the user uses vague or overloaded terms, propose a precise canonical term. 
 
 When domain relationships are being discussed, stress-test them with specific scenarios. Invent scenarios that probe
 edge cases and force the user to be precise about the boundaries between concepts — especially across the personal/team
-account split, role and permission checks, and what RLS does or doesn't enforce.
+account split, role and permission checks, and what access policies (RLS on the Supabase kit) do or don't enforce.
 
 ### Cross-reference with code
 
-When the user states how something works, check whether the code agrees. Schema and policies under `apps/web/supabase/`
-are the ground truth for the data model. If you find a contradiction, surface it: "Your policy scopes this to
-`account_id`, but you just said members of the parent account can read it. Which is right?" Learn from the coding
-patterns and from the code itself.
+When the user states how something works, check whether the code agrees. The ground truth for the data model is the
+schema the project's `AGENTS.md` names; otherwise whichever exists: Supabase's `apps/web/supabase/schemas` and
+`migrations`, a Drizzle `schema.ts` (its `drizzle.config` says where), or a `schema.prisma`. If you find a
+contradiction, surface it: "Your policy scopes this to `account_id`, but you just said members of the parent account can
+read it. Which is right?" Learn from the coding patterns and from the code itself.
 
 ### Record terms inline
 

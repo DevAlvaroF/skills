@@ -37,12 +37,10 @@ and this skill expects `Tracker contract: 3`. Otherwise stop, write nothing, and
 - a number higher than 3: these skills are behind — update them (`npx skills update -p`), and the tool whose prompt
   drove this session too if that prompt named a lower number.
 
-Read every `AGENTS.md` from the repo root down to each directory the change touches, in order, including each one's
-`## Skills` and any verification it adds — the root file is already loaded; read the rest directly, because not every
-agent loads nested files — and the glossary and the ADRs whose `scope` covers the touched paths, per
-`.mysdd/docs/agents/domain.md`. ADRs are binding. The phase's role (independent reviewer, or coder) is the role you are
-acting in and nothing more. Where it conflicts with those instructions, say so and ask the user rather than deciding the
-role wins.
+For the paths the change touches, read the `AGENTS.md` files, the glossary and the binding ADRs, as the first two
+bullets of `.mysdd/docs/agents/domain.md` § Ground yourself first list them. ADRs are binding. The phase's role
+(independent reviewer, or coder) is the role you are acting in and nothing more. Where it conflicts with those
+instructions, say so and ask the user rather than deciding the role wins.
 
 ## Inputs
 

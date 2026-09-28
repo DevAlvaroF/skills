@@ -45,7 +45,7 @@ issue's commit.
 
 If you hand parts of the work to sub-agents, split it **before** dispatching any. Give each sub-agent a disjoint set of
 files and the test boundaries it owns, and have its handoff name every path it created, edited or deleted. Do anything
-several slices depend on in this context first. That includes a shared type, a migration or RLS policy, or a contract
+several slices depend on in this context first. That includes a shared type, a migration or access policy, or a contract
 two apps or packages both change. Two sub-agents never edit the same file. Don't split any part that depends on the
 docs sub-agent's answer until that answer is in. If the work won't split without overlapping files, don't force it:
 implement it here, one piece after another. The review, the commit and advancing the issues stay in this context.
@@ -57,7 +57,8 @@ and the commit stages exactly its paths.
 
 Run typechecking regularly and single test files regularly — those are short, and you need their output in hand to
 drive the next cycle. Run the full test suite once at the end, as one of step 2's whole-repo runs, through the sub-agent
-that step describes.
+that step describes. If § Verification names no test command, still run the repo's test script (`package.json`'s
+`test`, or a turbo filter for the touched package) that way, and say so.
 
 Once the implementation is done, run the following in order:
 

@@ -17,16 +17,19 @@ Grill, to-spec, to-issues and implement send you here before they start. Read th
 
 - every `AGENTS.md` from the repo root down to each directory the work touches, in order — `AGENTS.md`, then
   `apps/web/AGENTS.md`, then `apps/web/app/[locale]/admin/AGENTS.md` and so on — including each one's `## Skills` and
-  any verification it adds. The root file is already loaded; read the rest directly, because not every agent loads
-  nested files. Add the vendored Next.js docs for anything Next.js. They're small and targeted. Where they and the skill
-  you are running differ, **follow the repo**.
+  any verification it adds, plus every `AGENTS.md` a file on that chain routes a touched concern to: the root's Key
+  Patterns table sends server actions to `packages/next/AGENTS.md` and the admin client to
+  `packages/supabase/AGENTS.md`. The root file is already loaded; read the rest directly, because not every agent
+  loads nested files. Add the vendored Next.js docs for anything Next.js. They're small and targeted. Where they and the
+  skill you are running differ, **follow the repo**.
 - the glossary and the ADRs whose `scope` covers the touched paths, per § Before exploring, read these. ADRs are
   binding.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
   piece is and how it fits. Read directly, and only for the pieces the feature touches.
 - the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
   upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
-  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work.
+  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. If the repo has
+  no `docs/`, skip this.
 
 The skill that sent you here says what to do while the docs sub-agent works.
 

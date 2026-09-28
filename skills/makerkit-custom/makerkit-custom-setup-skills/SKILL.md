@@ -174,9 +174,9 @@ Glossary in `.mysdd/docs/CONTEXT.md`, decisions as scoped ADRs in `.mysdd/docs/a
 ### Project docs
 
 Conventions live in a distribution of `AGENTS.md` files (root, per app/package, and deeper). Read every `AGENTS.md`
-from the root down to each directory you touch, in order: the root is already loaded; read the rest directly, because
-not every agent loads nested files. Invoke the skills each one's `## Skills` section names, and run any verification
-it adds.
+from the root down to each directory you touch, in order, plus every one those files route a concern you touch to: the
+root is already loaded; read the rest directly, because not every agent loads nested files. Invoke the skills each
+one's `## Skills` section names, and run any verification it adds.
 ```
 
 Then write the generated files, creating directories as needed, from the seed templates in this skill folder:
