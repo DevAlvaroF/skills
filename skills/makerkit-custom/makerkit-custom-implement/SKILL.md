@@ -25,7 +25,8 @@ SHA, it has been implemented: any further change to it is a final-review fix rou
 `/makerkit-custom-final-review`, the coder's triage of the review in a fresh session, not to this skill: stop for that
 issue and tell the user. Run the tracker's ignore probe (`.mysdd/issue-tracker.md` § Ignore policy) with the issue
 paths as targets before you start; if it reports an unresolved state, list the paths and stop until the user resolves
-them.
+them. Then, before editing anything, record `git status --porcelain=v1 -z --untracked-files=all`: the pre-existing
+dirty set.
 
 ## Ground yourself first
 
@@ -54,11 +55,16 @@ to change it, supersede it per `makerkit-custom-domain-modeling`'s rules. The AD
 issue's commit.
 
 If you hand parts of the work to sub-agents, split it **before** dispatching any. Give each sub-agent a disjoint set of
-files and the test boundaries it owns. Do anything several slices depend on in this context first. That includes a
-shared type, a migration or RLS policy, or a contract two apps or packages both change. Two sub-agents never edit the
-same file. Don't split any part that depends on the docs sub-agent's answer until that answer is in. If the work won't
-split without overlapping files, don't force it: implement it here, one piece after another. The review, the commit and
-advancing the issues stay in this context.
+files and the test boundaries it owns, and have its handoff name every path it created, edited or deleted. Do anything
+several slices depend on in this context first. That includes a shared type, a migration or RLS policy, or a contract
+two apps or packages both change. Two sub-agents never edit the same file. Don't split any part that depends on the
+docs sub-agent's answer until that answer is in. If the work won't split without overlapping files, don't force it:
+implement it here, one piece after another. The review, the commit and advancing the issues stay in this context.
+
+Keep an explicit **inventory** of every path the work creates, edits or deletes: yours, a new one only once you've
+confirmed it was absent, and each sub-agent's, as its handoff names them; never infer it from `git status`. A path in
+the pre-existing dirty set that the work also edits goes in marked **mixed**. The review covers exactly the inventory,
+and the commit stages exactly its paths.
 
 Run typechecking regularly and single test files regularly — those are short, and you need their output in hand to
 drive the next cycle. Run the full test suite once at the end, as one of step 2's whole-repo runs, through the sub-agent
@@ -93,9 +99,8 @@ commit exists.
    connection strings or URLs with embedded credentials, `.env`-style assignments of a secret-looking name, and pasted
    customer data or PII. If you find any, stop: do not commit, tell the user exactly what you found and where, and let
    them redact the spec first.
-3. **Commit on the current branch, whichever it is.** Commit the implementation files, plus the ADR file(s) the user
-   agreed to change for this issue, each by path, by the route in `.mysdd/issue-tracker.md` § Commit message format.
-   Never `git add .mysdd/` and never `git add -A`.
+3. **Commit on the current branch, whichever it is.** Commit exactly this issue's inventory paths, by the route in
+   `.mysdd/issue-tracker.md` § Commit message format. Never `git add .mysdd/` and never `git add -A`.
 4. **Build the message.** The header is always `CODE: `: this skill only ever makes the first-round commit, on an issue
    whose `codeCommit` is `null`. `CODE REVIEW FIXES: ` commits belong to the final-review skill's phase 2. Write the
    message to the shape in `.mysdd/issue-tracker.md` § Commit message format.
@@ -143,7 +148,7 @@ committing again.
 If an issue is only partly done, leave it open: tick only the criteria that are genuinely met and say which are
 outstanding. Never tick a criterion you did not verify.
 
-Then report, per issue: the commit SHA and its subject line (the issue → SHA mapping), which issues you advanced, and
-which you left open with a one-line reason for each. In committed mode the issue file is now dirty in the working tree
-and deliberately outside the commit — say so, and leave it to the user rather than amending the commit to chase its own
-SHA. In local mode it is ignored and stays out of every commit.
+Then report, per issue: the commit SHA and its subject line (the issue → SHA mapping), each mixed path it carries, which
+issues you advanced, and which you left open with a one-line reason for each. In committed mode the issue file is now
+dirty in the working tree and deliberately outside the commit — say so, and leave it to the user rather than amending
+the commit to chase its own SHA. In local mode it is ignored and stays out of every commit.

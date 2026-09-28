@@ -20,22 +20,12 @@ aggregates their findings.
 
 ## Collect the diff
 
-**Stay out of the full diff yourself.** The sub-agents below read it; in this context take only its shape:
-
-```bash
-git diff --stat HEAD
-git status --short
-```
-
-If no uncommitted changes exist, the review target is the last commit instead:
-
-```bash
-git show --stat HEAD
-```
-
-Hand each sub-agent the *command* that reproduces the full diff — `git diff HEAD`, or `git show HEAD` when reviewing
-the last commit — and let it run that itself. Never paste diff contents into a sub-agent prompt, and never read the
-full diff into this context: it is the largest thing this skill touches, and doing both means paying for it twice.
+The review covers exactly the inventory [SKILL.md](./SKILL.md) keeps. If it is empty, there is nothing to review: stop
+and say so. **Stay out of the full diff yourself**: the inventory is its shape. Hand each sub-agent the inventory, mixed
+paths marked (part of their diff predates the run), and the *commands* that reproduce the diff, to run itself:
+`git --literal-pathspecs diff HEAD -- '<tracked path>' …` for the tracked paths, and a whole read of each new file,
+which that diff never shows. Never paste diff contents into a sub-agent prompt, and never read the full diff into this
+context: it is the largest thing this skill touches, and doing both means paying for it twice.
 
 ## Process
 
@@ -96,7 +86,7 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 **Standards sub-agent prompt** should include:
 
-- The diff command from _Collect the diff_ (the command, never the diff itself) and the commit list.
+- The inventory and the commands from _Collect the diff_ (the commands, never the diff itself).
 - The list of standards-source files you found in step 2, **plus the smell baseline from step 2** pasted in full (the
   sub-agent has no other access to it).
 - The brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the
@@ -107,19 +97,21 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 **Spec sub-agent prompt** should include:
 
-- The diff command from _Collect the diff_ (the command, never the diff itself) and the commit list.
-- The *path* to the spec. Pass the path only and let the sub-agent read it; don't read the spec into this context to
-  paste it in.
-- The paths of the binding ADRs: those whose `scope` covers a touched file, per `.mysdd/docs/agents/domain.md`.
-- Each ADR the user agreed to supersede in this run, with its replacement, by number and title.
-- The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that
-  wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong;
+- The inventory and the commands from _Collect the diff_ (the commands, never the diff itself).
+- **The scope**: the selected Issue paths, with their `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and
+  `covers`.
+- **Constraints and context**: the *path* to the spec (the path only; don't read the spec into this context), the paths
+  of the binding ADRs, those whose `scope` covers a touched file per `.mysdd/docs/agents/domain.md`, and each ADR the
+  user agreed to supersede in this run, with its replacement, by number and title.
+- The brief: "Report: (a) what the scope asks for that is missing or partial — a spec requirement outside the selected
+  Issues' `covers` is not a finding: at most, note which other Issue owns it; (b) behaviour in the diff that wasn't
+  asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong;
   (d) places the diff contradicts the spec's Decision log or a binding ADR. An agreed supersession listed above is
   not a finding: its replacement outranks both the old ADR and the matching spec decision, so check the diff against
-  the replacement. Quote the spec line or ADR for each finding. Under 400 words."
+  the replacement. Quote the Issue, spec line or ADR for each finding. Under 400 words."
 
-If there is no spec, run the Spec sub-agent anyway: pass the issue path in its place, drop the Decision log from (d),
-and note "no spec available" in the final report. The binding-ADR check never depends on a spec.
+If there is no spec, run the Spec sub-agent anyway, without one: drop the Decision log from (d), and note "no spec
+available" in the final report. The scope and the binding-ADR check never depend on a spec.
 
 ### 4. Aggregate
 
