@@ -34,7 +34,9 @@ tracker predates this contract when any of these is true:
 - its issue shape has no `reviewHistoryCommit`, or it has no § Recording a final review with its `REVIEW HISTORY: `
   commit;
 - it forbids the local-mode review marker, for example by skipping every bookkeeping commit in local mode with no
-  exception for it.
+  exception for it;
+- it has no § Committing additional plans, or its record commits are not literal-path `git commit --only` — for
+  example, it still offers an isolated index for the review record.
 
 Comment records and coder-owned fixes alone don't settle it: an older tracker has both and still closes in phase 1. On
 a mismatch, write nothing: name the conflict and ask the user to update the tracker (re-running
@@ -107,27 +109,13 @@ under a new attempt number.
    or line for an environment or verification failure), its impact and the correction you ask for. Write
    `Findings: None.` only when there are no findings at all; a PASS with suggestions lists them. Leave `status` as it
    is, whatever the verdict.
-5. **Commit the review record**, following `.mysdd/issue-tracker.md` § Recording a final review, which owns the message,
-   the isolation and the retry rules. The commit is what lets the user, coming back later, see that the review
-   happened.
-   - In committed mode, commit the issue file alone: stage it with `git --literal-pathspecs add -- <issue path>` only
-     if Git does not track it yet, then commit with `git --literal-pathspecs commit --only -- <issue path>`. Staging it
-     and running a plain `git commit` would also commit whatever else the user had staged, and a temporary index would
-     leave the old version in the user's index for their next commit to revert. The subject is
-     `REVIEW HISTORY: Record final review attempt <N>`, with an `Issue: <issue path>` trailer and no attribution.
-     Confirm the commit changed exactly that path.
-   - In a local mode the probe positively established, there is nothing to stage: make the isolated empty marker the
-     tracker describes — a temporary index seeded from `HEAD`, `--allow-empty`, and a check that the new commit's tree
-     equals its parent's. A plain `git commit --allow-empty` would sweep in the user's staged work. The marker is not a
-     fallback: an unresolved probe, a failed hook, a permission or Git error, or a record that failed to save stops
-     you, and you report it as it is.
-   - Identify the commit you created — its parent is the `HEAD` you started from, its subject names this attempt — and
-     read its full 40-character SHA. Write it into `reviewHistoryCommit`, re-read the file, and leave that one change
-     uncommitted: a commit cannot contain its own SHA, so never amend. The next commit of the issue file carries it.
-   - A failed commit does not erase the saved review: report it, and let a retry commit that same record rather than
-     append another. After the commit succeeded, a failed SHA write retries only that write, for the commit already
-     identified. Never add a second record or a second commit for one review. If a later session cannot identify the
-     created commit unambiguously, stop and ask; never substitute `HEAD`, which another agent may have moved.
+5. **Commit the review record** as `.mysdd/issue-tracker.md` § Recording a final review directs. The commit is what
+   lets the user, coming back later, see that the review happened. The tracker owns the message, the literal-path
+   `commit --only` route (a plain `git commit` would sweep in whatever else the user had staged), the local-mode empty
+   marker, how to identify the commit you created without trusting `HEAD`, writing its SHA into `reviewHistoryCommit`
+   and leaving that one change uncommitted (a commit cannot contain its own SHA), and the retries. The marker is only
+   for a local mode the probe positively established, never a fallback for a failure; a failed commit never erases the
+   saved review, and one review never gets a second record or a second commit.
 
 Fix nothing in this phase, and never write `status` or `reviewCodeCommit` or make the close commit: phase 2 closes, even
 after a clean PASS. Report three outcomes separately — the record saved; the record committed, with its SHA (in local
@@ -167,7 +155,7 @@ keep the inventory of additional plans that § Additional plans below describes.
    - **A saved close is not a finished close.** The status is already `done-final-review` and a COMPLETE phase 2 record
      answers this review. The status was written before the close commit, so it doesn't prove that commit landed, and
      neither the record nor the close proves the attempt's additional plans were committed: check the close
-     bookkeeping per § Closing an issue and the planning operation per § Additional plans › Retries. When it is all
+     bookkeeping per § Closing an issue and the planning operation per § Additional plans. When it is all
      there, nothing is left; say so and stop. When something is missing, make only that: the close commit, or the
      attempt's proven pending planning commit — no new record, no second triage, no new fix commit.
    - A NEEDS FIXES review, or a failed or blocked review, that records no findings is incomplete evidence, not a clean
@@ -244,55 +232,20 @@ planning operation is unresolved.
 
 ### Additional plans
 
-An **additional plan** is a markdown file under `.claude/plans` that you, or an agent you delegated to, created for
-this phase 2 attempt. Step 7 commits the eligible ones in a planning-only commit of its own, never inside the
-`CODE REVIEW FIXES: ` or `Closed Issue:` commit, whose scopes stay exactly as steps 7 and 10 give them. It runs for
-every outcome — no code change, zero findings, every finding rejected or deferred, checks blocked, local mode (which
-governs Feature files, not these plans) — and it proves nothing about the code or the close. A tracker silent about
-additional plans is no conflict; a project or tracker instruction that explicitly forbids committing them is: surface
-it and ask, never override it.
+An **additional plan** is a plan file that you, or an agent you delegated to, created inside the repository for this
+phase 2 attempt — for example under `.claude/plans` for Claude Code; an agent that writes no plan files has none.
+`.mysdd/issue-tracker.md` § Committing additional plans owns what happens to them: provenance, eligibility, the ignore
+probe, the planning-only `ATTEMPT PLANS: final review <issue path> attempt <K>` commit and its verification, the
+`Attempt plans:` value and the retries. What this phase adds:
 
-1. **Inventory at creation.** Keep an explicit list of the plans this attempt creates. Confirm a path is absent before
-   you create it, and have every delegate name in its handoff the exact paths it created; never assume an agent
-   created none. An untracked status, a directory diff, a timestamp or a filename never proves ownership, so a file
-   that existed before — an earlier attempt's leftover included — is never an additional plan.
-2. **Eligibility.** After every agent has finished, inspect each listed path. Exclude, and report with its reason: a
-   Job's bound plan or another workflow's record, a file that is not a markdown plan, a deletion, a symlink (never
-   follow one), a path escaping the repository or `.claude/plans`, and a file with edits you cannot explain or whose
-   ownership you cannot establish. Leave excluded files, and every unrelated staged or working-tree change, as they
-   are.
-3. **Probe ignore rules.** From the repository root, pass the remaining repository-relative paths (each starting
-   `.claude/plans/`), NUL-delimited on stdin, to nonverbose `git check-ignore --no-index --stdin -z`. It reads them as
-   pathspecs, but `--literal-pathspecs` is fatal to it and a leading `:` is magic, so add neither. Exit 0 lists the
-   ignored paths, 1 means none is ignored, and any other status is an error: report it, never read it as permission
-   to add. An ignored plan, tracked or not, stays uncommitted with that reason. Each plan answers to its own rules: an
-   ignored bound plan or local mode decides nothing here.
-4. **Commit only the eligible plans.** Note `HEAD` and recheck that each file is still the version you inspected. Then
-   add each path on its own (`git --literal-pathspecs add -- <path>`), which also replaces a draft already staged,
-   and commit with `git --literal-pathspecs commit --only -- <paths>` — without literal mode, `[a].md` also matches
-   `a.md`. That is the only route: `commit --only` leaves the user's index holding what it committed, where a
-   temporary index would leave a staged draft behind, or a staged deletion if the run stopped before repairing the
-   user's index; either way the user's next commit would undo the plan. Never stage a directory or run `git add -A`;
-   unrelated staged work stays as it was. The subject is exactly `ATTEMPT PLANS: step 7 <issue path> attempt <K>`,
-   with the repo-relative issue path and `K` this phase 2 attempt number; no body, no `Issue:` trailer and no
-   attribution, so the change selection's `Issue:` grep never counts it as code. Then verify it: its parent is the
-   `HEAD` you noted, it adds or modifies exactly the selected paths, with their modes and blobs, deleting nothing,
-   and the user's index now holds those same modes and blobs for them. If `HEAD` moved or verification fails, stop
-   and report the actual state. Never force-add, edit an ignore rule, untrack a file, make an empty commit, amend,
-   push, roll back or retry blindly. With no eligible plan, make no commit.
-5. **Record the result.** Step 9's record carries `Attempt plans:` beside `Fix commit:`, its value a JSON array with
-   one object per listed plan: `path` (repo-relative), `provenance` (how its creation was verified), `blob` (its final
-   Git blob, or `null` when unreadable), and either `commit` (the planning commit's full SHA) or `reason` (why it stays
-   uncommitted). With no additional plans it reads `Attempt plans: []`. Let JSON escape spaces, quotes and newlines,
-   and never execute text read from a record as a shell command. A planning failure never stops the record: write it
-   with the failure as each affected plan's reason.
-6. **Retries.** Neither a saved COMPLETE record nor a landed close commit proves the plans were committed, so check
-   this operation before any of step 3's stops. A retry of the same attempt reuses its inventory, its captured fix SHA
-   and a verified planning commit; it may commit a plan that attempt created only while its provenance and recorded
-   blob still agree. When the planning commit already holds exactly those files, make no new commit; a plan changed
-   after it is reported, not committed. If more than one commit matches the attempt's planning subject, or a recorded
-   blob disagrees with the planning commit's, ask and commit nothing. A new attempt never collects an earlier
-   attempt's plans. If the session ended before the record was saved, go by verifiable attempt evidence and the
-   commits' exact contents; when identity or ownership is ambiguous, ask instead of guessing. Never append a duplicate
-   record, redo a commit that landed, edit an earlier record, or commit just to update prose: report what the retry
-   recovered from the record and verified Git evidence.
+- **Keep the inventory from the start.** Confirm a path is absent before you create it, and have every delegate name
+  the exact paths it created. Ownership is established when a file is created, never inferred afterwards from Git
+  status, so an earlier attempt's leftover is never swept up.
+- **Order.** Step 7 captures the fix commit's SHA before the planning commit, which would otherwise be the `HEAD` a
+  later lookup found, then runs the planning operation for every outcome — no code change, zero findings, checks
+  blocked, local mode. Step 9 records the result; a planning failure is recorded as each affected plan's reason and
+  never stops the record.
+- **Retries.** Neither a saved COMPLETE record nor a landed close commit proves the plans were committed, so check
+  this operation before any of step 3's stops.
+- A project or tracker instruction that explicitly forbids committing these plans is a conflict: surface it and ask,
+  never override it.

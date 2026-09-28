@@ -407,8 +407,9 @@ recorded here, not a copy of the findings and not proof that the review passed.
 
 ## Committing additional plans
 
-An **additional plan** is a markdown file under `.claude/plans` that the coder in phase 2, or an agent it delegated to,
-created for that triage attempt. Phase 2 commits the eligible ones in a planning-only commit of their own, after
+An **additional plan** is a plan file that the coder in phase 2, or an agent it delegated to, created inside the
+repository for that triage attempt — for example under `.claude/plans` for Claude Code; an agent that writes no plan
+files simply has none. Phase 2 commits the eligible ones in a planning-only commit of their own, after
 capturing its fix commit's SHA and before writing its record, so the record carries the actual results. They never go
 into the `CODE REVIEW FIXES: ` or `Closed Issue:` commit, whose files stay as § Commit message format and
 § Closing an issue give them. The operation runs for every outcome — no code change, zero findings, every finding
@@ -418,24 +419,24 @@ the close.
 - **Provenance.** Only a path in the attempt's explicit inventory qualifies: its absence was confirmed before it was
   created, or a delegate's handoff named it as created. An untracked status, a directory diff, a timestamp or a
   filename never proves ownership, so a file that existed before, an earlier attempt's leftover included, never does.
-- **Eligibility.** Once every agent has finished, a Job's bound plan or another workflow's record, a non-plan file, a
-  deletion, a symlink, a path escaping the repository or `.claude/plans`, and a file with unexplained edits or unproven
-  ownership are excluded and reported with their reason.
-- **Ignore probe.** From the repository root, the remaining repository-relative paths (each starting `.claude/plans/`)
-  go NUL-delimited on stdin to nonverbose `git check-ignore --no-index --stdin -z`, with no `--literal-pathspecs` (fatal
-  there) and no leading `:` (magic). Exit 0 lists ignored paths, 1 means none is ignored, and any other status is an
-  error, reported as one and never read as permission to add. An ignored plan, tracked or not, stays uncommitted with
-  that reason. Each plan answers to its own ignore rules, whatever the Feature mode (§ Ignore policy).
-- **The commit.** The subject is exactly `ATTEMPT PLANS: step 7 <issue path> attempt <K>`, the path repo-root-relative
-  and `K` the phase 2 attempt number. No body, no `Issue:` trailer and no attribution, so the final review's change
-  selection never counts it as code. It holds only the eligible plans, each rechecked just before. Add each path
-  with `git --literal-pathspecs add -- <path>`, which also replaces a draft already staged, and commit with
+- **Eligibility.** Once every agent has finished, a plan bound to other work or another workflow's record, a non-plan
+  file, a deletion, a symlink, a path escaping the repository or the directory it was created in, and a file with
+  unexplained edits or unproven ownership are excluded and reported with their reason.
+- **Ignore probe.** From the repository root, the remaining repository-relative paths go NUL-delimited on stdin to
+  nonverbose `git check-ignore --no-index --stdin -z`, with no `--literal-pathspecs` (fatal there) and no leading `:`
+  (magic). Exit 0 lists ignored paths, 1 means none is ignored, and any other status is an error, reported as one and
+  never read as permission to add. An ignored plan, tracked or not, stays uncommitted with that reason. Each plan
+  answers to its own ignore rules, whatever the Feature mode (§ Ignore policy).
+- **The commit.** The subject is exactly `ATTEMPT PLANS: final review <issue path> attempt <K>`, the path
+  repo-root-relative and `K` the phase 2 attempt number. No body, no `Issue:` trailer and no attribution, so the final
+  review's change selection never counts it as code. It holds only the eligible plans, each rechecked just before. Add
+  each path with `git --literal-pathspecs add -- <path>`, which also replaces a draft already staged, and commit with
   `git --literal-pathspecs commit --only -- <paths>` (without literal mode `[a].md` also matches `a.md`). That is the
-  only route: `commit --only` leaves the user's index holding what it committed, where a temporary index would leave
-  a staged draft or, stopped before its repair, a staged deletion for the user's next commit to make. Never stage a
+  only route: `commit --only` leaves the user's index holding what it committed, where a temporary index would leave a
+  staged draft or, stopped before its repair, a staged deletion for the user's next commit to make. Never stage a
   directory or run `git add -A`; unrelated staged work is preserved. Then verify its parent, changed paths, modes and
-  blobs, with no deletions, and that the user's index now holds those same modes and blobs. With no eligible plan
-  there is no commit.
+  blobs, with no deletions, and that the user's index now holds those same modes and blobs. With no eligible plan there
+  is no commit.
 - Never force-add, edit an ignore rule, untrack a file, make an empty commit, amend, push or roll back. If `HEAD` moved
   or verification fails, stop and report the actual state.
 - **Retries.** A saved COMPLETE record or a landed close commit is not proof the plans were committed. A retry of the
