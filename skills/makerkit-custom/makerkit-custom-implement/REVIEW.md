@@ -130,7 +130,9 @@ which isn't a mechanical fix. For each standards finding, use judgement, not a f
 
 - **Fix now**, directly in the working tree, when it's small, local, and safe: a rename, extracting one duplicated
   shape, deleting a speculative-generality abstraction, collapsing a repeated switch. A fix-now that touches untested
-  code writes the covering test first; if you can't, it becomes flag-only.
+  code writes the covering test first. At a boundary the issue doesn't list, propose that test to the user and write it
+  only once they agree, then add the boundary to that issue's `testBoundaries`, as [SKILL.md](./SKILL.md) does for any
+  new boundary. If you can't, or they decline, it becomes flag-only.
 - **Flag only**, listing it instead of touching it, when it's large, crosses many files, is ambiguous, or risks a
   behavior change — a Shotgun Surgery or Divergent Change spanning the codebase, or anything you're not confident is the
   right fix.

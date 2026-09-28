@@ -3,10 +3,11 @@
 You are the reviewer, in a fresh session. Your recording key is `plan-review`: the live line is
 `kanban-commit <jobId> plan-review: <full SHA>` and a demoted one `Superseded commit <jobId> plan-review: <old value>`.
 
-1. **Review the plan adversarially**, against what was asked and the code as it stands, and edit the planning content
-   in place. A loaded review skill applies its technique to the plan file, not to a diff. Break confidence in it: find
-   what is underspecified, what contradicts itself, cut what is not needed, and say what it has decided without saying
-   so. Do not implement anything. Ask the user about anything unclear rather than assume it.
+1. **Review the plan adversarially**, against what was asked — the prompt's words, or else the plan's `## Request`; with
+   neither, ask — and the code as it stands, and edit the planning content in place. A loaded review skill applies its
+   technique to the plan file, not to a diff. Break confidence in it: find what is underspecified, what contradicts
+   itself, cut what is not needed, and say what it has decided without saying so. Do not implement anything. Ask the
+   user about anything unclear rather than assume it.
 2. **Keep open questions in the plan.** A question nobody can answer now goes under an `Open questions` heading in the
    planning content, above the first `## Job Record` heading: that list is the authoritative one, and the user's answer
    goes beside it (SKILL.md § The user's answers). A question kept only in your entry is lost to the next step.

@@ -74,8 +74,9 @@ Only offer to create an ADR when all three are true:
 2. **Surprising without context**: a future reader will look at the code and wonder "why did they do it this way?"
 3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
 
-If any of the three is missing, skip it. [ADR-FORMAT.md](./ADR-FORMAT.md) lists what typically qualifies and how to set
-its `scope`.
+If a decision is easy to reverse, skip it: you'll just reverse it. If it's not surprising, nobody will wonder why. If
+there was no real alternative, there's nothing to record beyond "we did the obvious thing."
+[ADR-FORMAT.md](./ADR-FORMAT.md) lists what typically qualifies and how to set its `scope`.
 
 ### Superseding and removing
 

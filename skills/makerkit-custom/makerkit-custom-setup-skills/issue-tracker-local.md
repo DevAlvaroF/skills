@@ -397,15 +397,18 @@ before committing, then:
      ```sh
      parent=$(git rev-parse --verify HEAD)                 # noted before anything else
      tree=$(git rev-parse "$parent^{tree}")
-     new=$(git commit-tree "$tree" -p "$parent" -m "REVIEW HISTORY: Record final review attempt <N>" -m "Issue: <issue path>")
+     [ "$(git config --bool commit.gpgsign)" = true ] && sign=-S || sign=
+     new=$(git commit-tree "$tree" -p "$parent" -m "REVIEW HISTORY: Record final review attempt <N>" -m "Issue: <issue path>" $sign) &&
      git update-ref -m "REVIEW HISTORY: Record final review attempt <N>" HEAD "$new" "$parent"   # refuses if HEAD moved
      ```
 
      The marker's tree is its parent's by construction, and `update-ref` publishes it only while `HEAD` still names that
      parent, so it can never land on another agent's commit and revert it; the user's index is never touched. If
-     `update-ref` refuses, stop and report it: never retry onto the new `HEAD` without deciding again. Hooks don't run,
-     which is acceptable for a commit that carries no content. A plain `git commit --allow-empty` is never the marker:
-     it commits whatever the user has staged. The marker touches no path, so the change computation leaves it out too.
+     `update-ref` refuses, stop and report it: never retry onto the new `HEAD` without deciding again. `commit-tree`
+     runs no hooks, which is acceptable for a commit that carries no content, and ignores `commit.gpgsign`, hence `-S`:
+     if signing fails, nothing is published; stop and report it, never retry unsigned. A plain
+     `git commit --allow-empty` is never the marker: it commits whatever the user has staged. The marker touches no path,
+     so the change computation leaves it out too.
    - The marker exists only for a positively established local mode. It is never a fallback for an unresolved ignore
      state, a failed hook, a permission or Git error, or a record that failed to save: each of those stops the phase
      and is reported as it is. No review commit force-adds, edits an ignore rule, amends or pushes.
