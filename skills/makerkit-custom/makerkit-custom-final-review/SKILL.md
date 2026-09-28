@@ -29,13 +29,13 @@ an issue is closed. This skill does not restate it. If the file is missing, stop
 `/makerkit-custom-setup-skills`.
 
 **Check its contract before any write**, even when the user invoked this skill directly: the tracker is then the only
-statement of the rules. The tracker must hold exactly one line matching `^Tracker contract: [0-9]+$`, and this skill
-expects `Tracker contract: 2`. Otherwise stop, write nothing, and say which side is behind:
+statement of the rules. `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'` must print 1,
+and this skill expects `Tracker contract: 3`. Otherwise stop, write nothing, and say which side is behind:
 
 - no such line, more than one, or a `Tracker contract` line of any other shape: the tracker is damaged or predates
   contracts — re-run `/makerkit-custom-setup-skills`;
-- a number lower than 2: the tracker is behind — re-run `/makerkit-custom-setup-skills`;
-- a number higher than 2: these skills are behind — update them (`npx skills update -p`), and the tool whose prompt
+- a number lower than 3: the tracker is behind — re-run `/makerkit-custom-setup-skills`;
+- a number higher than 3: these skills are behind — update them (`npx skills update -p`), and the tool whose prompt
   drove this session too if that prompt named a lower number.
 
 Read every `AGENTS.md` from the repo root down to each directory the change touches, in order, including each one's

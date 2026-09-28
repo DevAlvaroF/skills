@@ -22,9 +22,10 @@ loaded; read the rest directly, because not every agent loads nested files.
   ADR's `**Status:**` line. Pick the binding set from it and open only those in full:
 
   ```sh
-  awk 'FNR == 1 { print "== " FILENAME; fm = hdr = ($0 == "---"); seen = 0; next }
-       fm { if ($0 == "---") fm = 0; else print; next }
-       !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }' .mysdd/docs/adr/*.md
+  find .mysdd/docs/adr -maxdepth 1 -name '*.md' -exec awk '{ sub(/\r$/, "") }
+    FNR == 1 { print "== " FILENAME; fm = hdr = ($0 ~ /^--- *$/); seen = 0; next }
+    fm { if ($0 ~ /^--- *$/) fm = 0; else print; next }
+    !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }' {} + 2>/dev/null || true
   ```
 
   Only a `---` on an ADR's first line opens frontmatter, so a horizontal rule further down a legacy ADR is never

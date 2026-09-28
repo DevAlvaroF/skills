@@ -37,7 +37,8 @@ downstream effects are worth remembering.
 
 Never delete an ADR that reached the code: the fact that the old approach was tried is itself the useful part. Write
 the replacement as a new ADR, then set the old one's `status` to `superseded by ADR-NNNN`. When nothing replaces it,
-set `status: superseded` and add one line saying what holds now. Leave the old body as it was.
+set `status: superseded` and add one line saying what holds now. Leave the old body as it was. An older ADR with no
+frontmatter is repo-wide and keeps its status in a `**Status:**` line: change that line the same way.
 
 Remove an ADR outright only with the user's agreement, and only when the decision never reached the code.
 
