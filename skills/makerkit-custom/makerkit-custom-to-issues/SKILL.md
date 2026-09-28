@@ -155,7 +155,11 @@ is non-empty, reconcile — never regenerate.
    implemented it, the fixes its review asked for and the commit that recorded that review. For each
    `acceptanceCriteria` entry, match on `text` and keep that entry's existing `done` value; never flip a `true` back to
    `false`. Update only `title`, `whatToBuild`, `blockedBy`, `testBoundaries`, `covers`, `spec`, and criteria genuinely
-   added or removed by text.
+   added or removed by text. A **delivered** issue (`codeCommit` set, or `status` past `ready-for-agent`) keeps its
+   `whatToBuild`, `acceptanceCriteria` and `testBoundaries` unchanged. Its new criteria, behaviour or `covers` go in a
+   **follow-up issue** that joins the breakdown: a new issue per rule 3, slug `<slug>-followup-<n>`, `blockedBy` the
+   delivered one, carrying the added `covers`. Criteria the breakdown drops or rewords on it are named to the user and
+   left as they are.
 3. **On no match, it's a new issue.** Assign `id` = the highest `id` present in the directory (including
    `issues/archive/`) + 1. **Never reuse a retired number.**
 4. **`id` and filename are immutable once written.** Never renumber an existing issue, even when the dependency order
@@ -167,8 +171,8 @@ is non-empty, reconcile — never regenerate.
    was dropped or renamed. Never silently remove it. List each one with the issue it sits on and ask the user whether
    that issue is now out of scope or should point at a different story. A `covers` entry naming a story marked
    `(retired)` is the same case, even though the ID is still in the spec: list it and ask the same question.
-7. **Report.** Show a table of every issue in the directory and what happened to it: created / updated / status
-   preserved / archived.
+7. **Report.** Show a table of every issue in the directory and what happened to it: created / follow-up created /
+   updated / status preserved / archived.
 
 #### The issue shape
 
