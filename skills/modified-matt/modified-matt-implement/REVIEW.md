@@ -43,7 +43,8 @@ Look for the originating spec, in this order:
 
 ### 2. Identify the standards sources
 
-Anything in the repo that documents how code should be written, such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`.
+Anything in the repo that documents how code should be written: its `AGENTS.md` and `CLAUDE.md` files, root and nested,
+for the touched paths, and files such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`.
 
 On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below: a fixed set of
 Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:

@@ -217,11 +217,12 @@ Skip this step when the run didn't start from a spec. Otherwise call the Skill t
 
 ### 7. Commit the Spec, the issues and the decisions
 
-**Scan for secrets first.** In committed mode this is the spec's first commit, and a secret in history outlives any
-later redaction. Before staging, read the spec and the issue files and scan them for secret-shaped strings: API keys and
-tokens, `sk-`/`ghp_`/`AKIA`-style prefixes, private key blocks, connection strings or URLs with embedded credentials,
-`.env`-style assignments of a secret-looking name, and pasted customer data or PII. If you find any, stop: commit
-nothing, tell the user exactly what you found and where, and let them redact it first.
+**Scan for secrets first.** In committed mode this is the spec's first commit, and in either mode a secret in history
+outlives any later redaction. Before staging, read every file the `SPEC:` commit carries, ADRs and glossary files
+included, and scan them for secret-shaped strings: API keys and tokens, `sk-`/`ghp_`/`AKIA`-style prefixes, private key
+blocks, connection strings or URLs with embedded credentials, `.env`-style assignments of a secret-looking name, and
+pasted customer data or PII. If you find any, stop: commit nothing, tell the user exactly what you found and where, and
+let them redact it first.
 
 Once the user approves the published issues and step 6, commit the Spec, the issues and the step-6 files as
 `.mysdd/issue-tracker.md` § Committing a Spec and its Issues defines, re-running its probe first. Follow it exactly —

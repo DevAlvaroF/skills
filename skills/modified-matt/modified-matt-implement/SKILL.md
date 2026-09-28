@@ -68,9 +68,9 @@ commit exists.
    connection strings or URLs with embedded credentials, `.env`-style assignments of a secret-looking name, and pasted
    customer data or PII. If you find any, stop: do not commit, tell the user exactly what you found and where, and let
    them redact the spec first.
-3. **Commit on the current branch, whichever it is.** Stage the implementation files, plus the ADR file(s) the user
-   agreed to change for this issue, each by path. Never `git add .mysdd/` and never `git add -A`. Then read
-   `git status --short` and confirm nothing unrelated was swept in.
+3. **Commit on the current branch, whichever it is.** Commit the implementation files, plus the ADR file(s) the user
+   agreed to change for this issue, each by path, by the route in `.mysdd/issue-tracker.md` § Commit message format.
+   Never `git add .mysdd/` and never `git add -A`.
 4. **Build the message.** The header is always `CODE: `: this skill only ever makes the first-round commit, on an issue
    whose `codeCommit` is `null`. `CODE REVIEW FIXES: ` commits belong to the final-review skill's phase 2. Write the
    message to the shape in `.mysdd/issue-tracker.md` § Commit message format.

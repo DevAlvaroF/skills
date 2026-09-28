@@ -89,8 +89,9 @@ push. Identify your commit by its parent (the `HEAD` you noted first) and subjec
 
 **Code commits (C, E):** the step's prefix and an imperative subject, at most 72 characters in all, and optionally one
 to three lines of why. No `Co-Authored-By`, no tool or model attribution. Stage this step's changes by path, never the
-Job's plan or unrelated changes. Nothing to commit means no commit, never an empty one. Straight after it, read its
-full SHA and confirm its subject.
+Job's plan or unrelated changes: `git --literal-pathspecs add -- <path>` each, then
+`git --literal-pathspecs commit --only -- <paths>`, checked as step 4 below checks the plan. Nothing to commit means no
+commit, never an empty one. Straight after it, read its full SHA and confirm its subject.
 
 **History commits (B, D, E)** commit the whole plan file, alone:
 

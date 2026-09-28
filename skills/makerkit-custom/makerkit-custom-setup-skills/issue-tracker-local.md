@@ -330,6 +330,15 @@ Issue: .mysdd/features/03-workspace-seats/issues/02-seat-guard.json
 Spec: .mysdd/features/03-workspace-seats/spec.md
 ```
 
+**The commit route.** Every commit here that carries files — code, `SPEC: `, `REVIEW HISTORY: `, `ATTEMPT PLANS: `,
+`Closed Issue: ` — goes on the current branch, whichever it is, the same way. Add each path with
+`git --literal-pathspecs add -- <path>`, then commit with `git --literal-pathspecs commit --only -- <paths>`. Literal
+mode stops a path holding `[`, `*` or `?`, such as a `[locale]` segment, from also matching its neighbours. `--only`
+commits exactly those paths and leaves the user's index holding what it committed, so the user's other staged work is
+neither swept in nor lost; a plain `git commit` would sweep it in, and committing through a separate index would leave
+the old version staged for the user's next commit to revert. Then verify the commit holds exactly those paths and that
+the user's other staged work is still staged. Never stage a directory or run `git add -A`.
+
 ## Committing a Spec and its Issues
 
 When the issues skill has published a feature's issues, it records the Spec, those issues and the decisions they rest on
@@ -344,6 +353,7 @@ in one commit of its own. Run the probe (§ Ignore policy) on that spec and thos
   changes out of the commit.
 - In **local** mode, stage no spec or issue file. The commit still carries the `CONTEXT.md` and ADR changes above, under
   the same `SPEC: ` subject; when there are none, make no commit.
+- Commit the staged paths by the route in § Commit message format.
 - The no-attribution rule in § Commit message format applies.
 - Never make an empty commit, and never amend.
 
@@ -367,14 +377,10 @@ before committing, then:
    where `<N>` is the record's phase 1 attempt number. No body and no other trailer; the no-attribution rule in
    § Commit message format applies.
 
-   - In **committed** mode the commit holds exactly the whole issue file and nothing else. Staging the file and then
-     running a plain `git commit` is not enough: the user's index may already hold other staged work, and that commit
-     would sweep it in. Commit by literal path instead: `git --literal-pathspecs add -- <issue path>` first only if Git
-     does not track the file yet, then `git --literal-pathspecs commit --only -- <issue path>` (without literal mode a
-     path holding `[`, `*` or `?` also matches its neighbours). That is the only route: `commit --only` leaves the
-     user's index holding what it committed, where committing through a separate index would leave the old version
-     staged for the user's next commit to revert. Then confirm the commit changed exactly that path. The file sits
-     under `.mysdd/features/`, so the final review's change computation leaves the commit out of the reviewed change.
+   - In **committed** mode the commit holds exactly the whole issue file and nothing else, by the route in
+     § Commit message format: staging the file and running a plain `git commit` would sweep in the user's other staged
+     work. The file sits under `.mysdd/features/`, so the final review's change computation leaves the commit out of
+     the reviewed change.
    - In **local** mode, positively established by the probe, there is nothing to stage, so make an **empty marker** in
      place of the record commit with exactly these commands, from the repository root:
 
@@ -475,10 +481,8 @@ again before staging:
 - The subject is exactly `Closed Issue: <issue path>`, the path repo-root-relative and beginning `.mysdd/features/`
   (`Closed Issue: .mysdd/features/03-workspace-seats/issues/02-seat-guard.json`). No body, no trailers.
 - Commit only that issue's JSON file, plus any `.mysdd/` board-state file the tooling keeps and has changed (for example
-  `.mysdd/kanban-boards.json`), by literal path: `git --literal-pathspecs add -- <path>` first for any of them Git does
-  not track yet, then `git --literal-pathspecs commit --only -- <issue path> [board file]`. The user's other staged work
-  stays staged and out of the commit. Never stage implementation files or anything under `.mysdd/docs/`: those belong to
-  the `SPEC: `, `CODE: ` and `CODE REVIEW FIXES: ` commits.
+  `.mysdd/kanban-boards.json`), by the route in § Commit message format. Never stage implementation files or anything
+  under `.mysdd/docs/`: those belong to the `SPEC: `, `CODE: ` and `CODE REVIEW FIXES: ` commits.
 - The issue file carries phase 1's uncommitted `reviewHistoryCommit` into this commit.
 - The no-attribution rule in § Commit message format applies.
 
