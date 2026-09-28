@@ -130,7 +130,8 @@ are never auto-applied: they're about whether the code matches the spec's intent
 Standards finding, use judgement, not a fixed rule, to decide:
 
 - **Fix now**, directly in the working tree, when it's small, local, and safe: a rename, extracting one duplicated
-  shape, deleting a speculative-generality abstraction, collapsing a repeated switch.
+  shape, deleting a speculative-generality abstraction, collapsing a repeated switch. A fix-now that touches untested
+  code writes the covering test first; if you can't, it becomes flag-only.
 - **Flag only**, listing it instead of touching it, when it's large, crosses many files, is ambiguous, or risks a
   behavior change — a Shotgun Surgery or Divergent Change spanning the codebase, or anything you're not confident is the
   right fix.
