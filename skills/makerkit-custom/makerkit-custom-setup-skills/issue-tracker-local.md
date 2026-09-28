@@ -1,5 +1,13 @@
 # Issue tracker: Local Files
 
+Tracker contract: 2
+
+The line above is this file's contract version. The skills update centrally, but this file is a per-project copy, so
+every skill that reads it checks that number before writing anything and stops on a mismatch. Contract 2 publishes the
+local-mode review marker by a checked ref update (§ Recording a final review) and routes every commit through
+literal-path `git commit --only` (§ Commit message format): a tracker with a lower number, or none, must be regenerated
+by re-running `/makerkit-custom-setup-skills`, which writes the line last. Never edit the number by hand.
+
 This file is the schema of record for the spec, issues, implement and final-review skills. Those skills read the
 generated `.mysdd/issue-tracker.md` rather than carrying their own copy — so a schema change starts here.
 

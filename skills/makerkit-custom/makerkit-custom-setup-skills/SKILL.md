@@ -191,6 +191,10 @@ Then write the generated files, creating directories as needed, from the seed te
   user left it. Sections the file has and the seed doesn't are the user's own additions: keep them unless they
   contradict a seed section, and say which ones you kept.
 - If the file and the seed are already equivalent, say so and write nothing.
+- **The tracker's `Tracker contract:` line goes last.** Apply every other seed change to `.mysdd/issue-tracker.md`
+  first, and only then write the seed's `Tracker contract: <N>` line under the title, replacing any existing one, so an
+  upgrade stopped halfway never claims a contract the file doesn't hold. The other skills stop on any other number.
+  Report the contract before (none, when the file had no such line) and after.
 
 Re-run the step 1 checks with the current inventory and targets before each migration write. Apply the Section C
 migration one file at a time: re-read each issue, mutate the parsed object, and write the whole file back as strict

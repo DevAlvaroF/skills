@@ -26,23 +26,15 @@ lifecycle, the comment records the two phases write, how phase 1 commits its rec
 an issue is closed. This skill does not restate it. If the file is missing, stop and tell the user to run
 `/makerkit-custom-setup-skills`.
 
-Then check that the tracker is this contract and not an older one, before any write. This holds when the user invoked
-this skill directly, with no prompt from a tool around it: the tracker is then the only statement of the rules. The
-tracker predates this contract when any of these is true:
+**Check its contract before any write**, even when the user invoked this skill directly: the tracker is then the only
+statement of the rules. The tracker must hold exactly one line matching `^Tracker contract: [0-9]+$`, and this skill
+expects `Tracker contract: 2`. Otherwise stop, write nothing, and say which side is behind:
 
-- it has no § Comment records, or still reserves fixes or `reviewCodeCommit` for the independent reviewer;
-- it lets phase 1 set `done-final-review` or make the close commit;
-- its issue shape has no `reviewHistoryCommit`, or it has no § Recording a final review with its `REVIEW HISTORY: `
-  commit;
-- it forbids the local-mode review marker, for example by skipping every bookkeeping commit in local mode with no
-  exception for it;
-- it has no § Committing additional plans, or its record commits are not literal-path `git commit --only` — for
-  example, it still offers an isolated index for the review record.
-
-Comment records and coder-owned fixes alone don't settle it: an older tracker has both and still closes in phase 1. On
-a mismatch, write nothing: name the conflict and ask the user to update the tracker (re-running
-`/makerkit-custom-setup-skills` does), rather than letting this skill, the prompt that drove it or the tracker win
-silently.
+- no such line, more than one, or a `Tracker contract` line of any other shape: the tracker is damaged or predates
+  contracts — re-run `/makerkit-custom-setup-skills`;
+- a number lower than 2: the tracker is behind — re-run `/makerkit-custom-setup-skills`;
+- a number higher than 2: these skills are behind — update them (`npx skills update -p`), and the tool whose prompt
+  drove this session too if that prompt named a lower number.
 
 Read every `AGENTS.md` from the repo root down to each directory the change touches, in order, including each one's
 `## Skills` and any verification it adds — the root file is already loaded; read the rest directly, because not every

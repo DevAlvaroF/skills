@@ -10,6 +10,15 @@ Implement the issues the user names, working from each issue and the spec it cam
 numbering, the issue JSON shape, and the status lifecycle. This skill does not restate it. If the file is missing, stop
 and tell the user to run `/makerkit-custom-setup-skills`.
 
+**Check its contract before any write.** The tracker must hold exactly one line matching `^Tracker contract: [0-9]+$`,
+and this skill expects `Tracker contract: 2`. Otherwise stop, write nothing, and say which side is behind:
+
+- no such line, more than one, or a `Tracker contract` line of any other shape: the tracker is damaged or predates
+  contracts — re-run `/makerkit-custom-setup-skills`;
+- a number lower than 2: the tracker is behind — re-run `/makerkit-custom-setup-skills`;
+- a number higher than 2: these skills are behind — update them (`npx skills update -p`), and the tool whose prompt
+  drove this session too if that prompt named a lower number.
+
 Read each issue you're implementing first (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work
 from its `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. If an issue's `codeCommit` already holds a
 SHA, it has been implemented: any further change to it is a final-review fix round. That belongs to phase 2 of
