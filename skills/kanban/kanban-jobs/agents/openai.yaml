@@ -1,0 +1,5 @@
+interface:
+  display_name: "Kanban Jobs"
+  short_description: "Run one step of a Job and record it"
+policy:
+  allow_implicit_invocation: false

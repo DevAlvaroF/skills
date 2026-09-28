@@ -11,6 +11,9 @@ project, never both.**
 | **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — knows its `AGENTS.md` layout, RLS and `.mdoc` docs; keeps the glossary and scoped, binding ADRs under `.mysdd/docs/`, out of the always-loaded `AGENTS.md` |
 | **Modified Matt Skills** (`modified-matt-*`) | Any other repo — root `CONTEXT.md` glossary, scoped and binding ADRs under `.mysdd/docs/adr/` |
 
+A third group, **Prompt-kanban companion**, holds one flavour-neutral skill,
+`kanban-jobs`, installed *alongside* whichever flavour you use — see below.
+
 ---
 
 ## For users
@@ -27,7 +30,8 @@ npx skills@latest add devalvarof/skills
 Then, in the menu:
 
 1. **Skills** — highlight *one* flavour's heading and press space. Don't use
-   *Select All*; that takes both flavours.
+   *Select All*; that takes both flavours. Using prompt-kanban's Simple
+   board? Also tick *Prompt-kanban companion*.
 2. **Agents** — Claude Code (preselected), plus Codex if you use it.
 3. **Method** — `Symlink`.
 4. **Scope** — `Project`.
@@ -38,6 +42,22 @@ Commit what it wrote (`.agents/skills/`, `.claude/skills/`,
 Finally, run the setup skill once in the project —
 `/modified-matt-setup-skills` or `/makerkit-custom-setup-skills` (in Codex,
 `$` instead of `/`). The other skills depend on the files it writes.
+
+### With prompt-kanban's Simple board, also install `kanban-jobs`
+
+The Simple board's Job prompts (steps B–E) name `kanban-jobs` and read it
+before writing anything: the skill owns how each step records its attempt in
+the plan's Job Record and commits it, and the prompts stop if it is missing
+or states another contract version. Install it the same way, ticking the
+*Prompt-kanban companion* group, or directly:
+
+```bash
+npx skills@latest add https://github.com/DevAlvaroF/skills/tree/main/skills/kanban --skill kanban-jobs
+```
+
+It works without prompt-kanban too: `/kanban-jobs` (`$kanban-jobs` in Codex)
+runs one step of the plan → review → code → review → fix cycle on a plan you
+name, asking for whatever a prompt would have handed it.
 
 ### Update
 
@@ -126,11 +146,12 @@ offers to move them out.
 ### Layout
 
 ```
-.claude-plugin/marketplace.json   # defines the picker's two groups — generated
+.claude-plugin/marketplace.json   # defines the picker's three groups — generated
 scripts/gen-marketplace.mjs       # regenerates it
 skills/
   makerkit-custom/<skill>/        # SKILL.md, optional references/ and agents/openai.yaml
   modified-matt/<skill>/
+  kanban/kanban-jobs/             # the flavour-neutral Job procedure: SKILL.md and STEP-A…E.md
 matt_submodule/skills             # upstream mattpocock/skills, for reference
 ```
 
@@ -148,7 +169,8 @@ matt_submodule/skills             # upstream mattpocock/skills, for reference
 - **The flavours are independent copies, not mirrors.** Port a fix to the
   other flavour only if it's about generic skill mechanics; Makerkit-specific
   fixes usually don't apply to `modified-matt`, and vice versa.
-- Keep the flavour prefix on every skill name.
+- Keep the flavour prefix on every flavour skill's name; `kanban-jobs` belongs
+  to no flavour.
 - `description` is all the agent sees before loading a skill — write it as
   trigger conditions ("Use when…"), not a summary.
 - Keep `SKILL.md` short (well under 500 lines) and put detail in reference
@@ -173,8 +195,8 @@ Each agent needs its own switch — keep them in sync:
   ```
 
 Currently user-invoked: `grill-with-docs`, `implement`, `final-review`,
-`setup-skills`, `to-spec`, `to-issues`. Model-invoked: `domain-modeling`,
-`tdd`.
+`setup-skills`, `to-spec`, `to-issues`, and `kanban-jobs`. Model-invoked:
+`domain-modeling`, `tdd`.
 
 ---
 

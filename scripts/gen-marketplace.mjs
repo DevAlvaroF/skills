@@ -2,8 +2,8 @@
 // Regenerates .claude-plugin/marketplace.json from whatever is on disk.
 //
 // The manifest is what makes `npx skills add DevAlvaroF/skills`
-// show "Makerkit Custom Skills" and "Modified Matt Skills" as toggleable
-// groups in its picker: the CLI reads plugins[].skills and tags each skill
+// show "Makerkit Custom Skills", "Modified Matt Skills" and the prompt-kanban
+// companion as toggleable groups in its picker: the CLI reads plugins[].skills and tags each skill
 // with the owning plugin name. A skill missing from the manifest still
 // installs, but lands in an "Other" group. Run this after adding, removing or
 // renaming a skill.
@@ -30,6 +30,13 @@ const GROUPS = [
         description:
             "The same engineering skills without the Makerkit-specific assumptions. For any repo. Terms live in a root CONTEXT.md and binding decisions in path-scoped ADRs under .mysdd/docs/adr/; agent-written config lives in .mysdd/docs/agents/.",
         keywords: ["engineering", "tdd", "code-review", "grilling"],
+    },
+    {
+        dir: "kanban",
+        name: "prompt-kanban-companion",
+        description:
+            "The Job procedure prompt-kanban's Simple board runs — plan, review the plan, code, review the code, fix — recorded in the plan's Job Record. Install it alongside either flavour; it also runs by hand in any project.",
+        keywords: ["prompt-kanban", "jobs", "code-review"],
     }
 ];
 
@@ -45,7 +52,7 @@ const manifest = {
     name: "devalvarof-skills",
     owner: {name: "Alvaro F", url: "https://github.com/DevAlvaroF"},
     description:
-        "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic.",
+        "Engineering skills for Claude Code and Codex, in two flavours — Makerkit-aware and generic — plus a prompt-kanban companion.",
     plugins: GROUPS.map((g) => ({
         name: g.name,
         source: `./skills/${g.dir}`,

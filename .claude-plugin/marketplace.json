@@ -4,7 +4,7 @@
     "name": "Alvaro F",
     "url": "https://github.com/DevAlvaroF"
   },
-  "description": "Engineering skills for Claude Code and Codex, in two flavours: Makerkit-aware and generic.",
+  "description": "Engineering skills for Claude Code and Codex, in two flavours — Makerkit-aware and generic — plus a prompt-kanban companion.",
   "plugins": [
     {
       "name": "makerkit-custom-skills",
@@ -49,6 +49,20 @@
         "./modified-matt-tdd",
         "./modified-matt-to-issues",
         "./modified-matt-to-spec"
+      ]
+    },
+    {
+      "name": "prompt-kanban-companion",
+      "source": "./skills/kanban",
+      "description": "The Job procedure prompt-kanban's Simple board runs — plan, review the plan, code, review the code, fix — recorded in the plan's Job Record. Install it alongside either flavour; it also runs by hand in any project.",
+      "category": "engineering",
+      "keywords": [
+        "prompt-kanban",
+        "jobs",
+        "code-review"
+      ],
+      "skills": [
+        "./kanban-jobs"
       ]
     }
   ]
