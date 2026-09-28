@@ -141,6 +141,128 @@ offers to move them out.
 
 ---
 
+## Workflows
+
+What each step is supposed to do: who runs it, what it reads and writes, and
+what it commits. prompt-kanban numbers the steps and hands over the prompts —
+on the Agile board steps 1–4 run once per Feature and 5–7 once per Issue; on
+the Simple board A–E run once per Job. A step names a *role*, not an agent:
+the Feature or Job picks which CLI codes and which reviews. The app ticks the
+skills listed below on each step, and refuses to copy a prompt without the
+ones marked *required*. Every step also needs your **Mark as complete** there.
+
+### Steps 1–7: a Feature and its Issues
+
+Run once first: setup writes `.mysdd/issue-tracker.md` (the tracker: issue
+shape, statuses, record and commit formats) and
+`.mysdd/docs/agents/domain.md`, and commits nothing. The gates the steps
+share:
+
+- **Tracker contract.** `to-spec`, `to-issues`, `implement` and `final-review`
+  stop before writing unless the tracker holds exactly one
+  `Tracker contract: 2` line; prompts 6 and 7 check the same line. Missing or
+  lower: re-run setup. Higher: update the skills or the app.
+- **Status.** `ready-for-agent` → `done-coding-awaiting-final-review` →
+  `done-final-review`. Step 4 seeds the first, step 5 sets the second, and
+  only a COMPLETE step 7 sets the last. Step 6 never touches `status`.
+- **Committed or local.** The tracker's ignore probe runs before every write.
+  With the single rule `.mysdd/features/`, specs and issues are written but
+  never staged: the `SPEC:` commit carries only glossary and ADR changes
+  (none, no commit), there is no `Closed Issue:` commit, and step 6's record
+  commit becomes an empty marker (`commit-tree` on `HEAD`'s own tree,
+  published by a checked `update-ref`). Any other ignore state stops the
+  skill.
+- **Review scope.** Step 6 reviews exactly the change: `codeCommit` plus every
+  later commit whose `Issue:` trailer names the issue, minus bookkeeping
+  commits. A loaded review skill gets those SHAs, never its default diff.
+- **Approval.** Step 7 changes no code until you reply approving its triage.
+  Copying the prompt or marking the step is not approval; a review with zero
+  findings has nothing to approve.
+
+| Step | Run by | Skills (app) | Reads | Writes | Commits |
+|---|---|---|---|---|---|
+| **1 Grill** | coder, auto mode | `grill-with-docs` (required, editable in Settings); it loads `domain-modeling` | glossary, ADRs scoped to the touched paths | glossary terms and ADRs as they settle, one question round at a time | nothing — step 4 commits them |
+| **2 PRD Spec** | coder, **same session** as 1 | `to-spec` (warns if missing) | the grill conversation, tracker | `.mysdd/features/<NN>-<slug>/spec.md`: `US-NNN` stories, test boundaries you confirmed, a redacted Decision log; you bind it in the app | nothing |
+| **3 Review PRD Spec** | reviewer, fresh session | `reviewer` (warns if missing), `to-spec` | `spec.md` | edits `spec.md` in place; never cuts User Stories or renumbers an ID | nothing |
+| **4 Spec to Issues** | coder, fresh session | `to-issues` | spec, existing issues (reconciled by `slug`, never regenerated) | one issue JSON per vertical slice: `ready-for-agent`, `blockedBy`, `testBoundaries`, `covers`, commit fields `null`; after your approval, ADRs for the spec's standing decisions | `SPEC: <subject>`, no trailers — spec, issues, glossary, ADRs |
+| **5 Implement** | coder, auto mode | `implement`, `tdd` | issue, its spec when `spec` isn't `null`, ADRs | code, its own two-axis review (`REVIEW.md`); then the issue: criteria ticked, `done-coding-awaiting-final-review`, `codeCommit`, an implementation record with `Deviations and tradeoffs:` | `CODE: <subject>` + `Issue:`/`Spec:` trailers — code and agreed ADRs only; the issue file stays uncommitted |
+| **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, every finding numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file (local: empty marker) |
+| **7 Fix Findings** (phase 2) | coder, fresh session, plan mode | `final-review` (required), `tdd` | latest phase 1 record, implementation record, earlier phase 2 records answering it | FIX / REJECT / DEFER per finding → your approval → fixes, checks; phase 2 record (`Outcome`, `Verdicts`, `Checks`, `Fix commit`, `Attempt plans`); `reviewCodeCommit`; `done-final-review` only on COMPLETE | `CODE REVIEW FIXES: <subject>` if code changed; `ATTEMPT PLANS: final review <issue path> attempt <K>` for plans it created; on COMPLETE, `Closed Issue: <issue path>` (issue + board file; none in local mode) |
+
+Step 7 always runs, even after a PASS with zero findings: the checks still
+have to pass, and only phase 2 closes an Issue. On the Agile board the card
+reaches Done once the file says `done-final-review` and steps 5–7 are marked.
+
+**Without prompt-kanban**, invoke the skills in the same order:
+`/modified-matt-grill-with-docs`, then `/modified-matt-to-spec` in that
+session, `/modified-matt-to-issues`, `/modified-matt-implement`, and
+`/modified-matt-final-review` — phase 1 unless you name phase 2, which you run
+in a fresh coder session. Step 3 is the app's prompt around your review skill;
+by hand, ask any reviewer to edit `spec.md` in place.
+
+### Where Makerkit differs
+
+Same steps, gates and commits under `makerkit-custom-*`, except:
+
+- **Glossary** is `.mysdd/docs/CONTEXT.md`, one for the repo, not a root
+  `CONTEXT.md` or `CONTEXT-MAP.md`; the `SPEC:` commit carries that file.
+- **Grounding.** Grill, to-spec, to-issues and implement read every
+  `AGENTS.md` from the root down to each touched directory — its `## Skills`
+  and any verification it adds included — plus the README of each app or
+  package involved, and follow the repo where it differs. Final-review and tdd
+  read the same `AGENTS.md` chain.
+- **Makerkit docs** (`docs/`, 150+ `.mdoc` files) are asked of a sub-agent,
+  never walked in context, and are never searched for a spec.
+- **Checks.** Step 5 and step 7 run root `AGENTS.md` § Verification in its
+  order, plus what nested files add, whole-repo runs through a sub-agent, and
+  say which list they actually ran.
+- **Reviews.** Step 5's `REVIEW.md` always runs the spec axis; standards
+  belong to the `/reviewer` that § Verification names. Its Standards fallback
+  (the smell baseline) runs only when no general review skill is named or
+  installed, or only a specialist one like `/rls-review`. Step 6 reviews
+  with whichever of the repo's `/reviewer`, `/rls-review` and the like is
+  loaded.
+- **Slicing.** A slice crossing migration, policy, types, action, page and
+  tests is still one slice; a shared migration or RLS policy is done before
+  work is split across sub-agents.
+
+### Steps A–E: a Job (`kanban-jobs`)
+
+Flavour-neutral, installed beside either flavour. B–E require `kanban-jobs`,
+and their prompts stop unless its `SKILL.md` states `Job Record contract: 1`
+(the skill stops too on a prompt naming another number). Step E, like 7,
+changes no code before you approve its triage, and always runs. Step D
+reviews every code commit the plan records for this Job, live or superseded —
+never `HEAD` or a range.
+
+| Step | Run by | Skills (app) | Reads | Writes | Commits |
+|---|---|---|---|---|---|
+| **A Generate Plan** | coder, fresh session, plan mode | none | the Job's title and description | a plan under `.claude/plans` ending with an empty `## Job Record <jobId>`; you bind it in the app | nothing |
+| **B Review Plan** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the plan, the code as it stands | edits the plan in place, open questions under `Open questions` above the record; entry `### Step B, attempt <N>` (Changes, Open questions), then its `plan-review` line | `REVIEW HISTORY: Record step B attempt <N>` — the plan alone (ignored plan: empty marker) |
+| **C Code** | coder, fresh session | `tdd`, `kanban-jobs` (required) | the plan and its answered questions | code, checks, self-review; entry (`Outcome`, Deviations and tradeoffs) and a `code` line when it committed | `CODE: <subject>` — code only, and only when COMPLETE; never the plan |
+| **D Review Code** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the Job's recorded code commits, the plan | no source change; entry (`Reviewed commits`, `Verdict`, numbered Findings), then its `code-review` line | `REVIEW HISTORY: Record step D attempt <N>` — the plan, whatever the verdict (ignored: marker) |
+| **E Fix Findings** | coder, fresh session, plan mode | `tdd`, `kanban-jobs` (required) | latest D entry's findings, latest C entry's deviations | FIX / REJECT / DEFER → your approval → fixes, checks; entry (`Outcome`, `Attempt plans`, Verdicts) and a `code-fix` line when it committed | `CODE REVIEW FIXES: <subject>` if COMPLETE with code; `ATTEMPT PLANS: step E <jobId> attempt <N>` for plans it created; `JOB HISTORY: Record step E attempt <N>` — the plan, every outcome (ignored: none, no marker) |
+
+**The Job Record.** Each Job owns one section of its plan, opened by the
+column-zero heading `## Job Record <jobId>` and running to the next level-one
+or level-two heading. Every attempt appends one entry,
+`### Step <X>, attempt <N>`, ending in a `#### CLI summary`; earlier entries
+are never edited, so a correction is a new attempt. B–E each own one
+recording line, `kanban-commit <jobId> <key>: <full SHA>`, keyed
+`plan-review`, `code`, `code-review` or `code-fix`. Writing one turns every
+earlier line for that key into `Superseded commit <jobId> <key>: <old SHA>`,
+so one stays live. Code steps add theirs after the code commit; review steps
+commit the entry first and then record that commit's SHA, left uncommitted.
+The app reads these lines to select each step's commit; marking E moves the
+Job to Done.
+
+**Without prompt-kanban**, `/kanban-jobs` (`$kanban-jobs` in Codex) runs any
+step on a plan you name: it proposes the next step from the record, asks for
+what a prompt would have handed it, and follows `STEP-A.md` for a plan written
+by hand.
+
+---
+
 ## For developers
 
 ### Layout
