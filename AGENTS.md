@@ -68,7 +68,8 @@ only in a commit that names the incident the extra text answers.
 
 ## Measure every change
 
-A change to a skill runs prompt-kanban's `npm run skill-evals` — at least the
-affected scenario, new against old — and the size budget, and reports the pass
-rate and the token delta. A change that costs tokens needs a result that pays
-for them.
+A change to a skill runs the harness in `evals/` (from a prompt-kanban checkout,
+`npm run skill-evals`) — at least the affected scenario, new against old — and the
+size budget, and reports the pass rate and the token delta. A change that costs
+tokens needs a result that pays for them. `evals/README.md` holds the loop and the
+last baseline.

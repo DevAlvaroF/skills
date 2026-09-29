@@ -1,0 +1,196 @@
+{
+  "about": "Scenarios for `npm run skill-evals`. A driver (a person or an agent) runs each one in /tmp/pk-e2e/<id>, one fresh Codex session per Step, answering questions from `answers`, and turns `checks` into verify calls after the Step named. `<head:X>` is the HEAD recorded before Step X (steps/X.head). Assertions the Skills guarantee regardless of the app are the ones that matter; wording is never graded.",
+  "every_step": [
+    "commits: every new commit descends from <head:step>, subject <= 72 chars, no attribution, SENTINEL.txt in none",
+    "sentinel: SENTINEL.txt still staged",
+    "reflog: no amend/rebase/reset/checkout since <head:step>"
+  ],
+  "scenarios": [
+    {
+      "id": "mm-agile",
+      "eval_id": 1,
+      "flavour": "modified-matt",
+      "repo": "fixture node-app",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Slugify",
+        "description": "Add slugify(text) to src/text.js: lower-case, ASCII letters and digits kept, runs of anything else become one hyphen, no leading or trailing hyphen. Export it and test it."
+      },
+      "steps": [
+        {
+          "label": "0-setup",
+          "prompt": "$modified-matt-setup-skills",
+          "answers": "Committed tracker. Accept every recommendation. No extra sections.",
+          "checks": [
+            "file .mysdd/issue-tracker.md matches ^Tracker contract: <N>$ once",
+            "setup's own files committed or left for the user as the skill says"
+          ]
+        },
+        {
+          "label": "1-grill",
+          "step": "grill",
+          "answers": "Answer from the brief; keep it to one function; no Unicode transliteration; empty string returns empty string."
+        },
+        {
+          "label": "2-spec",
+          "step": "spec-generate",
+          "resume": "1-grill",
+          "checks": [
+            "file <spec> exists",
+            "spec-marker <spec> = brief.id"
+          ]
+        },
+        {
+          "label": "3-spec-review",
+          "step": "spec-review",
+          "answers": "Accept the reviewer's recommendations.",
+          "checks": [
+            "file <spec> still has its US-NNN ids and kanban-brief marker"
+          ]
+        },
+        {
+          "label": "4-to-issues",
+          "step": "spec-to-issues",
+          "checks": [
+            "every issues/*.json parses with IssueFileSchema, status ready-for-agent",
+            "commits: one SPEC: commit holding exactly the spec and issue files"
+          ]
+        },
+        {
+          "label": "5-implement",
+          "step": "implement",
+          "issue": "first issue",
+          "checks": [
+            "issue status done-coding-awaiting-final-review, codeCommit recorded and its subject is the CODE: commit",
+            "comments match Deviations and tradeoffs:",
+            "npm test passes"
+          ]
+        },
+        {
+          "label": "6-final-review",
+          "step": "final-review",
+          "checks": [
+            "issue status unchanged (done-coding-awaiting-final-review)",
+            "reviewHistoryCommit recorded, resolves, holds only the issue file",
+            "comments match ^Final review, phase 1, attempt 1 and Verdict:"
+          ]
+        },
+        {
+          "label": "7-review-fix",
+          "step": "review-fix",
+          "answers": "I approve your triage.",
+          "checks": [
+            "issue status done-final-review only if the record says COMPLETE",
+            "reviewCodeCommit recorded and resolves",
+            "comments match ^Final review, phase 2, attempt 1 and Outcome:"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-local",
+      "eval_id": 2,
+      "flavour": "modified-matt",
+      "repo": "fixture node-app, `.mysdd/features/` listed in .gitignore before setup",
+      "steps": "setup (local mode), then 2, 4, 5, 6, 7 as in mm-agile, with the Spec written straight from the brief at step 2",
+      "checks": [
+        "tracker states local mode",
+        "no commit ever holds a path under .mysdd/features/",
+        "6 and 7 each commit an empty marker: tree equal to its parent, index untouched",
+        "the SHA each review records is that marker"
+      ]
+    },
+    {
+      "id": "mm-jobs",
+      "eval_id": 3,
+      "flavour": "modified-matt + kanban",
+      "repo": "fixture node-app",
+      "job": {
+        "id": "8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d",
+        "title": "Word count",
+        "description": "Add wordCount(text) to src/text.js: whitespace-separated words, 0 for blank text. Export and test it.",
+        "plan": ".claude/plans/word-count.md"
+      },
+      "steps": [
+        {
+          "label": "A-plan",
+          "step": "plan-generate",
+          "answers": "Approve the plan. Write it to .claude/plans/word-count.md.",
+          "checks": [
+            "plan exists, owned by the Job (planJobIds), has ## Request"
+          ]
+        },
+        {
+          "label": "B-plan-review",
+          "step": "plan-review",
+          "answers": "Accept your recommendations.",
+          "checks": [
+            "plan records plan-review and it resolves",
+            "### Step B entry"
+          ]
+        },
+        {
+          "label": "C-code",
+          "step": "code",
+          "checks": [
+            "plan records code, subject is the change commit",
+            "npm test passes",
+            "### Step C entry inside the Job Record, not in ## Request"
+          ]
+        },
+        {
+          "label": "D-code-review",
+          "step": "code-review",
+          "checks": [
+            "plan records code-review",
+            "no source file changed"
+          ]
+        },
+        {
+          "label": "E-code-fix",
+          "step": "code-fix",
+          "answers": "I approve your triage.",
+          "checks": [
+            "plan records code-fix only when E made a CODE REVIEW FIXES commit",
+            "JOB HISTORY: Record step E attempt <N> holds only the plan",
+            "### Step E entry inside the Job Record"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-jobs-ignored",
+      "eval_id": 4,
+      "flavour": "modified-matt + kanban",
+      "repo": "fixture node-app, `.claude/plans/` ignored, plan written by hand with the Job Record heading",
+      "steps": "B, D (after a hand-made code commit), E",
+      "checks": [
+        "each step records its commit (the ignored-plan marker)",
+        "no commit holds the plan",
+        "plan still owned by the Job"
+      ]
+    },
+    {
+      "id": "mk-agile",
+      "eval_id": 5,
+      "flavour": "makerkit-custom + kanban",
+      "repo": "git clone --no-hardlinks <a Makerkit project> (remote removed; ask before pnpm install)",
+      "steps": "setup upgrades its contract-less tracker, then 1-7 as in mm-agile on a one-issue feature, then one A-E pass",
+      "checks": [
+        "tracker states the current contract once, project sections kept",
+        "the mm-agile and mm-jobs checks"
+      ]
+    },
+    {
+      "id": "direct",
+      "eval_id": 6,
+      "flavour": "modified-matt + kanban",
+      "repo": "the mm-jobs repo after C, and the mm-agile repo after 5",
+      "steps": "`$kanban-jobs` step B named by hand (no app prompt); `$modified-matt-final-review` with only the Issue path, to infer phase 1",
+      "checks": [
+        "kanban-jobs asks for the Job ID or plan it is missing rather than guessing",
+        "final-review infers phase 1 and records it as in mm-agile step 6"
+      ]
+    }
+  ]
+}

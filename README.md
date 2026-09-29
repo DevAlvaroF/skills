@@ -281,6 +281,7 @@ skills/
   modified-matt/<skill>/
   kanban/kanban-jobs/             # the flavour-neutral Job procedure: SKILL.md and STEP-A…E.md
 matt_submodule/skills             # upstream mattpocock/skills, for reference
+evals/                            # end-to-end skill evals through Codex, run from prompt-kanban
 ```
 
 ### Changing a skill
