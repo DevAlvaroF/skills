@@ -71,3 +71,5 @@ deletion test, seams, and designing it twice. Don't let the test quietly design 
 - **One slice at a time.** One boundary, one test, one minimal implementation per cycle.
 - **Refactoring is not part of the loop.** Standards and smells are checked after it, by `/makerkit-custom-implement`'s
   review — the repo's review skill, or that review's Standards fallback — not in the red → green cycle.
+- **Report missing grounding.** Your final reply names a missing § Ground yourself first in
+  `.mysdd/docs/agents/domain.md` and asks the user to re-run `/makerkit-custom-setup-skills`.
