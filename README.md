@@ -281,6 +281,9 @@ by hand.
 ```
 .claude-plugin/marketplace.json   # defines the picker's three groups — generated
 scripts/gen-marketplace.mjs       # regenerates it
+scripts/check-tracker-contract.sh # source of the tracker-contract check the readers bundle
+scripts/commit-route.sh           # source of the Commit Route the committing skills bundle
+scripts/sync-bundled-scripts.mjs  # stamps both sources into those skills
 skills/
   makerkit-custom/<skill>/        # SKILL.md, optional references/, scripts/ and agents/openai.yaml
   modified-matt/<skill>/
@@ -290,7 +293,8 @@ matt_submodule/skills             # upstream mattpocock/skills, for reference
 
 ### Changing a skill
 
-1. Edit the skill under `skills/<flavour>/`.
+1. Edit the skill under `skills/<flavour>/` — except a bundled script: see
+   the rules of thumb below.
 2. If you added, removed or renamed a skill, run
    `node scripts/gen-marketplace.mjs` — otherwise it shows up under "Other"
    in the picker.
@@ -312,10 +316,13 @@ matt_submodule/skills             # upstream mattpocock/skills, for reference
 - Stick to frontmatter keys both agents understand: `name`, `description`,
   `license`, `allowed-tools`, `metadata`. The one exception is Claude Code's
   `disable-model-invocation`, which Codex ignores (see below).
-- The four tracker readers in each flavour bundle the same
-  `scripts/check-tracker-contract.sh`, byte for byte; change all eight
-  copies together, and raise the contract in the seeds, setup and every
-  reader's invocation at once. prompt-kanban's tests check both.
+- **Bundled scripts have one source each: edit the source and run the sync
+  step**, `node scripts/sync-bundled-scripts.mjs`, never a copy. It stamps
+  `scripts/check-tracker-contract.sh` into the four tracker readers of each
+  flavour, and `scripts/commit-route.sh` into those eight and `kanban-jobs`,
+  byte for byte; prompt-kanban's tests fail when a copy differs from its
+  source. Raise the contract in the seeds, setup and every reader's
+  invocation at once; prompt-kanban's tests check that too.
 
 ### Making a skill user-invoked only
 
