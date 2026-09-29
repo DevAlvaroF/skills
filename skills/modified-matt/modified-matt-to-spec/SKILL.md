@@ -1,157 +1,110 @@
 ---
 name: modified-matt-to-spec
-description: "Turns the current conversation into a spec and publishes it under .mysdd/features/, or reviews an existing spec adversarially with the user and edits it in place. Use when a design session is done and needs writing up as a spec, or when a spec needs a review before it is cut into issues."
+description: "Turns the current conversation into a spec under .mysdd/features/, or reviews an existing spec adversarially with the user and edits it in place. Use when a design session is done and needs writing up as a spec, or when a spec needs a review before it is cut into issues."
 disable-model-invocation: true
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a spec.
-Do NOT interview the user when writing a new spec; just synthesize what you already know. If the design conversation
-isn't in this session's context, say so and ask the user to point you at it rather than inventing a decision log.
-Beyond confirming the test boundaries in step 2, the one thing to stop and ask about is a contradiction with a binding
-ADR that the conversation never resolved. A spec that already exists is reviewed instead, with the user: see
-§ Reviewing an existing spec.
+Turn the current conversation and your understanding of the codebase into a spec. For a new spec, don't interview the
+user: synthesise what was already decided. If the design conversation isn't in this session, say so and ask where it
+is rather than inventing a decision log. A spec that already exists is reviewed instead: see § Reviewing an existing
+spec.
 
 ## Process
 
-1. Explore the repo to understand the current state of the codebase, if you haven't already. Read the glossary and the
-   binding ADRs for the paths you touch, per `.mysdd/docs/agents/domain.md`. ADRs are binding. Use the glossary's
-   vocabulary throughout the spec.
+1. Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 5` line: with none (or no file)
+   or a lower number, stop and tell the user to re-run `/modified-matt-setup-skills`; with a higher one, stop and tell
+   them to run `npx skills update -p`. Its § Layout and § Committed or local decide where the spec goes and whether it
+   may be written at all.
+2. Explore the repo. Read the glossary and the binding ADRs for the paths you touch, per
+   `.mysdd/docs/agents/domain.md`, and use the glossary's vocabulary. The one thing to stop and ask about is a
+   contradiction with a binding ADR the conversation never resolved: a spec can't quietly overrule a recorded decision.
+3. Sketch the boundaries you'll test at. Prefer existing ones, and the highest one possible; the fewer across the
+   codebase the better, ideally one. Check with the user that they match their expectations.
+4. Write the spec from the template below as `spec.md` in a new Feature directory, named and numbered per § Layout.
+   If § Committed or local leaves the mode unresolved, write nothing and say why. A spec carries no status and this
+   skill makes no commit: `/modified-matt-to-issues` cuts it into issues, and its `SPEC:` commit carries the spec.
 
-   **Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for spec, then
-   those sections in full, by the commands its § Contents gives, never the whole file. The file is the contract. This
-   skill does not restate it. If the file is missing, stop and tell the user to run `/modified-matt-setup-skills`. Check
-   its contract line with `sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4`. If it exits non-zero,
-   write nothing and relay its message: on exit 1 the tracker is behind, so have the user re-run
-   `/modified-matt-setup-skills`; on exit 3 the skills are behind, so have them run `npx skills update -p`, and update
-   the app too if its prompt named a lower number; on any other exit, report the error.
-
-2. Sketch out the boundaries at which you're going to test the feature. Existing boundaries should be preferred to new
-   ones. Use the highest boundary possible. If new boundaries are needed, propose them at the highest point you can. The
-   fewer boundaries across the codebase, the better - the ideal number is one.
-
-Check with the user that these boundaries match their expectations.
-
-3. Write the spec using the template below, then publish it as `spec.md` under the feature's
-   `.mysdd/features/<NN>-<feature-slug>/` directory, after running the tracker's ignore probe
-   (`.mysdd/issue-tracker.md` § Ignore policy) on that path. A spec is prose, not an issue, so it carries no status;
-   the `/modified-matt-to-issues` skill is what turns it into `ready-for-agent` issues.
+When the prompt gives you a `kanban-brief: <id>` line, put it on its own line directly under the spec's title, exactly
+as given, and keep a matching one that's already there: prompt-kanban binds the Brief to the spec by that line. If a
+marker names another Brief or is malformed, report the conflict rather than overwrite it.
 
 <spec-template>
 
 ## Problem Statement
 
-The problem that the user is facing, from the user's perspective.
+The problem the user faces, from the user's perspective.
 
 ## Solution
 
-The solution to the problem, from the user's perspective.
+The solution, from the user's perspective.
 
 ## User Stories
 
-A LONG list of user stories, each carrying a stable ID. Each user story should be in the format of:
+A long, extensive list covering every aspect of the feature, each with a stable ID:
 
-- **US-NNN** — As an <actor>, I want a <feature>, so that <benefit>
+- **US-001** — As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed
+  decisions about my spending
 
-<user-story-example>
-- **US-001** — As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
-</user-story-example>
-
-This list of user stories should be extremely extensive and cover all aspects of the feature.
-
-Each story's `US-NNN` is **immutable once written**. Never renumber a story and never reuse a retired ID:
-downstream issues reference these IDs in their `covers` field, so an ID is an address, not a position in the
-running order. On a later revision a new story takes the highest existing ID + 1, wherever it sits in the list,
-and a dropped story leaves its ID retired, not recycled.
-A dropped story stays in the list under its own ID, marked `(retired)`: never delete it or merge it into another.
+A `US-NNN` is immutable once written, because issues address stories by it in `covers`. Never renumber or reuse one:
+a new story takes the highest ID + 1, and a dropped story stays in the list under its ID, marked `(retired)`.
 
 ## Implementation Decisions
 
-A list of implementation decisions that were made. This can include:
+The decisions made: modules built or changed and their interfaces, architecture, schema changes, API contracts,
+specific interactions, technical clarifications, and `AGENTS.md` convention lines agreed (one imperative line each,
+verbatim, naming the `AGENTS.md` it goes in). Aim each module deep, a small interface over a lot of behaviour
+(`/modified-matt-tdd` has more).
 
-- The modules that will be built/modified
-- The interfaces of those modules that will be modified
-- Convention lines agreed for an `AGENTS.md`, one imperative line each, verbatim, naming the `AGENTS.md` it goes in
-- Technical clarifications from the developer
-- Architectural decisions
-- Schema changes
-- API contracts
-- Specific interactions
-
-Aim each module deep: a small interface over a lot of behaviour. A module whose deletion would make its complexity
-vanish is a pass-through, and one with a single adapter needs no seam yet. The DESIGN.md of `/modified-matt-tdd` has
-the rest.
-
-Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
-
-Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine,
-reducer, schema, type shape), inline it within the relevant decision and note briefly that it came from a prototype.
-Trim to the decision-rich parts, not a working demo, just the important bits.
+No file paths or code snippets: they go stale fast. The exception is a prototype snippet that encodes a decision more
+precisely than prose (a state machine, reducer, schema, type shape): inline its decision-rich part and say it came from
+a prototype.
 
 ## Testing Decisions
 
-A list of testing decisions that were made. Include:
-
-- A description of what makes a good test (only test external behavior, not implementation details)
-- Which modules will be tested
-- Prior art for the tests (i.e. similar types of tests in the codebase), or, when there are none, a statement that no
-  similar tests exist and the new test boundary agreed in step 2
+What makes a good test here (external behaviour, not implementation details), which modules are tested, and prior art:
+similar tests in this codebase, or a statement that none exist plus the new boundary agreed in step 3.
 
 ## Out of Scope
 
-A description of the things that are out of scope for this spec.
+What this spec excludes.
 
 ## Further Notes
 
-Any further notes about the feature.
+Anything else.
 
 ## Decision log
 
-A **redacted summary**, in your own words, of the decisions, constraints, and rejected alternatives that shaped this
-spec: what was chosen, what was ruled out, and why. This is a summary, not a transcript — never paste the raw
-conversation.
-
-**Redact before you write.** This file is committed to the repository and `/modified-matt-implement` puts its path in the
-commit message, so anything here reaches git history permanently. Exclude secrets, credentials, tokens, API keys,
-connection strings, customer data, PII, internal URLs carrying auth, and any conversation unrelated to the decisions
-above. When a decision genuinely turns on a sensitive value, describe the value's role without reproducing it.
-
-When the design supersedes an ADR, name it here by number and title (ADR-NNNN, <title>). `/modified-matt-to-issues`
-reads this log to keep `.mysdd/docs/adr/` in step with the spec.
+A redacted summary, in your own words, of the decisions, constraints and rejected alternatives that shaped the spec,
+and why. Never a transcript. It reaches git history through the `SPEC:` and `Spec:`-trailered commits, so leave out
+secrets, credentials, tokens, connection strings, customer data, PII and anything unrelated; describe a sensitive
+value's role without reproducing it. Name any ADR the design supersedes (ADR-NNNN, title): `/modified-matt-to-issues`
+keeps `.mysdd/docs/adr/` in step from this log.
 
 </spec-template>
 
 ## Before you publish
 
-Confirm each of these. Any "no" is a fix, not a caveat: don't publish until it's a "yes".
+Any "no" is a fix, not a caveat:
 
-- Every user story carries a `US-NNN` ID, and no ID was renumbered or reused from an earlier revision
-- Every user story describes externally observable behaviour, not an implementation detail
-- The test boundaries in Testing Decisions are the ones the user confirmed in step 2
-- The feature directory is `.mysdd/features/<NN>-<feature-slug>/`, numbered per `.mysdd/issue-tracker.md`
-- The ignore probe on the spec path reported committed or local mode, not unresolved
-- Out of Scope is non-empty: a spec that excludes nothing hasn't been scoped
-- Testing Decisions names prior art: actual similar tests in this codebase, not a description of what one would look
-  like. With none to name, it says so and names the new test boundary agreed in step 2
-- The decision log is a redacted summary in your own words, carrying no secrets, credentials, PII, or raw
-  transcript
-- No Implementation Decision contradicts a live binding ADR. An ADR the user agreed to supersede already reads
-  `superseded`, and the Decision log names it
-- No file paths or code snippets anywhere, except a prototype-derived snippet that encodes a decision prose can't,
-  and the `AGENTS.md` a convention line goes in
+- Every story has a `US-NNN`, none renumbered or reused, and each describes externally observable behaviour.
+- Testing Decisions holds the boundaries the user confirmed, and names real prior art or says there is none.
+- Out of Scope is non-empty: a spec that excludes nothing hasn't been scoped.
+- The Decision log is a redacted summary with no secrets, PII or raw transcript.
+- No Implementation Decision contradicts a live binding ADR; one the user agreed to supersede already reads
+  `superseded` and is named in the Decision log.
+- No paths or snippets beyond a prototype snippet and the `AGENTS.md` a convention line goes in.
 
 ## Reviewing an existing spec
 
-When the spec already exists (the user asks for a review, or a workflow step sends you here), review that `spec.md`
-adversarially and edit it in place; don't write a new one. Do step 1 first, then run the ignore probe on the spec's
-path before the first edit. Find what is underspecified, what contradicts itself or a binding ADR, and what it has
-decided without saying so, and cut what isn't needed. Interviewing the user is expected here: ask about every gap and
-open decision rather than assuming an answer.
+When the spec already exists, review that `spec.md` adversarially with the user and edit it in place; don't write a new
+one. Do steps 1 and 2 first, and stop if the mode is unresolved. Find what is underspecified, what contradicts itself or
+a binding ADR, and what it has decided without saying so, and cut what isn't needed. Interview the user about every gap
+and open decision rather than guess: a guessed answer becomes a requirement nobody agreed to.
 
-- Never delete the User Stories section, and never renumber a `US-NNN`: retire the story instead, per the template.
-- Append to the Decision log, redacted like the rest; never rewrite an earlier entry.
-- Don't implement anything.
-- Before you finish, the spec passes § Before you publish, confirming its test boundaries with the user if they
-  weren't confirmed in step 2.
+- Never delete the User Stories section or renumber a `US-NNN`; retire a story instead, because issues point at it.
+- Only append to the Decision log, redacted like the rest: earlier entries are the record of why.
+- Keep any `kanban-brief:` line as it is.
+- Implement nothing.
 
-Commit it only as the sections the tracker's Contents row for spec direct. Where they name no commit, leave the edit
+Before you finish, the spec passes § Before you publish, with its test boundaries confirmed by the user. Leave the edit
 uncommitted: the `SPEC:` commit of `/modified-matt-to-issues` carries it.

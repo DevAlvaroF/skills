@@ -4,86 +4,54 @@ description: "Runs the two-phase final review of an implemented issue: the indep
 disable-model-invocation: true
 ---
 
-This skill runs the final review of one issue that `/makerkit-custom-implement` has already committed. The review has
-two phases, run by two different agents in two different sessions:
+The final review of an issue `/makerkit-custom-implement` committed runs in two phases, two agents, two fresh
+sessions, so whoever judges the code never fixes it in the same breath:
 
-- **Phase 1, review.** You are the **independent reviewer**, in a fresh session. You review the change, record every
-  finding in the issue, and commit that record so the review is visible in git history. You fix nothing, and you never
-  close the issue, whatever the verdict.
-- **Phase 2, the coder's triage.** You are the **coder** (the agent that implements, not the reviewer), in a fresh,
-  cleared session. Nothing from phase 1's session is in your context: you work from the records in the issue. You weigh
-  every finding on its merits, propose a disposition for each, wait for the user to approve it, apply only the approved
-  fixes, run the checks, record the outcome, and close the issue when the outcome is COMPLETE. Phase 2 runs even after a
-  PASS with zero findings: it is the only phase that closes, and the checks still have to pass first.
+- **Phase 1**: the **independent reviewer** records every finding in the issue and commits that record. It fixes
+  nothing and never changes `status`, whatever the verdict.
+- **Phase 2**: the **coder**, with nothing of phase 1's session in context, weighs every finding, applies what the
+  user approves, runs the checks, records the outcome and closes on COMPLETE. It runs even after a zero-finding PASS:
+  only it closes, and the checks must still pass.
 
-This skill owns the lifecycle of both phases: what to read, when to write the issue, and which commits to make. It does
-not own the review technique. In phase 1, run the review itself, on the change PHASE-1.md step 1 names, with the review
-skills loaded alongside this one (the repo's `/reviewer`, `/rls-review` and the like). Unless a general review skill is
-both named in an `AGENTS.md` § Verification and installed — a specialist one such as `/rls-review` doesn't count — also
-run `/makerkit-custom-implement`'s [REVIEW.md](../makerkit-custom-implement/REVIEW.md) yourself on the same commits:
-its Standards fallback with the smell baseline, and its Spec pass scoped to this issue. Skip its _Assess refactors_
-step: phase 1 fixes nothing.
+Read `.mysdd/issue-tracker.md` whole before writing anything: its issue shape, comment records and commit rules are
+the ones both phases write to. It must hold exactly one `Tracker contract: 5` line; missing, lower or none → stop and
+tell the user to re-run `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
-**Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for review phase 1
-or review phase 2, whichever you run, then those sections in full, by the commands its § Contents gives, never the whole
-file. The file is the contract. This skill does not restate it. If the file is missing, stop and tell the user to run
-`/makerkit-custom-setup-skills`. Check its contract line with
-`sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4`. If it exits non-zero, write nothing and relay its
-message: on exit 1 the tracker is behind, so have the user re-run `/makerkit-custom-setup-skills`; on exit 3 the skills
-are behind, so have them run `npx skills update -p`, and update the app too if its prompt named a lower number; on any
-other exit, report the error.
+## Ground yourself first
 
-For the paths the change touches, read the `AGENTS.md` files, the glossary and the binding ADRs, as the first two
-bullets of `.mysdd/docs/agents/domain.md` § Ground yourself first list them. ADRs are binding. The phase's role
-(independent reviewer, or coder) is the role you are acting in and nothing more. Where it conflicts with those
-instructions, say so and ask the user rather than deciding the role wins.
+For the touched paths, read every `AGENTS.md` from the repo root down, plus any the chain routes a touched concern to,
+and the glossary and binding ADRs per `.mysdd/docs/agents/domain.md`: the repo wins where it and this skill differ.
+The phase's role is only the role you act in; where it conflicts with those instructions, ask.
 
 ## Inputs
 
-The user passes the issue path (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`), and may name the agent
-that implemented it, the commit, and which phase to run. With no phase named, infer it from the issue, taking the first
-case that fits:
+The user passes the issue path, and may name the implementer, commit and phase. With no phase named, infer it from the
+issue and `git log` alone, first match wins:
 
-- `status` is `done-final-review`: phase 2, which says what is left.
-- The latest phase 1 record has no `REVIEW HISTORY:` commit for its attempt, or `reviewHistoryCommit` doesn't name that
-  commit: phase 1, to finish its bookkeeping.
-- The issue holds no review yet: phase 1.
-- The latest phase 1 record's reviewed commits start at `codeCommit`, every commit of the change below is one it
-  reviewed or a fix commit an earlier phase 2 record answering it made, and no COMPLETE phase 2 record answers it:
-  phase 2.
+- `status` is `done-final-review` → phase 2, which says what is left.
+- The latest phase 1 record has no `REVIEW HISTORY:` commit for its attempt, or `reviewHistoryCommit` doesn't name it
+  → phase 1, to finish its bookkeeping.
+- No review yet → phase 1.
+- The latest phase 1 record's reviewed commits start at `codeCommit`, every commit of the change is one it reviewed or
+  a fix commit an earlier phase 2 record answering it made, and no COMPLETE phase 2 answers it → phase 2.
 
-Decide from the issue and `git log` alone, and read only the chosen phase's file. Anything else, such as a stale
-review or an older record without labels, is ambiguous: ask. Say which phase you
-inferred and the role it gives you, and write nothing until the user confirms. Phase 2 never continues phase 1's
-session: if the user asks the session that ran phase 1 to go on fixing, tell them phase 2 is run by the coder in a
-fresh session.
+Anything else (a stale review, an unlabelled older record) is ambiguous: ask. Say which phase you inferred and its
+role, and write nothing until the user confirms: each role writes different things. Phase 2 never continues phase 1's
+session.
 
-Read the issue and take from it:
+Work from the issue's `codeCommit` (`null`: not implemented, stop; the user named another: ask), `spec`,
+`whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `comments`.
 
-- `codeCommit`: the implementation under review. If it is `null`, the issue hasn't been implemented; stop and tell the
-  user. If the user named a different commit, say so and ask which one to review.
-- `spec`: the spec the issue came from, or `null`.
-- `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `comments`.
+**The change** is `codeCommit` plus every later commit whose `Issue:` trailer names this issue's path, minus the
+bookkeeping commits that touch only `.mysdd/features/` or `.mysdd/kanban-boards.json` (review records, markers,
+closes); an ADR-only fix stays in. Not `reviewCodeCommit`: it holds only the latest round. Don't open other commits.
 
-In phase 1, if the status is already `done-final-review`, stop and tell the user: there is nothing left to review. In
-phase 2 a closed status is not enough to stop on; PHASE-2.md step 3 says what it means.
-
-**The change** is `codeCommit` plus every fix commit made for this issue since, from every round:
-`git log --reverse --format=%H --fixed-strings --grep='Issue: <issue path>' <codeCommit>..HEAD -- .
-':(exclude).mysdd/features' ':(exclude).mysdd/kanban-boards.json'`. The pathspec drops the code-free bookkeeping
-commits: a `REVIEW HISTORY:` commit touches only the issue file (a local-mode marker touches nothing), and a
-`Closed Issue:` commit only the issue and board files. It keeps an ADR-only fix. Don't rely on `reviewCodeCommit`: it
-holds only the latest round. Commits outside that list are not the change; don't open them.
-
-**Writing the issue**, in either phase, follows the tracker: run its ignore probe (§ Ignore policy) with the issue path
-as the target, parse the file, mutate the object, write the whole file back as strict JSON, and re-read it to confirm it
-parses. If the probe reports an unresolved state, write nothing: list the paths and let the user resolve them. Append
-to `comments`; never edit or remove an earlier entry. Never write `codeCommit`. Phase 1 writes only its record and
-`reviewHistoryCommit`; phase 2 carries `reviewHistoryCommit` over as it stands.
+**Writing the issue** waits for § Committed or local to resolve to a mode, follows § Issue shape's one-writer table,
+and only appends to `comments`: an earlier record is evidence the next phase reads.
 
 ## The phase files
 
-Once the phase is settled, read its own file in full before writing anything:
+Once the phase is settled, read its file in full, and only that one, before writing anything:
 
 | Phase | File | For |
 |---|---|---|

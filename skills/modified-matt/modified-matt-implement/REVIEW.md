@@ -1,151 +1,68 @@
 # How to Review
 
-The review `/modified-matt-implement` runs on its own work, before it commits or advances any issue.
+The review `/modified-matt-implement` runs on its own work, before it commits or advances any issue. It has two axes,
+each run by its own sub-agent in parallel, because a change can pass one and fail the other, and one reviewer tends to
+let the axis it cares about mask the other:
 
-Review the changes along two axes:
+- **Standards**: does the code follow this repo's documented standards?
+- **Spec**: does it faithfully implement the issue and its spec?
 
-- **Standards**: does the code conform to this repo's documented coding standards?
-- **Spec**: does the code faithfully implement the originating issue / spec?
+## Scope
 
-Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their
-findings.
+The review covers exactly the inventory [SKILL.md](./SKILL.md) keeps; an empty inventory has nothing to review, so say
+so and stop. Give each sub-agent the inventory, mixed paths marked (part of their diff predates the run), and the
+commands that reproduce the diff — a `git diff HEAD` over the tracked paths and a whole read of each new file — never
+the diff itself: it is the largest thing this skill touches, and pasting it pays for it twice.
 
-## Collect the diff
+## The sub-agents
 
-Run from final-review, the change's `git show <sha>` commands replace the inventory; never diff `HEAD`. Otherwise, the
-review covers exactly the inventory [SKILL.md](./SKILL.md) keeps. If it is empty, there is nothing to review: stop
-and say so. **Stay out of the full diff yourself**: the inventory is its shape. Hand each sub-agent the inventory, mixed
-paths marked (part of their diff predates the run), and the *commands* that reproduce the diff, to run itself:
-`git --literal-pathspecs diff HEAD -- '<tracked path>' …` for the tracked paths, and a whole read of each new file,
-which that diff never shows. Never paste diff contents into a sub-agent prompt, and never read the full diff into this
-context: it is the largest thing this skill touches, and doing both means paying for it twice.
+**Standards** gets the scope, the repo's standards files for the touched paths (root and nested `AGENTS.md` and
+`CLAUDE.md`, `CODING_STANDARDS.md`, `CONTRIBUTING.md` and the like), the binding ADRs' paths and the smell baseline
+below, pasted in full since it has no other copy. Brief: "Report each place the diff breaks a documented standard,
+citing the file and rule, and each baseline smell you see, quoting the hunk. Drop a smell a documented rule or binding
+ADR endorses, and say so when that's ambiguous. Standards breaches can be hard violations; smells are always judgement
+calls. Skip what tooling enforces. Under 400 words."
 
-## Process
+**Spec** gets the scope; the issues' `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `covers`; the spec's path
+(the issue's `spec`, else one the user names, else ask; with none it runs against the issue and ADRs alone and the
+report says "no spec available"); the binding ADRs' paths; and each ADR the user agreed to supersede, with its
+replacement. Brief: "Report (a) what the issues ask for that is missing or partial — a requirement outside their
+`covers` belongs to another issue, not here; (b) behaviour nobody asked for; (c) requirements implemented wrongly;
+(d) contradictions of the spec's Decision log or a binding ADR. An agreed supersession outranks both the old ADR and
+the spec line it replaces, so check against the replacement. Quote the source for each. Under 400 words."
 
-### 1. Identify the spec source
+### Smell baseline
 
-Look for the originating spec, in this order:
+Fowler's code smells (_Refactoring_, ch. 3), each a labelled heuristic ("possible Feature Envy"), never a hard
+violation, and overridden by the repo's own rules:
 
-1. The `spec` field of the issue(s) you just implemented.
-2. A path the user passed as an argument.
-3. A spec file under `docs/`, `specs/`, or `.mysdd/features/` matching the branch name or feature.
-4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent still
-   runs, against the issue and the binding ADRs alone.
+- **Mysterious Name**: the name doesn't say what it does or holds → rename; no honest name means murky design.
+- **Duplicated Code**: the same shape in more than one hunk → extract it, call it from both.
+- **Feature Envy**: reaches into another object's data more than its own → move it onto that data.
+- **Data Clumps**: the same fields travel together → bundle them into one type.
+- **Primitive Obsession**: a primitive standing in for a domain concept → give it a small type.
+- **Repeated Switches**: the same switch on the same type recurs → polymorphism, or one shared map.
+- **Shotgun Surgery**: one logical change scatters edits across many files → gather what changes together.
+- **Divergent Change**: one module edited for unrelated reasons → split it.
+- **Speculative Generality**: abstraction for needs the spec doesn't have → delete it until a real need shows.
+- **Message Chains**: long `a.b().c().d()` walks → hide the walk behind one method.
+- **Middle Man**: mostly delegates onward → call the real target.
+- **Refused Bequest**: ignores most of what it inherits → use composition.
 
-### 2. Identify the standards sources
+## Aggregate
 
-Anything in the repo that documents how code should be written: its `AGENTS.md` and `CLAUDE.md` files, root and nested,
-for the touched paths, and files such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`.
+Present the reports under `## Standards` and `## Spec`, verbatim or lightly cleaned, never merged or reranked across
+axes, since that ranking is what the split exists to prevent. End with the finding count and worst finding per axis.
 
-On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below: a fixed set of
-Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
+## Refactors
 
-- **The repo overrides — check before reporting, not after.** Before naming a baseline smell, check it against the
-  standards-source files identified above: if a documented rule endorses the exact pattern the smell would flag (an
-  adapter that's supposed to just delegate, an abstraction the docs call load-bearing), suppress it — don't report it
-  and rely on a later pass to catch the conflict. If a match is ambiguous, say so in the finding instead of silently
-  including or dropping it.
-- **Always a judgement call.** Each smell is a labelled heuristic ("possible Feature Envy"), never a hard violation.
-  Like any standard here, skip anything tooling already enforces.
+Always assess the Standards findings; Spec findings are never auto-applied, because matching intent isn't a mechanical
+fix. Drop any a binding ADR sanctions, naming it. Then, by judgement:
 
-Each smell reads *what it is* → *how to fix*; match it against the diff:
+- **Fix now** when small, local and safe (a rename, one extraction, deleting a speculative abstraction). Untested code
+  gets its covering test first; a boundary the issue doesn't list is agreed with the user and added to
+  `testBoundaries`, or the finding becomes flag-only.
+- **Flag only** when it's large, cross-cutting, ambiguous or risks a behaviour change.
 
-- **Mysterious Name**: a function, variable, or type whose name doesn't reveal what it does or holds. → rename it; if no
-  honest name comes, the design's murky.
-- **Duplicated Code**: the same logic shape appears in more than one hunk or file in the change. → extract the shared
-  shape, call it from both.
-- **Feature Envy**: a method that reaches into another object's data more than its own. → move the method onto the data
-  it envies.
-- **Data Clumps**: the same few fields or params keep travelling together (a type wanting to be born). → bundle them
-  into one type, pass that.
-- **Primitive Obsession**: a primitive or string standing in for a domain concept that deserves its own type. → give the
-  concept its own small type.
-- **Repeated Switches**: the same `switch`/`if`-cascade on the same type recurs across the change. → replace with
-  polymorphism, or one map both sites share.
-- **Shotgun Surgery**: one logical change forces scattered edits across many files in the diff. → gather what changes
-  together into one module.
-- **Divergent Change**: one file or module is edited for several unrelated reasons. → split so each module changes for
-  one reason.
-- **Speculative Generality**: abstraction, parameters, or hooks added for needs the spec doesn't have. → delete it;
-  inline back until a real need shows.
-- **Message Chains**: long `a.b().c().d()` navigation the caller shouldn't depend on. → hide the walk behind one method
-  on the first object.
-- **Middle Man**: a class or function that mostly just delegates onward. → cut it, call the real target direct.
-- **Refused Bequest**: a subclass or implementer that ignores or overrides most of what it inherits. → drop the
-  inheritance, use composition.
-
-### 3. Spawn both sub-agents in parallel
-
-**Standards sub-agent prompt** should include:
-
-- The inventory and the commands from _Collect the diff_ (the commands, never the diff itself).
-- The list of standards-source files you found in step 2, the binding ADRs' paths (the Spec sub-agent's), **plus the
-  smell baseline from step 2** pasted in full (the sub-agent has no other access to it).
-- The brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the
-  standard (file + the rule); and (b) any baseline smell you spot — but check it against the standards-source files and
-  ADRs first: if a documented rule or a binding ADR endorses the exact pattern, drop it, don't report it. For anything
-  you do report, name the smell and quote the hunk. Distinguish hard violations from judgement calls:
-  documented-standard breaches can be hard, but baseline smells are always judgement calls. Skip anything tooling
-  enforces. Under 400 words."
-
-**Spec sub-agent prompt** should include:
-
-- The inventory and the commands from _Collect the diff_ (the commands, never the diff itself).
-- **The scope**: the selected Issue paths, with their `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and
-  `covers`.
-- **Constraints and context**: the *path* to the spec (the path only; don't read the spec into this context), the paths
-  of the binding ADRs for the touched files, per `.mysdd/docs/agents/domain.md`, and each ADR the user agreed to
-  supersede in this run, with its replacement, by number and title.
-- The brief: "Report: (a) what the scope asks for that is missing or partial — a spec requirement outside the selected
-  Issues' `covers` is not a finding: at most, note which other Issue owns it; (b) behaviour in the diff that wasn't
-  asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong;
-  (d) places the diff contradicts the spec's Decision log or a binding ADR. An agreed supersession listed above is
-  not a finding: its replacement outranks both the old ADR and the matching spec decision, so check the diff against
-  the replacement. Quote the Issue, spec line or ADR for each finding. Under 400 words."
-
-If there is no spec, run the Spec sub-agent anyway, without one: drop the Decision log from (d), and note "no spec
-available" in the final report. The scope and the binding-ADR check never depend on a spec.
-
-### 4. Aggregate
-
-Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or
-rerank findings, because the two axes are deliberately separate (see _Why two axes_).
-
-End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a
-single winner across axes: that's the reranking the separation exists to prevent.
-
-### 5. Assess refactors
-
-This step always runs — assessing refactor-worthiness is not something the user has to ask for separately, and it is not
-conditional on the diff looking messy.
-
-Take only the **Standards** sub-agent's findings (hard violations and smell-baseline hits from step 2). Spec findings
-are never auto-applied: they're about whether the code matches the spec's intent, which isn't a mechanical fix. First
-drop any finding a binding ADR sanctions, and say which ADR. For each Standards finding left, use judgement, not a fixed
-rule, to decide:
-
-- **Fix now**, directly in the working tree, when it's small, local, and safe: a rename, extracting one duplicated
-  shape, deleting a speculative-generality abstraction, collapsing a repeated switch. A fix-now that touches untested
-  code writes the covering test first. At a boundary the issue doesn't list, propose that test to the user and write it
-  only once they agree, then add the boundary to that issue's `testBoundaries`, as [SKILL.md](./SKILL.md) does for any
-  new boundary. If you can't, or they decline, it becomes flag-only.
-- **Flag only**, listing it instead of touching it, when it's large, crosses many files, is ambiguous, or risks a
-  behavior change — a Shotgun Surgery or Divergent Change spanning the codebase, or anything you're not confident is the
-  right fix.
-
-After applying any fixes, re-run whatever verification the repo defines (tests, lint, build) before reporting them as
-done — through a sub-agent reporting failures only, on the same terms as the end-of-implementation suite run in [SKILL.md](./SKILL.md).
-
-Report the outcome under a third heading, `## Refactors`, separate from `## Standards` and `## Spec`: what was fixed,
-and what was flagged and left alone. This is not the cross-axis reranking step 4 forbids — that rule is about not
-collapsing Standards and Spec into one ranked list. Assessing and applying refactors stays entirely inside the Standards
-axis, after both reports have already been presented untouched.
-
-## Why two axes
-
-A change can pass one axis and fail the other:
-
-- Code that follows every standard but implements the wrong thing → **Standards pass, Spec fail.**
-- Code that does exactly what the issue asked but breaks the project's conventions → **Spec pass, Standards fail.**
-
-Reporting them separately stops one axis from masking the other.
+After any fix, re-run the repo's verification through a failures-only sub-agent. Report under `## Refactors`: what was
+fixed and what was flagged.

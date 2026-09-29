@@ -6,223 +6,125 @@ disable-model-invocation: true
 
 # To Issues
 
-Break a plan, spec, or conversation into a set of **issues**: tracer-bullet vertical slices, each declaring the issues
-that **block** it.
+Break a plan, spec, or conversation into **issues**: tracer-bullet vertical slices, each declaring the issues that
+**block** it.
 
 ## Process
 
 ### 1. Gather context
 
-Work from whatever is already in the conversation context. If the user passes a reference (a spec path or issue path) as
-an argument, read the file's full contents.
+Work from what is already in the conversation. If the user passes a spec or issue path, read the whole file.
 
-**Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for issues, then
-those sections in full, by the commands its § Contents gives, never the whole file. The file is the contract. This skill
-does not restate it. If the file is missing, stop and tell the user to run `/makerkit-custom-setup-skills`. Check its
-contract line with `sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4`. If it exits non-zero, write
-nothing and relay its message: on exit 1 the tracker is behind, so have the user re-run `/makerkit-custom-setup-skills`;
-on exit 3 the skills are behind, so have them run `npx skills update -p`, and update the app too if its prompt named a
-lower number; on any other exit, report the error.
+Read `.mysdd/issue-tracker.md` whole before writing anything: its layout, issue shape and commit rules are the ones
+this skill writes to. It must hold exactly one `Tracker contract: 5` line; missing, lower or none → stop and tell the
+user to re-run `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
-### 2. Explore the codebase
+### 2. Ground yourself first
 
-**Before starting**, if you haven't already explored the codebase to understand the state of the code, read the
-project's own documentation as `.mysdd/docs/agents/domain.md` § Ground yourself first lists it. Don't block on the docs
-sub-agent: draft the slices that don't depend on its answer while it works.
+Before exploring, read the project's own documentation, because where it and this skill differ, the repo wins:
 
-Issue titles and descriptions should use the glossary's vocabulary.
+- every `AGENTS.md` from the repo root down to each directory the work touches, plus any a file on that chain routes a
+  touched concern to — read them directly, since not every agent loads nested files;
+- the glossary and the binding ADRs, per `.mysdd/docs/agents/domain.md`;
+- the `README.md` of each app or package the feature involves;
+- the Makerkit docs, through one sub-agent, per `.mysdd/docs/agents/domain.md` § Makerkit docs; draft the slices that
+  don't depend on its answer while it works.
 
-Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the
-easy change."
+Use the glossary's vocabulary in titles and descriptions. Look for prefactoring that makes the work easier: "make the
+change easy, then make the easy change."
 
 ### 3. Draft vertical slices
 
-Break the work into **tracer bullet** issues.
-
 <vertical-slice-rules>
 
-- Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests): vertical, NOT a horizontal
-  slice of one layer
-- A completed slice is demoable or verifiable on its own
-- Each slice is sized to fit in a single fresh context window. You can't measure tokens directly, so use the file count
-  as the proxy: a slice that looks like it will create or edit more than ~10 files is too big — split it along
-  behaviour, never by layer. A slice crossing migration, policy, types, action, page and tests is still one slice
-- Any prefactoring should be done first
+- Each slice cuts a narrow but complete path through every layer (schema, API, UI, tests), never a horizontal slice
+  of one layer.
+- A completed slice is demoable or verifiable on its own.
+- Each slice fits one fresh context window; more than ~10 files created or edited is too big, so split it along
+  behaviour, never by layer. A slice crossing migration, policy, types, action, page and tests is still one slice.
+- Prefactoring comes first.
 
 </vertical-slice-rules>
 
-Give each issue its **blocking edges**: the other issues that must complete before it can start. An issue with no
-blockers can start immediately.
+For each issue settle:
 
-Identify each issue's **test boundaries**: the public interface its tests will hit. When the issue set descends from a
-spec with a Testing Decisions section, draw boundaries from what was agreed there; propose a new one only when a slice
-needs a boundary the spec didn't cover. An issue with no dedicated tests (e.g. a pure prefactor, or one leg of a
-wide-refactor batch) can carry no boundaries.
+- its **blocking edges**: the issues that must complete before it can start (none means it starts now);
+- its **test boundaries**: the public interface its tests hit, drawn from the spec's Testing Decisions where it has
+  them; a new one only where a slice needs it; none for a pure prefactor;
+- the `US-NNN` stories it **covers**. Together the issues cover every story not marked `(retired)`; an uncovered story
+  is a missed slice or a deliberate deferral, and step 4 finds out which.
 
-When the issue set descends from a spec, map each slice to the **user stories it satisfies**: the `US-NNN` IDs from the
-spec's User Stories section. Between them the issues should satisfy every story in the spec not marked `(retired)`; a story no slice covers is
-either a missed slice or a deliberate deferral, and step 4 is where you find out which. An issue can satisfy no story
-directly — a pure prefactor, or one leg of an expand–contract batch — and carries none.
-
-**Wide refactors are the exception to vertical slicing.** A **wide refactor** is one mechanical change (rename a column,
-retype a shared symbol) whose **blast radius** fans across the whole codebase, so a single edit breaks thousands of call
-sites at once and no vertical slice can land green. Don't force it into a tracer bullet; sequence it as
-**expand–contract**. First expand: add the new form beside the old so nothing breaks. Then migrate the call sites over
-in batches sized by blast radius (per package, per directory), each batch its own issue blocked by the expand, keeping
-CI green batch to batch because the old form still exists. Finally contract: delete the old form once no caller remains,
-in an issue blocked by every migrate batch. When even the batches can't stay green alone, keep the sequence but let them
-share an integration branch that all block a final integrate-and-verify issue; green is promised only there.
+**Wide refactors** — one mechanical change whose blast radius breaks call sites across the codebase — can't land as a
+green vertical slice, so sequence them expand–contract: add the new form beside the old; migrate call sites in batches
+(per package or directory), each blocked by the expand; then delete the old form, blocked by every batch.
 
 ### 4. Quiz the user
 
-Present the proposed breakdown as a numbered list. For each issue, show:
-
-- **Title**: short descriptive name
-- **Blocked by**: which other issues (if any) must complete first
-- **What it delivers**: the end-to-end behaviour this issue makes work
-- **Test boundaries**: which boundaries this issue's tests will hit
-- **Covers**: which user stories (`US-NNN`) from the spec this issue satisfies
-
-Ask the user:
-
-- Does the granularity feel right? (too coarse / too fine)
-- Are the blocking edges correct: does each issue only depend on issues that genuinely gate it?
-- Should any issues be merged or split further?
-- Are the test boundaries right: does each issue test at the right boundary, and are any missing or superfluous?
-- Is every user story covered? Skip stories marked `(retired)`. List each other `US-NNN` in the spec that no issue covers, and ask whether it is a deliberate
-  deferral or a slice you missed.
-- Does any issue contradict a binding ADR? Name each one, with the ADR's number and title.
-
-Iterate until the user approves the breakdown.
+Show the breakdown as a numbered list: title, blocked by, what it delivers, test boundaries, covers. Ask whether the
+granularity is right, whether each blocking edge genuinely gates, what to merge or split, whether the boundaries are
+right, which uncovered story is a deliberate deferral, and name each binding ADR (number and title) an issue would
+contradict. Iterate until the user approves.
 
 ### 5. Publish the issues
 
-**Inspect before you write.** List `issues/*.json` and `issues/archive/*.json` in the target feature directory first.
-Then run the ignore probe (`.mysdd/issue-tracker.md` § Ignore policy) with the spec and every issue file this run will
-create or update as its targets. If it reports an unresolved state, write nothing: list the paths and let the user
-resolve them.
+List `issues/` and `issues/archive/` in the Feature directory first, and write only once § Committed or local resolves
+to a mode.
 
-- **No live issue** (`issues/*.json` absent or empty) → first publish. Create the issues as described below, in
-  dependency order (blockers first), numbering from `01` — or, when `issues/archive/` holds **Retired Issues** (an id
-  found only there, which the tracker counts as resolved for `blockedBy`), from one past their highest number, which is
-  never reused.
-- **Non-empty** → **reconciliation mode**. Write nothing until the whole reconciliation is resolved and shown to the
-  user; see *Reconciling with existing issues* below.
+- **No live issue** → create one file per issue in dependency order, numbered from `01`, or from past the highest
+  Retired Issue under `issues/archive/`, since a retired number is never reused.
+- **Live issues** → reconcile, below. Write nothing until the whole reconciliation is shown to the user.
 
-Write one file per issue under `.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`. The feature directory's
-`NN` is its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that
-issue's `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's
-`spec.md` path if this run started from a spec (a spec path was passed in, or one exists at
-`.mysdd/features/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testBoundaries` to the boundaries agreed for that
-issue in step 4, and `covers` to the `US-NNN` IDs agreed there. Each `AGENTS.md` line the spec's Implementation
-Decisions agreed rides on the first issue, in dependency order, whose slice touches its area: add an acceptance
-criterion naming that `AGENTS.md` and the line verbatim, so `/makerkit-custom-implement` commits it with the code. Use
-the issue shape from `.mysdd/issue-tracker.md` § Issue shape: one issue per file, never a single combined file.
-
-Work the **frontier**: any issue whose blockers are all done. For a purely linear chain that means top to bottom.
-
-Do NOT modify the feature's `spec.md`.
-
-Avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that
-encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note
-briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
+Each file follows § Issue shape exactly, every field present, strict JSON. `spec` is the Feature's `spec.md` when the
+run started from one, else `null`; `testBoundaries` and `covers` are what step 4 agreed. Each `AGENTS.md` convention
+line or routing row the spec agreed rides on the first issue, in dependency order, that touches its area, as an
+acceptance criterion naming that `AGENTS.md` and the line verbatim, so `/makerkit-custom-implement` commits it with the
+code. No file paths or code snippets, beyond a trimmed prototype snippet that encodes a decision prose can't. Never
+modify `spec.md`: it is the user's reviewed record.
 
 #### Reconciling with existing issues
 
-An issue already on disk may carry live state that exists nowhere else: a `status` reached through real work, `comments`
-holding review findings, `acceptanceCriteria` already ticked. Regenerating the directory from `01` destroys all three,
-and because the numbering restarts it can also land one issue's content in another issue's file. So when the directory
-is non-empty, reconcile — never regenerate.
+An issue on disk may hold state that exists nowhere else — a status reached through real work, review comments,
+ticked criteria, commit SHAs — so reconcile, never regenerate:
 
-1. **Identity is `slug`, never the number.** Match each entry in the approved breakdown to an existing file by its
-   `slug`. Numbers are addresses, not identities.
-2. **On a slug match, preserve — never reset.** Carry `status`, `comments`, `codeCommit`, `reviewCodeCommit`, and
-   `reviewHistoryCommit` over verbatim — the commit fields are the only pointers from the issue to the code that
-   implemented it, the fixes its review asked for and the commit that recorded that review. For each
-   `acceptanceCriteria` entry, match on `text` and keep that entry's existing `done` value; never flip a `true` back to
-   `false`. Update only `title`, `whatToBuild`, `blockedBy`, `testBoundaries`, `covers`, `spec`, and criteria genuinely
-   added or removed by text. A **delivered** issue (`codeCommit` set, or `status` past `ready-for-agent`) keeps its
-   `whatToBuild`, `acceptanceCriteria` and `testBoundaries` unchanged. Its new criteria, behaviour or `covers` go in a
-   **follow-up issue** that joins the breakdown: a new issue per rule 3, slug `<slug>-followup-<n>`, `blockedBy` the
-   delivered one, carrying the added `covers`. Criteria the breakdown drops or rewords on it are named to the user and
-   left as they are.
-3. **On no match, it's a new issue.** Assign `id` = the highest `id` present in the directory (including
-   `issues/archive/`) + 1. **Never reuse a retired number.**
-4. **`id` and filename are immutable once written.** Never renumber an existing issue, even when the dependency order
-   changed. This is what stops content shifting between files and what keeps every `blockedBy` reference valid.
-   Dependency order is carried by `blockedBy`, not by the numbering — remap `blockedBy` onto the preserved ids.
-5. **Never delete.** An existing issue with no counterpart in the new breakdown is listed to the user with one question:
-   keep it, or move it to `issues/archive/`? No `rm`, no silent drop, no answer assumed on their behalf. Archiving it
-   makes it a Retired Issue, which unblocks every issue waiting on it, so list each live issue whose `blockedBy` names
-   it and ask, for each, whether to remap that edge onto another issue or drop it.
-6. **A `covers` entry with no matching story is a dangling reference.** It means the spec was revised and that `US-NNN`
-   was dropped or renamed. Never silently remove it. List each one with the issue it sits on and ask the user whether
-   that issue is now out of scope or should point at a different story. A `covers` entry naming a story marked
-   `(retired)` is the same case, even though the ID is still in the spec: list it and ask the same question.
-7. **Report.** Show a table of every issue in the directory and what happened to it: created / follow-up created /
-   updated / status preserved / archived.
-
-#### The issue shape
-
-`.mysdd/issue-tracker.md` § Issue shape defines the fields, their types, and what each empty value means. Follow it
-exactly — this skill does not restate it. Write strict JSON: no comments, no trailing commas, and every field present on
-every issue.
-
-The `status`, `acceptanceCriteria[].done`, `comments`, `codeCommit`, `reviewCodeCommit`, and `reviewHistoryCommit`
-values shown there are **seed values for a newly created issue only**. On an issue that already exists they are live
-state: carry them over from the file on disk rather than re-seeding them. `status` starts at `ready-for-agent`;
-`acceptanceCriteria` entries start with `"done": false` and ticking one means flipping it to `true`; `comments` starts
-as `[]`; `codeCommit`, `reviewCodeCommit` and `reviewHistoryCommit` all start as `null`. `codeCommit` is written only
-by the implement skill, `reviewCodeCommit` only by the final-review skill's phase 2 (the coder's triage), and
-`reviewHistoryCommit` only by its phase 1 (the independent reviewer, after committing its review record) — never by
-this skill.
+1. **Identity is `slug`**, never the number. Match each approved entry to a file by `slug`.
+2. **On a match, preserve.** Carry `status`, `comments` and the three commit fields over verbatim, and each
+   criterion's `done` by matching `text`; never flip `true` back. Update only `title`, `whatToBuild`, `blockedBy`,
+   `testBoundaries`, `covers`, `spec` and criteria added or removed by text. A delivered issue (`codeCommit` set, or
+   past `ready-for-agent`) keeps its `whatToBuild`, criteria and boundaries: new work for it goes in a follow-up issue,
+   slug `<slug>-followup-<n>`, blocked by it; name any criteria the breakdown dropped from it to the user.
+3. **No match is a new issue**, id one past the highest in `issues/` and `issues/archive/`.
+4. **Ids and filenames never change**: `blockedBy` addresses issues by them. Order lives in `blockedBy`, so remap edges
+   onto the preserved ids.
+5. **Never delete.** Ask about each issue with no counterpart: keep it, or move it to `issues/archive/`? Archiving makes
+   it a Retired Issue, which unblocks its dependents, so ask for each dependent whether to remap or drop that edge.
+6. **A `covers` entry naming a missing or `(retired)` story is dangling**: list it and ask whether the issue is out of
+   scope or points at another story; never drop it silently.
+7. **Report** every issue and what happened to it: created, follow-up created, updated, preserved, archived.
 
 ### 6. Record the spec's standing decisions
 
-Skip this step when the run didn't start from a spec. Otherwise call the Skill tool with
-"makerkit-custom-domain-modeling" and apply its rules: the three tests, docs stand alone, superseding and removing.
+Only when the run started from a spec. Apply `/makerkit-custom-domain-modeling`'s rules (the three tests, docs stand
+alone, superseding and removing):
 
-1. **Add what's missing.** Walk the spec's Implementation Decisions and Decision log. Each decision that passes the
-   three tests and is not already recorded **or superseded** in `.mysdd/docs/adr/` becomes a new ADR, scoped to the
-   paths it binds. The "or superseded" part stops a re-run from re-adding a decision that implement or final-review
-   already replaced.
-2. **Retire what the spec dropped.** Trace provenance through the spec's own history and its issues' `comments` —
-   never through IDs in the ADRs (they carry none).
-   - **Every decision this spec ever made:** the Implementation Decisions and Decision log of each committed version
-     (`git log --format=%H -- <spec path>`, then `git show <sha>:<spec path>`), plus each replacement recorded as an
-     agreed supersession in the `comments` of its issues, `issues/archive/` included. In **local** mode the spec has
-     no history, so use the current spec and those `comments` alone, and say that the trace was that narrow.
-   - **Its live ADRs:** read every ADR in `.mysdd/docs/adr/` whose `status` isn't superseded, and match each against
-     those decisions by what it states.
-   - **Candidates:** a live ADR stating a decision an earlier version made that the current spec no longer carries,
-     unless it is a recorded replacement or another feature's spec still carries it; or, once every issue of this spec
-     has been retired to `issues/archive/`, every live ADR of this spec, replacements included. Ask for each
-     candidate: supersede or remove? Recommend removal only on positive evidence that the decision never reached
-     the code: every issue carrying it still reads `ready-for-agent` with `codeCommit: null`, and the code doesn't
-     implement it. A `null` `codeCommit` alone proves nothing (setup backfills it on older, finished issues), so
-     without that evidence recommend superseding. Never decide for the user.
-3. **Collect the files for the commit:** every ADR step 6 added or changed, plus the uncommitted ADRs and
-   `CONTEXT.md` edits from this spec's design session (`git status --short -- .mysdd/docs`). `CONTEXT.md` is committed
-   whole, so name any other uncommitted edit it carries.
-4. **Show, then write.** List the adds, supersedes, removes and files next to the published issues. Write nothing to
-   `.mysdd/docs/` until the user approves, and run the ignore probe with each ADR as a target before writing it.
+1. **Add what's missing.** Each decision in Implementation Decisions or the Decision log that passes the three tests
+   and isn't already recorded or superseded in `.mysdd/docs/adr/` becomes an ADR scoped to the paths it binds;
+   "or superseded" keeps a re-run from reviving a decision a review already replaced.
+2. **Retire what the spec dropped.** Trace every decision this spec ever made through its committed history and the
+   supersessions recorded in its issues' `comments` (in local mode the current spec and comments alone — say the trace
+   was that narrow), never through ids in the ADRs. A live ADR whose decision the spec no longer carries, and no other
+   spec does, is a candidate: ask supersede or remove. Recommend removal only when every issue carrying it is still
+   `ready-for-agent` with `codeCommit: null` and the code doesn't implement it; otherwise recommend superseding.
+3. **Show, then write.** List the adds, supersedes and removes with the uncommitted `.mysdd/docs/` edits from the design
+   session, and write nothing to `.mysdd/docs/` until the user approves: ADRs bind every later run.
 
-### 7. Commit the Spec, the issues and the decisions
+### 7. Commit
 
-**Scan for secrets first.** In committed mode this is the spec's first commit, and in either mode a secret in history
-outlives any later redaction. Before staging, read every file the `SPEC:` commit carries, ADRs and glossary files
-included, and scan them for secret-shaped strings: API keys and tokens, `sk-`/`ghp_`/`AKIA`-style prefixes, private key
-blocks, connection strings or URLs with embedded credentials, `.env`-style assignments of a secret-looking name, and
-pasted customer data or PII. If you find any, stop: commit nothing, tell the user exactly what you found and where, and
-let them redact it first.
-
-Once the user approves the published issues and step 6, commit the Spec, the issues and the step-6 files as
-`.mysdd/issue-tracker.md` § Committing a Spec and its Issues defines, re-running its probe first. Follow it exactly —
-this skill does not restate it. In local mode that commit carries only the step-6 files, and there is none when they
-are empty. Report the commit's SHA and subject, and each ADR and glossary change it carried, or that no commit was
-made and why.
+Once the user approves the issues and step 6, make the `SPEC:` commit per § Commits. First read every file it carries
+and scan for secret-shaped strings — keys, tokens, `sk-`/`ghp_`/`AKIA` prefixes, private keys, credentialed URLs,
+`.env`-style assignments, customer data: history outlives any later redaction, so on a hit commit nothing and tell the
+user what and where. Report the SHA and subject and each ADR and glossary change it carried, or that there was no
+commit and why.
 
 ## Next step
 
-Once the Spec, its issues and its decisions are committed — or, in local mode, the decisions alone, if any — the next
-step is `/makerkit-custom-implement`, taking one issue from the frontier.
+`/makerkit-custom-implement`, taking one issue from the frontier: any issue whose blockers are all done.
