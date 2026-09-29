@@ -39,11 +39,11 @@ on it: a running exploration is an unsettled prerequisite, so only the questions
 to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
 
 **Before the first round**, also read the project's own documentation so you never spend a question on something the
-repo already answers, as `.mysdd/docs/agents/domain.md` § Ground yourself first lists it. If that section is missing,
-tell the user in your reply to re-run `/makerkit-custom-setup-skills`, and until then read every AGENTS.md from the root
-down to each directory you touch, the ones they route you to, CONTEXT.md and the ADRs whose scope covers those paths.
-Per the frontier rule above, don't block round one on the docs sub-agent: only the questions downstream of its answer
-wait for it to report.
+repo already answers, as `.mysdd/docs/agents/domain.md` § Ground yourself first lists it, and dispatch the Makerkit
+docs sub-agent its § Makerkit docs describes. If those sections are missing, tell the user in your reply to re-run
+`/makerkit-custom-setup-skills`, and until then read every AGENTS.md from the root down to each directory you touch,
+the ones they route you to, CONTEXT.md and the ADRs whose scope covers those paths. Per the frontier rule above, don't
+block round one on the docs sub-agent: only the questions downstream of its answer wait for it to report.
 
 Understanding the architecture is a first step, not a question. Ask the user only what the docs genuinely don't answer —
 and when a question survives that reading, say what you checked, so they can see it's a real gap rather than a shortcut.

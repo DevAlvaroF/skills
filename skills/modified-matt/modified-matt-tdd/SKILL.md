@@ -19,7 +19,7 @@ See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking g
 
 A **test boundary** is the public interface you test at: the point where you observe behavior without reaching inside. Tests live at boundaries, never against internals.
 
-**Test only at pre-agreed boundaries.** If you're implementing from an issue, its `testBoundaries` field (set by `/modified-matt-to-issues` when the issue was drafted) is that agreement — use it, don't re-ask. Otherwise, before writing any test, write down the boundaries under test and confirm them with the user. No test is written at an unconfirmed boundary. You can't test everything, so agreeing the boundaries up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
+**Test only at pre-agreed boundaries.** If you're implementing from an issue, its `testBoundaries` field is that agreement — use it, don't re-ask. Otherwise, before writing any test, write down the boundaries under test and confirm them with the user. No test is written at an unconfirmed boundary. You can't test everything, so agreeing the boundaries up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
 
 If implementation reveals a pre-agreed boundary doesn't hold (that interface doesn't exist, or testing there misses the behavior that matters), stop and confirm the change with the user rather than silently testing elsewhere.
 
@@ -37,4 +37,4 @@ When the shape of that interface is itself in question (how deep the module is, 
 
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
 - **One slice at a time.** One boundary, one test, one minimal implementation per cycle.
-- **Refactoring is not part of the loop.** The review stage always assesses the diff for refactor-worthy smells and applies the safe ones (see the `modified-matt-implement` skill's _Assess refactors_ step), not the red → green implementation cycle.
+- **Refactoring is not part of the loop.** It belongs to the review that follows (`/modified-matt-implement` runs one), not the red → green cycle.

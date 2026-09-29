@@ -1,8 +1,6 @@
 # ADR Format
 
-ADRs live in `.mysdd/docs/adr/` at the repo root — one directory for the whole repo, including multi-context repos — one decision per file, with sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
-
-Create the `.mysdd/docs/adr/` directory lazily: only when the first ADR is needed.
+ADRs live in `.mysdd/docs/adr/` at the repo root — one directory for the whole repo, even with several contexts — one decision per file, numbered `0001-slug.md`, `0002-slug.md`, … Create the directory lazily, when the first ADR is needed.
 
 ## Template
 
@@ -19,29 +17,22 @@ scope:
 {1-3 sentences: what's the context, what did we decide, and why.}
 ```
 
-That's it. An ADR can be a single paragraph. The value is in recording *that* a decision was made and *why*, not in filling out sections.
+That's it. An ADR can be a single paragraph: the value is in recording *that* a decision was made and *why*. Add **Considered Options** or **Consequences** only when the rejected alternatives or the downstream effects are worth remembering.
 
 ## Frontmatter
 
 - **`status`** (required): `accepted`; `superseded by ADR-NNNN` once another ADR replaces it; or `superseded` when nothing does.
-- **`scope`** (optional): the repo-root-relative paths or globs the decision binds. Omit it, or write `"/"`, for a repo-wide decision. Consumers read an ADR only when its scope covers a path they touch, so scope it as narrowly as the decision genuinely holds: too wide and every session pays for it, too narrow and code it binds slips past. Quote each entry.
+- **`scope`** (optional): the repo-root-relative paths or globs the decision binds. Omit it, or write `"/"`, for a repo-wide decision. Readers open an ADR only when its scope covers a path they touch, so scope it as narrowly as the decision genuinely holds: too wide and every session pays for it, too narrow and code it binds slips past. Quote each entry.
 
-**Older ADRs** may have no frontmatter. Treat one as repo-wide, and read its status from a `**Status:**` line in the body (`accepted` when there is none). `/modified-matt-setup-skills` offers to add the frontmatter; nothing adds it silently.
-
-## Optional sections
-
-Only include these when they add genuine value. Most ADRs won't need them.
-
-- **Considered Options**: only when the rejected alternatives are worth remembering
-- **Consequences**: only when non-obvious downstream effects need to be called out
+An older ADR with no frontmatter is repo-wide and keeps its status in a `**Status:**` line (`accepted` when there is none). Leave it as it is: `/modified-matt-setup-skills` offers to add frontmatter.
 
 ## Numbering
 
-Take the highest number among the ADRs in `.mysdd/docs/adr/` and every ADR ever committed there (`git log --format= --name-only --no-renames --diff-filter=A -- .mysdd/docs/adr/`), and increment by one. Never reuse a number, not even a removed ADR's: the history is what remembers a removed one.
+One more than the highest number in `.mysdd/docs/adr/` or ever committed there. Never reuse a removed ADR's number: its history still answers to it.
 
 ## Superseding and removing
 
-Never delete an ADR that reached the code: the fact that the old approach was tried is itself the useful part. Write the replacement as a new ADR, then set the old one's `status` to `superseded by ADR-NNNN`. When nothing replaces it, set `status: superseded` and add one line saying what holds now. Leave the old body as it was. On an older ADR without frontmatter, change its `**Status:**` line the same way.
+Never delete an ADR that reached the code: the fact that the old approach was tried is itself the useful part. Write the replacement as a new ADR, then set the old one's `status` to `superseded by ADR-NNNN`; when nothing replaces it, `status: superseded` plus one line saying what holds now. Leave the old body as it was. On an older ADR, change its `**Status:**` line the same way.
 
 Remove an ADR outright only with the user's agreement, and only when the decision never reached the code.
 
@@ -49,12 +40,12 @@ Remove an ADR outright only with the user's agreement, and only when the decisio
 
 The three tests in `SKILL.md` decide. Decisions that typically pass them:
 
-- **Architectural shape.** "We're using a monorepo." "The write model is event-sourced, the read model is projected into Postgres."
-- **Integration patterns between contexts.** "Ordering and Billing communicate via domain events, not synchronous HTTP."
-- **Technology choices that carry lock-in.** Database, message bus, auth provider, deployment target. Not every library: just the ones that would take a quarter to swap out.
-- **Boundary and scope decisions.** "Customer data is owned by the Customer context; other contexts reference it by ID only." The explicit no-s are as valuable as the yes-s.
-- **Deliberate deviations from the obvious path.** "We're using manual SQL instead of an ORM because X." Anything where a reasonable reader would assume the opposite. These stop the next engineer from "fixing" something that was deliberate.
-- **Constraints not visible in the code.** "We can't use AWS because of compliance requirements." "Response times must be under 200ms because of the partner API contract."
-- **Rejected alternatives when the rejection is non-obvious.** If you considered GraphQL and picked REST for subtle reasons, record it; otherwise someone will suggest GraphQL again in six months.
+- **Architectural shape**: "The write model is event-sourced, the read model is projected into Postgres."
+- **Integration patterns between contexts**: "Ordering and Billing communicate via domain events, not synchronous HTTP."
+- **Technology choices that carry lock-in**: the ones that would take a quarter to swap out, not every library.
+- **Boundary and scope decisions**, including the explicit no-s: "other contexts reference a Customer by ID only."
+- **Deliberate deviations from the obvious path**, which stop the next engineer "fixing" something deliberate.
+- **Constraints not visible in the code**: compliance, a partner API's response-time contract.
+- **Rejected alternatives when the rejection is non-obvious**, so nobody suggests them again in six months.
 
 Anything verification already enforces, or you'd reverse without a second thought, doesn't qualify.

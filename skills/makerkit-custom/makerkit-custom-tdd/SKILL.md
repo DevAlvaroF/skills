@@ -12,7 +12,7 @@ them before and during the loop, not after.
 When exploring the codebase, read the `AGENTS.md` chain for the directory under test and for the test file's own
 directory (`apps/e2e` and `apps/web/supabase/tests` carry their own), and the glossary in `.mysdd/docs/CONTEXT.md`, as
 `.mysdd/docs/agents/domain.md` § Ground yourself first lists them. If that section is missing, tell the user in your
-reply to re-run `/makerkit-custom-setup-skills`, and until then read every AGENTS.md from the root down to each
+final reply to re-run `/makerkit-custom-setup-skills`, and until then read every AGENTS.md from the root down to each
 directory you touch, the ones they route you to, CONTEXT.md and the ADRs whose scope covers those paths. Test names and
 interface vocabulary match the project's language, and where the repo and this description differ, **follow the repo**.
 The ADRs whose `scope` covers the code under test are binding: a test that would pin behaviour contradicting one is a
@@ -35,8 +35,7 @@ See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking g
 A **test boundary** is the public interface you test at: the point where you observe behavior without reaching inside.
 Tests live at boundaries, never against internals.
 
-**Test only at pre-agreed boundaries.** If you're implementing from an issue, its `testBoundaries` field (set by
-`/makerkit-custom-to-issues` when the issue was drafted) is that agreement — use it, don't re-ask. Otherwise, before
+**Test only at pre-agreed boundaries.** If you're implementing from an issue, its `testBoundaries` field is that agreement — use it, don't re-ask. Otherwise, before
 writing any test, write down the boundaries under test and confirm them with the user. No test is written at an
 unconfirmed boundary. You can't test everything, so agreeing the boundaries up front is how testing effort lands on the
 critical paths and complex logic instead of every edge case.
@@ -69,7 +68,5 @@ deletion test, seams, and designing it twice. Don't let the test quietly design 
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or
   add speculative features.
 - **One slice at a time.** One boundary, one test, one minimal implementation per cycle.
-- **Refactoring is not part of the loop.** Standards and smells are checked after it, by `/makerkit-custom-implement`'s
-  review — the repo's review skill, or that review's Standards fallback — not in the red → green cycle.
-- **Report missing grounding.** Your final reply names a missing § Ground yourself first in
-  `.mysdd/docs/agents/domain.md` and asks the user to re-run `/makerkit-custom-setup-skills`.
+- **Refactoring is not part of the loop.** Standards and smells belong to the review that follows
+  (`/makerkit-custom-implement` runs one), not the red → green cycle.
