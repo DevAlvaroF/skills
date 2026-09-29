@@ -31,8 +31,8 @@ the Job's record (after C comes D) and ask them to confirm. For the plan, the us
 Never pick the newest plan silently. The Job ID comes from the plan's `## Job Record <uuid>`. Exactly one → use it.
 Several → ask which. None → step A (or a B–E run on a plan without one) generates a UUID and adds the heading. Never
 reuse another Job's ID, and never guess between candidates. New IDs are lowercase UUID v4
-(`python3 -c 'import uuid; print(uuid.uuid4())'`), the only shape read. A skeleton's `<agent>` is the prompt's label
-or, invoked directly, your own name (Claude, Codex, …).
+(`python3 -c 'import uuid; print(uuid.uuid4())'`, or `uuidgen` lowercased), the only shape read. A skeleton's
+`<agent>` is the prompt's label or, invoked directly, your own name (Claude, Codex, …).
 
 ## The Job Record
 
@@ -92,26 +92,36 @@ commit. Identify your commit by its parent (the `HEAD` you noted first) and subj
 
 1. A merge, cherry-pick, revert or rebase in progress (`git status`): stop and report. A detached `HEAD`: commit there
    and say so.
-2. Note the staged paths that aren't yours: `git diff --cached --name-only`.
+2. Note `HEAD` itself (`git rev-parse --verify -q HEAD`; `unborn` when it fails on a branch with no commit yet) and
+   the staged paths: `git diff --cached --name-only --no-renames`, which names both paths of a staged `git mv`.
 3. `git --literal-pathspecs add -- '<path>'` each path that exists; a deleted, `git rm`ed or `git mv`ed path gets no
    `add`, and a rename commits both its paths.
-4. `git --literal-pathspecs commit --only -m "<subject>" -- '<paths>'`. Nothing to commit means no commit, never an
-   empty one.
-5. Verify `git diff-tree --no-commit-id --name-only -r HEAD` lists exactly your paths, that
-   `git --literal-pathspecs diff --cached --quiet HEAD -- '<those paths>'` succeeds, and that every noted path is still
-   staged.
-6. If a hook (lint-staged, a formatter) added paths or left the index disagreeing, name what it added and
-   `git --literal-pathspecs reset -q -- '<path>'` each path it added or left disagreeing that isn't noted; for a noted
-   one, stop and report.
+4. `git --literal-pathspecs commit --only -m "<subject>" -- '<paths>'`, with one more `-m "<paragraph>"` before `--`
+   for each further paragraph of the message. Nothing to commit means no commit, never an empty one.
+5. Once it has committed, read the new commit's SHA once with `git rev-parse HEAD`, and its parent and subject with
+   `git log -1 --format='%P%n%s' <sha>`. If the parent isn't the noted `HEAD` (after `unborn`: if it has one), or the
+   subject isn't yours, stop and report. Never search for the commit.
+6. Verify that SHA, never a later `HEAD`: `git diff-tree --root --no-commit-id --name-only -r <sha>` lists exactly your
+   paths, `git --literal-pathspecs diff --cached --quiet <sha> -- '<those paths>'` succeeds, and every noted path that
+   isn't yours is still staged.
+7. A hook (lint-staged, a formatter) can change the commit. A commit holding any path that isn't yours has failed
+   isolation. Stop. Report its SHA, the foreign paths, and that the user's index still holds their pre-hook versions,
+   so a later commit would revert them. End the attempt INCOMPLETE/BLOCKED with the SHA in the report or record.
+   Don't treat the SHA as the step's commit, never amend, reset the branch or retry, and let the user decide what
+   happens next. When only your own paths leave the index disagreeing (a formatter rewrote your file),
+   `git --literal-pathspecs reset -q -- '<path>'` each; for a noted one, stop and report.
 
 **Code commits (C, E):** the step's prefix and an imperative subject, at most 72 characters in all, and optionally one
 to three lines of why. Stage this step's changes by path, never the Job's plan or unrelated changes, by the route.
 Straight after it, read its full SHA and confirm its subject.
 
-**History commits (B, D, E)** commit the whole plan file, alone, by the route, when
-`git check-ignore --no-index -q -- '<plan path>'` exits 1; 0 means ignored, anything else is an error to report. The
-subject is `REVIEW HISTORY: Record step <B|D> attempt <N>` or `JOB HISTORY: Record step E attempt <N>`, with no body.
-If this attempt's exact entry is already committed, reuse that commit.
+**History commits (B, D, E)** commit the whole plan file, alone, by the route, unless it is **ignored**: matched by
+an ignore rule **and untracked**. `git check-ignore --no-index -q -- '<plan path>'` exits 1 when no rule matches and 0
+when one does; `git --literal-pathspecs ls-files --error-unmatch -- '<plan path>'` exits 0 when it is tracked and 1
+when it isn't; any other status is an error to report. A tracked plan takes the route whatever its rules. The subject
+is `REVIEW HISTORY: Record step <B|D> attempt <N>` or `JOB HISTORY: Record step E attempt <N>`, with no body. If this
+attempt's exact entry is already committed, reuse that commit when it holds the plan and no other path; otherwise ask
+the user.
 
 **An ignored plan (B, D)** gets an **empty marker** under the same subject, so the review leaves a trace:
 
@@ -123,9 +133,10 @@ new=$(git commit-tree "$tree" -p "$parent" -m "<subject>" $sign) &&
 git update-ref -m "<subject>" HEAD "$new" "$parent"   # refuses if HEAD moved
 ```
 
-It keeps its parent's tree and is published only onto that parent, so it can't revert another agent's commit or touch
-the user's index. `commit-tree` runs no hooks and ignores `commit.gpgsign`, hence `-S`: if signing fails, nothing is
-published; stop and report, never retry unsigned. If `update-ref` refuses, stop and report; never retry onto the new
-`HEAD`. Report "local record saved; marker committed". It is only for a plan Git positively reports as ignored — never a
+On an unborn branch the first command fails and there is no parent to mark: stop and report. The marker keeps its
+parent's tree and is published only onto that parent, so it can't revert another agent's commit or touch the user's
+index. `commit-tree` runs no hooks and ignores `commit.gpgsign`, hence `-S`: if signing fails, nothing is published;
+stop and report, never retry unsigned. If `update-ref` refuses, stop and report; never retry onto the new `HEAD`.
+Report "local record saved; marker committed". It is only for a plan Git positively reports as ignored — never a
 fallback for an unclear ignore state, permissions, hooks, a Git error or a failed save. A fix (E) makes no marker and
 says no history commit was made.
