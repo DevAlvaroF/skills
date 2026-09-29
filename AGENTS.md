@@ -73,3 +73,7 @@ A change to a skill runs the harness in `evals/` (from a prompt-kanban checkout,
 size budget, and reports the pass rate and the token delta. A change that costs
 tokens needs a result that pays for them. `evals/README.md` holds the loop and the
 last baseline.
+
+After touching `kanban-jobs`, or to check a plan an agent wrote, run
+`npm run -s skill-check [plan.md…]` from the prompt-kanban checkout. It lives in
+`evals/`, never under `skills/`, so it is not installed with the skills.

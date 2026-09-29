@@ -2,7 +2,8 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { GitHistoryService } from '@main/services/git-history.service'
-import { IssueFileSchema, JobRecordSchema, RECORDED_SHA_PATTERN, parseSpecMarker, planJobIds, readPlanRecord, type PlanRecordStepKey } from '@shared/domain'
+import { IssueFileSchema, RECORDED_SHA_PATTERN, parseSpecMarker, planJobIds, readJobRecord, readPlanRecord, type JobRecordRead, type PlanRecordStepKey } from '@shared/domain'
+import { growthProblems, recordProblems, recordedShas } from './job-record-check'
 
 /**
  * The verifier: every assertion a scenario makes about a disposable repo, read
@@ -63,48 +64,9 @@ function readIssue(repo: string, path: string) {
   }
 }
 
-/**
- * The JSON inside this Job's `<job-record id="…">` block, read by the grammar the app
- * parses: a column-zero opening line, blank lines, a ```json fence, the JSON, its closing
- * fence, blank lines, a column-zero `</job-record>`. `null` when the plan has no block for
- * the Job; an `error` when it has two, or one that breaks the grammar or the JSON.
- */
-function jobRecordJson(contents: string, jobId: string): { value: unknown } | { error: string } | null {
-  const lines = contents.split('\n').map((line) => line.replace(/\r$/, ''))
-  const opens = lines.flatMap((line, index) => line === `<job-record id="${jobId}">` ? [index] : [])
-  if (opens.length === 0) return null
-  if (opens.length > 1) return { error: `${opens.length} blocks for this Job, at lines ${opens.map((index) => index + 1).join(', ')}` }
-  let at = opens[0]! + 1
-  const skipBlank = () => { while (at < lines.length && lines[at]!.trim() === '') at++ }
-  skipBlank()
-  if (lines[at] !== '```json') return { error: `line ${at + 1}: expected \`\`\`json, found ${JSON.stringify(lines[at] ?? '(end of file)')}` }
-  const start = ++at
-  while (at < lines.length && lines[at] !== '```') at++
-  if (at === lines.length) return { error: 'the json fence never closes' }
-  const json = lines.slice(start, at).join('\n')
-  at++
-  skipBlank()
-  if (lines[at] !== '</job-record>') return { error: `line ${at + 1}: expected </job-record>, found ${JSON.stringify(lines[at] ?? '(end of file)')}` }
-  try { return { value: JSON.parse(json) } } catch (error) { return { error: `invalid JSON: ${String(error)}` } }
-}
-
-type JsonRecord = { commits?: Record<string, unknown>; attempts?: Array<Record<string, unknown>> }
-
-/** Every SHA the record holds, with where it sits: `commits`, each attempt's `commit` and `reviewedCommits`. */
-function recordedShas(record: JsonRecord): Array<{ at: string; value: unknown }> {
-  const out = Object.entries(record.commits ?? {}).filter(([, value]) => value !== null).map(([key, value]) => ({ at: `commits.${key}`, value }))
-  for (const [index, attempt] of (Array.isArray(record.attempts) ? record.attempts : []).entries()) {
-    if (attempt?.commit != null) out.push({ at: `attempts[${index}].commit`, value: attempt.commit })
-    for (const [n, value] of (Array.isArray(attempt?.reviewedCommits) ? attempt.reviewedCommits : []).entries()) out.push({ at: `attempts[${index}].reviewedCommits[${n}]`, value })
-  }
-  return out
-}
-
-/** JSON with object keys sorted, so a rewrite that only reorders keys compares equal. */
-function canonical(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
-  if (value && typeof value === 'object') return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`).join(',')}}`
-  return JSON.stringify(value)
+/** A read of this Job's record, as the evidence line a failed check shows. */
+function unread(read: JobRecordRead): string {
+  return read.state === 'none' ? 'no block for this Job' : read.state === 'unusable' ? `${read.reason}: ${read.detail}` : ''
 }
 
 /**
@@ -112,27 +74,15 @@ function canonical(value: unknown): string {
  * there, unchanged and in order, new ones only follow them, and at most one `commits` key
  * changed — the step's own — and never back to `null`.
  */
-function attemptsGrow(beforePath: string, jobId: string, after: ReturnType<typeof jobRecordJson>): Expectation {
+function attemptsGrow(beforePath: string, jobId: string, after: JobRecordRead): Expectation {
   const text = `Job ${jobId.slice(0, 8)}'s attempts only grow, and at most one commits key changed`
   if (!existsSync(beforePath)) return { text, passed: false, evidence: `no snapshot at ${beforePath}` }
-  const before = jobRecordJson(readFileSync(beforePath, 'utf8'), jobId)
-  if (!before || 'error' in before) return { text, passed: false, evidence: `before: ${before ? before.error : 'no block for this Job'}` }
-  if (!after || 'error' in after) return { text, passed: false, evidence: `after: ${after ? after.error : 'no block for this Job'}` }
-  const was = before.value as JsonRecord
-  const now = after.value as JsonRecord
-  const wasAttempts = Array.isArray(was.attempts) ? was.attempts : []
-  const nowAttempts = Array.isArray(now.attempts) ? now.attempts : []
-  const problems: string[] = []
-  if (nowAttempts.length < wasAttempts.length) problems.push(`${wasAttempts.length} attempts before, ${nowAttempts.length} now`)
-  wasAttempts.forEach((attempt, index) => {
-    if (index < nowAttempts.length && canonical(attempt) !== canonical(nowAttempts[index])) problems.push(`attempts[${index}] changed`)
-  })
-  const keys = new Set([...Object.keys(was.commits ?? {}), ...Object.keys(now.commits ?? {})])
-  const changed = [...keys].filter((key) => canonical(was.commits?.[key] ?? null) !== canonical(now.commits?.[key] ?? null))
-  if (changed.length > 1) problems.push(`commits changed: ${changed.join(', ')}`)
-  for (const key of changed) if (now.commits?.[key] == null) problems.push(`commits.${key} went back to null`)
+  const before = readJobRecord(readFileSync(beforePath, 'utf8'), jobId)
+  if (before.state !== 'read') return { text, passed: false, evidence: `before: ${unread(before)}` }
+  if (after.state !== 'read') return { text, passed: false, evidence: `after: ${unread(after)}` }
+  const problems = growthProblems(before.record, after.record)
   return { text, passed: problems.length === 0,
-    evidence: problems.join(' | ') || `${wasAttempts.length} → ${nowAttempts.length} attempts; commits changed: ${changed.join(', ') || 'none'}` }
+    evidence: problems.join(' | ') || `${before.record.attempts.length} → ${after.record.attempts.length} attempts` }
 }
 
 async function check(repo: string, item: Check, history: GitHistoryService): Promise<Expectation[]> {
@@ -215,22 +165,25 @@ async function check(repo: string, item: Check, history: GitHistoryService): Pro
       const out: Expectation[] = [{ text: `${item.path} is owned by Job ${job}`, passed: owners.includes(item.jobId), evidence: owners.join(', ') || 'no <job-record> block' }]
       // One parse is the whole format check: an attempt cannot land outside the block, and a
       // short or retyped SHA fails the schema (contract 5 once recorded a SHA 3 characters short).
-      const block = jobRecordJson(contents, item.jobId)
-      const parsed = block && 'value' in block ? JobRecordSchema.safeParse(block.value) : null
+      const read = readJobRecord(contents, item.jobId)
       out.push({
         text: `Job ${job}'s record block parses with JobRecordSchema`,
-        passed: parsed?.success === true,
-        evidence: !block ? 'no block for this Job' : 'error' in block ? block.error
-          : parsed!.success ? `${parsed!.data.attempts.length} attempts; ${Object.entries(parsed!.data.commits).map(([key, sha]) => `${key} ${sha?.slice(0, 8) ?? 'null'}`).join(', ')}`
-          : parsed!.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; '),
+        passed: read.state === 'read',
+        evidence: read.state === 'read'
+          ? `${read.record.attempts.length} attempts; ${Object.entries(read.record.commits).map(([key, sha]) => `${key} ${sha?.slice(0, 8) ?? 'null'}`).join(', ')}`
+          : unread(read),
       })
-      if (block && 'value' in block && block.value && typeof block.value === 'object') {
-        const shas = recordedShas(block.value as JsonRecord)
-        const bad = shas.filter(({ value }) => typeof value !== 'string' || !RECORDED_SHA_PATTERN.test(value) || tryGit(repo, ['cat-file', '-e', `${value}^{commit}`]) === null)
+      if (read.state === 'read') {
+        // What skill-check holds a record to: each attempt's fields, its numbering, and
+        // every key naming the latest commit its step's attempts made.
+        const problems = recordProblems(read.record)
+        out.push({ text: `Job ${job}'s record keeps the kanban-jobs contract (skill-check)`, passed: problems.length === 0, evidence: problems.join(' | ') || 'no problems' })
+        const shas = recordedShas(read.record)
+        const bad = shas.filter(({ sha }) => !RECORDED_SHA_PATTERN.test(sha) || tryGit(repo, ['cat-file', '-e', `${sha}^{commit}`]) === null)
         out.push({ text: `every SHA Job ${job}'s record holds is 40 lowercase hex and names a commit`, passed: bad.length === 0,
-          evidence: bad.map(({ at, value }) => `${at} = ${JSON.stringify(value)}`).join(' | ') || `${shas.length} SHAs, all full commits` })
+          evidence: bad.map(({ at, sha }) => `${at} = ${JSON.stringify(sha)}`).join(' | ') || `${shas.length} SHAs, all full commits` })
       }
-      if (item.before !== undefined) out.push(attemptsGrow(resolve(item.before), item.jobId, block))
+      if (item.before !== undefined) out.push(attemptsGrow(resolve(item.before), item.jobId, read))
       for (const key of item.recorded) {
         const record = readPlanRecord(contents, item.jobId, key)
         let passed = record.state === 'recorded'

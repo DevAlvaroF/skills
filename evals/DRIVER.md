@@ -49,8 +49,9 @@ known), `{"kind":"sentinel"}`, `{"kind":"reflog","since":…}`. Then the step's 
 `evals.json` — Issue status and recorded fields (`issue`), plan records (`plan`), spec marker,
 `recorded-subject` (the recorded SHA names the commit this step made), and `file` patterns for the
 comment-record labels. A Job step's `plan` check (B–E) carries `"before": "<run>/steps/<label>.plan-before"`:
-it parses the `<job-record>` block with `JobRecordSchema`, checks every SHA in it is full and a
-commit, and that attempts only grew. Grade formats, done rules and hard limits, never wording. Where a check
+it parses the `<job-record>` block with `JobRecordSchema`, holds the record to `skill-check` (each
+attempt's fields, its numbering, every key naming its step's latest commit), checks every SHA in it
+is full and a commit, and that attempts only grew. Grade formats, done rules and hard limits, never wording. Where a check
 cannot be expressed in `verify`, check by hand and append a
 `{"text","passed","evidence"}` entry to `grading.json` yourself (keep the `summary` block
 consistent).

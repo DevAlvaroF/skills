@@ -37,9 +37,29 @@ check means what the app means. There, `npm run skill-evals` runs `cli.ts`.
 that commits it, or unstages it, swept the user's work. With `--plan <path>` it
 also copies the Job's plan, as the step finds it, to
 `steps/<label>.plan-before`: the `plan` check's `before`, against which the Job
-Record's attempts may only grow. Each step's
+Record's attempts may only grow. The `plan` check also holds the record to
+`job-record-check.ts`, the checker `npm run skill-check` runs (below). Each step's
 `timing.json` sums the token usage Codex reports per turn; the run's
 `timing.json` sums the steps.
+
+## skill-check
+
+`npm run -s skill-check` checks the skills' own statement of the Job Record —
+`kanban-jobs` states the contract the app reads, shows exactly
+`jobRecordTemplate('<jobId>')`, and each `STEP-<X>.md` example is an attempt
+of its step that the schema accepts — and `npm run -s skill-check -- <plan.md>…`
+checks any plan an agent wrote: each Job's block reads, every attempt carries
+its step's fields and is numbered 1, 2, 3… per step, and every `commits` key
+names the latest commit its step's attempts made. It exits 1 on any problem.
+
+It is a maintainer tool, not part of a skill: it sits here, outside `skills/`,
+so `npx skills` never installs it and an installed skill stays prose-only. The
+eval transcripts behind it showed agents writing their own block parser in
+every recording step (37 of 452 commands across the contract-2 runs), never
+getting one wrong — the evidence for a tool on the maintainer's side, not yet
+for bundling one into the skill. It reads blocks with the app's own
+`readJobRecord`, and `kanban-jobs-contract.test.ts` runs it, so `npm test`
+fails wherever it would.
 
 ## Rules
 
