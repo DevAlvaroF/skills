@@ -15,19 +15,19 @@ row names and those on the line below, each in full, never the whole file. Run e
 awk '/^## Conventions/ { exit } 1' .mysdd/issue-tracker.md
 ```
 
-Then list § Conventions, § Ignore policy and the row's full headings in `s`, separated by `|`; the command adds the
+Then list § Conventions, § Ignore policy and the row's full headings in `s`, separated by `;`; the command adds the
 line's headings itself, matches each heading exactly, and exits 1 naming any it didn't find. A missing heading means
 the file is out of date: stop and have the user re-run `/makerkit-custom-setup-skills`.
 
 ```sh
-awk -v s='Conventions|Ignore policy|Issue shape' -v d='|' '
+awk -v s='Conventions;Ignore policy;Issue shape' -v d=';' -v e='|' '
 function t(x) { sub(/[ \r]+$/, "", x); return x }
 BEGIN { n = split(s, a, d); for (i = 1; i <= n; i++) w[t(a[i])] }
 /^Every operation also reads: / && !c++ { v = t($0); sub(/^[^:]*: /, "", v)
-  if (v != "none") { n = split(v, a, d); for (i = 1; i <= n; i++) w[t(a[i])] } }
+  if (v != "none") { n = split(v, a, e); for (i = 1; i <= n; i++) w[t(a[i])] } }
 /^## / { h = t(substr($0, 4)); p = (h in w); if (p) got[h] }
 p
-END { for (h in w) if (!(h in got)) { print "missing section: " h; e = 1 }; exit e }
+END { for (h in w) if (!(h in got)) { print "missing section: " h; bad = 1 }; exit bad }
 ' .mysdd/issue-tracker.md
 ```
 
