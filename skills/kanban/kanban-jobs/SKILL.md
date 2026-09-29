@@ -53,7 +53,8 @@ A skeleton's `<agent>` is the prompt's label or, by hand, your own name (Claude,
 
 B, C, D and E each own one line, keyed `plan-review`, `code`, `code-review` and `code-fix`: exactly
 `kanban-commit <jobId> <key>: <full SHA>` directly under the entry's heading, the full 40-character SHA, unindented
-and bare — the app reads only that whole line. In the same write, turn every earlier line for your key into
+and bare — the app reads only that whole line. Write the SHA from Git's own output, never retyped: a run once dropped
+three characters by hand, and a short SHA is an unusable record. In the same write, turn every earlier line for your key into
 `Superseded commit <jobId> <key>: <old value>`, since two live lines that disagree are unreadable. If one is
 malformed, or two disagree, ask before recording.
 
