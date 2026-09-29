@@ -11,12 +11,13 @@ How the engineering skills should consume this repo's domain documentation when 
   This prints every ADR's whole frontmatter in one read, however long its `scope`, or a legacy ADR's `**Status:**` line. Pick the binding set from it and open only those in full:
 
   ```sh
+  ( top=$(git rev-parse --show-toplevel) && cd "$top" || exit
   if [ -d .mysdd/docs/adr ]; then
     find .mysdd/docs/adr -maxdepth 1 -name '*.md' -print0 | sort -z | xargs -0 -r awk '{ sub(/\r$/, "") }
       FNR == 1 { print "== " FILENAME; fm = hdr = ($0 ~ /^--- *$/); seen = 0; next }
       fm { if ($0 ~ /^--- *$/) fm = 0; else print; next }
       !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }'
-  fi
+  fi )
   ```
 
   Only a `---` on an ADR's first line opens frontmatter, so a horizontal rule further down a legacy ADR is never mistaken for it.
