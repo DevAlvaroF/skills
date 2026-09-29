@@ -1,6 +1,6 @@
 ---
 name: makerkit-custom-grill-with-docs
-description: A relentless interview to sharpen a plan or design, which also records terms into .mysdd/docs/CONTEXT.md and offers ADRs for decisions as we go. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+description: Runs a relentless interview to sharpen a plan or design, recording terms in .mysdd/docs/CONTEXT.md and offering ADRs as decisions crystallise. Use when the user wants to stress-test a plan or design before it becomes a spec.
 disable-model-invocation: true
 ---
 
@@ -38,17 +38,18 @@ tools, etc.), dispatch a sub-agent to find it; don't ask the user for anything y
 on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent
 to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
 
-The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed.
-Do not act on it until the user confirms you have reached a shared understanding. Once they confirm,
-`/makerkit-custom-to-spec` turns this session into a spec — run it **in this same session**, while the design tree is
-still in context. The glossary terms and ADRs this session writes stay uncommitted. `/makerkit-custom-to-issues`
-commits them with the spec.
-
-## Ground yourself first
-
-**Before the first round**, read the project's own documentation so you never spend a question on something the repo
-already answers, as `.mysdd/docs/agents/domain.md` § Ground yourself first lists it. Per the frontier rule above, don't
-block round one on the docs sub-agent: only the questions downstream of its answer wait for it to report.
+**Before the first round**, also read the project's own documentation so you never spend a question on something the
+repo already answers, as `.mysdd/docs/agents/domain.md` § Ground yourself first lists it. If that section is missing,
+tell the user to re-run `/makerkit-custom-setup-skills`, and until then read every AGENTS.md from the root down to each
+directory you touch, the ones they route you to, CONTEXT.md and the ADRs whose scope covers those paths. Per the
+frontier rule above, don't block round one on the docs sub-agent: only the questions downstream of its answer wait for
+it to report.
 
 Understanding the architecture is a first step, not a question. Ask the user only what the docs genuinely don't answer —
 and when a question survives that reading, say what you checked, so they can see it's a real gap rather than a shortcut.
+
+The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed.
+Do not act on it until the user confirms you have reached a shared understanding. Once they confirm, tell the user to
+run `/makerkit-custom-to-spec` here, **in this same session** while the design tree is still in context: only they can
+invoke it. The glossary terms and ADRs this session writes stay uncommitted. `/makerkit-custom-to-issues`
+commits them with the spec.

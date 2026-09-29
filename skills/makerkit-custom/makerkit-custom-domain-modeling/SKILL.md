@@ -1,6 +1,6 @@
 ---
 name: makerkit-custom-domain-modeling
-description: Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing .mysdd/docs/CONTEXT.md, or recording or superseding an ADR in .mysdd/docs/adr/.
+description: Builds and sharpens a project's domain model — the glossary, the ADRs and the one-line conventions an AGENTS.md carries. Use when discussing codebase terminology, writing or editing .mysdd/docs/CONTEXT.md, or recording or superseding an ADR in .mysdd/docs/adr/.
 ---
 
 # Domain Modeling
@@ -16,9 +16,20 @@ you're changing the model, not just consuming it.)
 - **Decisions**: one ADR per file in `.mysdd/docs/adr/`, each scoped to the paths it binds, in the format of
   [ADR-FORMAT.md](./ADR-FORMAT.md).
 
-Create each lazily, when its first entry needs writing. Never record a term or a decision in an `AGENTS.md`: those files
-load into every session, so they keep only the conventions, the monorepo map and the verification steps every session
-needs.
+Create each lazily, when its first entry needs writing. Before writing either, check the target isn't ignored: with the
+tracker's ignore probe (`.mysdd/issue-tracker.md` § Ignore policy) when the tracker exists, otherwise
+`git check-ignore --no-index -q -- '<target>'`, where exit 0 means ignored, 1 means not, and anything else is an error.
+On an ignored target or an error, write nothing and tell the user: an ignored doc never reaches the repo.
+
+Never record a term or a decision in an `AGENTS.md`: those files load into every session, so they keep only the
+conventions, the monorepo map and the verification steps every session needs.
+
+**A convention is one line.** A convention that always applies and would surprise nobody (name every hook `use…`) fails
+the ADR tests but still belongs somewhere. Propose it as one imperative line, with no rationale, for the `AGENTS.md`
+that owns the area — and a new package's routing row for the `AGENTS.md` that routes to it — and don't write either
+yourself: each goes into the spec's Implementation Decisions (with no spec coming, hand it to the user), so
+`/makerkit-custom-to-issues` attaches it to the first Issue that touches the area and `/makerkit-custom-implement`
+commits it with that Issue's code. Decisions still go only to ADRs.
 
 **Docs stand alone.** `.mysdd/docs/` stays while the feature directories under `.mysdd/features/` get archived and
 deleted, so nothing under it points into one: no issue ID or path, no `US-NNN`, no spec path, no "see the spec". State

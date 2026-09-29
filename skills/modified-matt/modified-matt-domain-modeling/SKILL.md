@@ -1,6 +1,6 @@
 ---
 name: modified-matt-domain-modeling
-description: Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording, editing or superseding an ADR.
+description: Builds and sharpens a project's domain model — the glossary, the ADRs and the one-line conventions an AGENTS.md carries. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording, editing or superseding an ADR.
 ---
 
 # Domain Modeling
@@ -9,9 +9,11 @@ Actively build and sharpen the project's domain model as you design. This is the
 
 ## File structure
 
-Layout follows [./CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md): a root `CONTEXT.md`, or a root `CONTEXT-MAP.md` pointing at per-context files. Decisions go one per file in `.mysdd/docs/adr/`, each scoped to the paths it binds, in the format of [ADR-FORMAT.md](./ADR-FORMAT.md). Create lazily — `CONTEXT.md` when the first term resolves, `.mysdd/docs/adr/` when the first ADR is needed.
+Layout follows [./CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md): a root `CONTEXT.md`, or a root `CONTEXT-MAP.md` pointing at per-context files. Decisions go one per file in `.mysdd/docs/adr/`, each scoped to the paths it binds, in the format of [ADR-FORMAT.md](./ADR-FORMAT.md). Create lazily — `CONTEXT.md` when the first term resolves, `.mysdd/docs/adr/` when the first ADR is needed. Before writing either, check the target isn't ignored: with the tracker's ignore probe (`.mysdd/issue-tracker.md` § Ignore policy) when the tracker exists, otherwise `git check-ignore --no-index -q -- '<target>'`, where exit 0 means ignored, 1 means not, and anything else is an error. On an ignored target or an error, write nothing and tell the user: an ignored doc never reaches the repo.
 
 Never record a term or a decision in `CLAUDE.md` or `AGENTS.md`: those files load into every session, so every entry there is a permanent context cost.
+
+**A convention is one line.** A convention that always applies and would surprise nobody (name every hook `use…`) fails the ADR tests but still belongs somewhere. Propose it as one imperative line, with no rationale, for the `AGENTS.md` that owns the area, and don't write it there yourself: it goes into the spec's Implementation Decisions (with no spec coming, hand it to the user), so `/modified-matt-to-issues` attaches it to the first Issue that touches the area and `/modified-matt-implement` commits it with that Issue's code. Decisions still go only to ADRs.
 
 **Docs stand alone.** The glossary and the ADRs stay while feature directories under `.mysdd/features/` get archived and deleted, so neither points into one: no issue ID or path, no `US-NNN`, no spec path, no "see the spec". State the term, or the decision and its reasoning, in full. An ADR may cite another ADR by number and use glossary terms. When a decision turns on a secret, describe the secret's role, never its value.
 

@@ -1,6 +1,6 @@
 ---
 name: modified-matt-tdd
-description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
+description: Guides test-driven development — what a good test is, where tests go, the anti-patterns and the red-green loop. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
 ---
 
 # Test-Driven Development
@@ -25,7 +25,7 @@ If implementation reveals a pre-agreed boundary doesn't hold (that interface doe
 
 Ask: "What's the public interface, and which boundaries should we test?"
 
-When the shape of that interface is itself in question (how deep the module is, where the boundary belongs, what the interface should expose), settle that with the user before writing the test. Don't let the test quietly design the interface.
+When the shape of that interface is itself in question (how deep the module is, where the boundary belongs, what the interface should expose), settle that with the user before writing the test, using [DESIGN.md](DESIGN.md): depth, the deletion test, seams, and designing it twice. Don't let the test quietly design the interface.
 
 ## Anti-patterns
 

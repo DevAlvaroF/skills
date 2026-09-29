@@ -1,6 +1,6 @@
 ---
 name: modified-matt-to-issues
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .mysdd/features/.
+description: Breaks a plan, spec, or the current conversation into tracer-bullet issues, each declaring its blocking edges as data, published as one JSON file per issue under .mysdd/features/ and committed with the spec. Use when a spec or plan is ready to be cut into issues, or its issues need reconciling after the spec changed.
 disable-model-invocation: true
 ---
 
@@ -9,25 +9,20 @@ disable-model-invocation: true
 Break a plan, spec, or conversation into a set of **issues**: tracer-bullet vertical slices, each declaring the issues
 that **block** it.
 
-**Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for issues, then
-those sections in full, by the commands its § Contents gives, never the whole file. The file is the contract. This skill
-does not restate it. If the file is missing, stop and tell the user to run `/modified-matt-setup-skills`.
-
-**Check its contract before any write.** `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'`
-must print 1, and this skill expects `Tracker contract: 3`. Otherwise stop, write nothing, and say which side is behind:
-
-- no such line, more than one, or a `Tracker contract` line of any other shape: the tracker is damaged or predates
-  contracts — re-run `/modified-matt-setup-skills`;
-- a number lower than 3: the tracker is behind — re-run `/modified-matt-setup-skills`;
-- a number higher than 3: these skills are behind — update them (`npx skills update -p`), and the tool whose prompt
-  drove this session too if that prompt named a lower number.
-
 ## Process
 
 ### 1. Gather context
 
 Work from whatever is already in the conversation context. If the user passes a reference (a spec path or issue path) as
 an argument, read the file's full contents.
+
+**Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for issues, then
+those sections in full, by the commands its § Contents gives, never the whole file. The file is the contract. This skill
+does not restate it. If the file is missing, stop and tell the user to run `/modified-matt-setup-skills`. Check its
+contract line with
+`sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4 "$(git rev-parse --show-toplevel)"`. If it exits
+non-zero, write nothing: relay its message and have the user re-run `/modified-matt-setup-skills` (when the tracker is
+behind) or update this skill (when the tracker is ahead).
 
 ### 2. Explore the codebase
 
@@ -106,8 +101,9 @@ create or update as its targets. If it reports an unresolved state, write nothin
 resolve them.
 
 - **No live issue** (`issues/*.json` absent or empty) → first publish. Create the issues as described below, in
-  dependency order (blockers first), numbering from `01` — or, when `issues/archive/` holds retired issues, from one
-  past their highest number, which is never reused.
+  dependency order (blockers first), numbering from `01` — or, when `issues/archive/` holds **Retired Issues** (an id
+  found only there, which the tracker counts as resolved for `blockedBy`), from one past their highest number, which is
+  never reused.
 - **Non-empty** → **reconciliation mode**. Write nothing until the whole reconciliation is resolved and shown to the
   user; see *Reconciling with existing issues* below.
 
@@ -115,9 +111,11 @@ Write one file per issue under `.mysdd/features/<NN>-<feature-slug>/issues/<NN>-
 `NN` is its two-digit sequence number; the issue filename's `NN` is a separate sequence within that feature and is that
 issue's `id`. Each file's `blockedBy` lists the issues it depends on. Set each issue's `spec` field to that feature's
 `spec.md` path if this run started from a spec (a spec path was passed in, or one exists at
-`.mysdd/features/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testBoundaries` to the boundaries agreed for
-that issue in step 4, and `covers` to the `US-NNN` IDs agreed there. Use the issue shape from `.mysdd/issue-tracker.md`
-§ Issue shape: one issue per file, never a single combined file.
+`.mysdd/features/<NN>-<feature-slug>/spec.md`); otherwise `null`. Set `testBoundaries` to the boundaries agreed for that
+issue in step 4, and `covers` to the `US-NNN` IDs agreed there. Each `AGENTS.md` line the spec's Implementation
+Decisions agreed rides on the first issue, in dependency order, whose slice touches its area: add an acceptance
+criterion naming that `AGENTS.md` and the line verbatim, so `/modified-matt-implement` commits it with the code. Use the
+issue shape from `.mysdd/issue-tracker.md` § Issue shape: one issue per file, never a single combined file.
 
 Work the **frontier**: any issue whose blockers are all done. For a purely linear chain that means top to bottom.
 
@@ -152,7 +150,9 @@ is non-empty, reconcile — never regenerate.
    changed. This is what stops content shifting between files and what keeps every `blockedBy` reference valid.
    Dependency order is carried by `blockedBy`, not by the numbering — remap `blockedBy` onto the preserved ids.
 5. **Never delete.** An existing issue with no counterpart in the new breakdown is listed to the user with one question:
-   keep it, or move it to `issues/archive/`? No `rm`, no silent drop, no answer assumed on their behalf.
+   keep it, or move it to `issues/archive/`? No `rm`, no silent drop, no answer assumed on their behalf. Archiving it
+   makes it a Retired Issue, which unblocks every issue waiting on it, so list each live issue whose `blockedBy` names
+   it and ask, for each, whether to remap that edge onto another issue or drop it.
 6. **A `covers` entry with no matching story is a dangling reference.** It means the spec was revised and that `US-NNN`
    was dropped or renamed. Never silently remove it. List each one with the issue it sits on and ask the user whether
    that issue is now out of scope or should point at a different story. A `covers` entry naming a story marked

@@ -1,6 +1,6 @@
 ---
 name: makerkit-custom-tdd
-description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
+description: Guides test-driven development — what a good test is, where tests go, the anti-patterns and the red-green loop. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
 ---
 
 # Test-Driven Development
@@ -9,11 +9,14 @@ TDD is the red → green loop. This skill is the reference that makes that loop 
 test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult
 them before and during the loop, not after.
 
-When exploring the codebase, read the `AGENTS.md` chain for the directory under test, as `.mysdd/docs/agents/domain.md`
-§ Ground yourself first lists it, and the glossary in `.mysdd/docs/CONTEXT.md`, so test names and interface vocabulary
-match the project's language. Where they and this description differ, **follow the repo**. The ADRs whose `scope`
-covers the code under test are binding, per that file: a test that would pin behaviour contradicting one is a stop —
-flag it and ask.
+When exploring the codebase, read the `AGENTS.md` chain for the directory under test and for the test file's own
+directory (`apps/e2e` and `apps/web/supabase/tests` carry their own), and the glossary in `.mysdd/docs/CONTEXT.md`, as
+`.mysdd/docs/agents/domain.md` § Ground yourself first lists them. If that section is missing, tell the user to re-run
+`/makerkit-custom-setup-skills`, and until then read every AGENTS.md from the root down to each directory you touch, the
+ones they route you to, CONTEXT.md and the ADRs whose scope covers those paths. Test names and interface vocabulary
+match the project's language, and where the repo and this description differ, **follow the repo**. The ADRs whose
+`scope` covers the code under test are binding: a test that would pin behaviour contradicting one is a stop — flag it
+and ask.
 
 The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, boundaries
 over internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A
@@ -44,8 +47,8 @@ behavior that matters), stop and confirm the change with the user rather than si
 Ask: "What's the public interface, and which boundaries should we test?"
 
 When the shape of that interface is itself in question (how deep the module is, where the boundary belongs, what the
-interface should expose), settle it with the user before writing the test. Don't let the test quietly design the
-interface.
+interface should expose), settle it with the user before writing the test, using [DESIGN.md](DESIGN.md): depth, the
+deletion test, seams, and designing it twice. Don't let the test quietly design the interface.
 
 ## Anti-patterns
 

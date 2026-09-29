@@ -1,5 +1,5 @@
 interface:
   display_name: "Makerkit Custom To Spec"
-  short_description: "Turn a conversation into a spec"
+  short_description: "Write a spec from a conversation, or review one"
 policy:
   allow_implicit_invocation: false
