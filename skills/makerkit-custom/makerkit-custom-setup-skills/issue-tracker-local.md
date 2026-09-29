@@ -165,7 +165,9 @@ Subjects are ≤72 characters. `<issue path>` is repo-root-relative, starting `.
 | phase 2 close | `Closed Issue: <issue path>` | none | the issue file, plus `.mysdd/kanban-boards.json` if changed | none: the status change is the close |
 
 The code prefix follows `codeCommit`: `null` → `CODE: `, a SHA → `CODE REVIEW FIXES: `. One commit per issue where
-the work separates. Final review finds the change by its `Issue:` trailers, so write them in both modes.
+the work separates. Final review finds the change by its `Issue:` trailers, so write them in both modes, as the
+message's last paragraph with no blank line between them: Git reads only that block as trailers (a run once split
+them into separate `-m` paragraphs, and `Issue:` stopped being one).
 
 **Hard limits**:
 
