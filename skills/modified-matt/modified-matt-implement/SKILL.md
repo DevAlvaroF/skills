@@ -11,8 +11,9 @@ those sections in full, by the commands its § Contents gives, never the whole f
 does not restate it. If the file is missing, stop and tell the user to run `/modified-matt-setup-skills`. Check its
 contract line with
 `sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4 "$(git rev-parse --show-toplevel)"`. If it exits
-non-zero, write nothing: relay its message and have the user re-run `/modified-matt-setup-skills` (when the tracker is
-behind) or update this skill (when the tracker is ahead).
+non-zero, write nothing and relay its message: on exit 1 the tracker is behind, so have the user re-run
+`/modified-matt-setup-skills`; on exit 3 the skills are behind, so have them run `npx skills update -p`, and update the
+app too if its prompt named a lower number; on any other exit, report the error.
 
 Read each issue you're implementing first (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work
 from its `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. If an issue's `codeCommit` already holds a

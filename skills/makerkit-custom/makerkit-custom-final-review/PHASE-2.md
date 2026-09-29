@@ -126,8 +126,8 @@ probe, the planning-only `ATTEMPT PLANS: final review <issue path> attempt <K>` 
   status, so an earlier attempt's leftover is never swept up.
 - **Order.** Step 7 captures the fix commit's SHA before the planning commit, which would otherwise be the `HEAD` a
   later lookup found, then runs the planning operation for every outcome — no code change, zero findings, checks
-  blocked, local mode. Step 9 records the result; a planning failure is recorded as each affected plan's reason and
-  never stops the record.
+  blocked, local mode — except after a failed isolation, which makes no further commit. Step 9 records the result; a
+  planning failure is recorded as each affected plan's reason and never stops the record.
 - **Retries.** Neither a saved COMPLETE record nor a landed close commit proves the plans were committed, so check
   this operation before any of step 3's stops.
 - A project or tracker instruction that explicitly forbids committing these plans is a conflict: surface it and ask,

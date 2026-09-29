@@ -61,16 +61,18 @@ You are the coder, in a fresh session: work from the plan's records, not from me
    A verdict is FIXED with its location and verification, or REJECTED or DEFERRED with the approved reason. An approved
    FIX that could not finish is unresolved, with its blocker — never relabelled FIXED — and so is a finding the user
    left undecided. With zero findings, write None.
-9. **Commit the plan for every outcome, even when code stays uncommitted**, under
-   `JOB HISTORY: Record step E attempt <N>` (SKILL.md § Commits, history commits), unless that exact version is already
-   committed: reuse that commit when it holds the plan and no other path; otherwise ask the user. Never write this
-   commit's SHA into the plan: `code-fix` lines name code commits only. An ignored plan gets no commit and no marker.
+9. **Commit the plan for every outcome, even when code stays uncommitted**, except after a failed isolation, which makes
+   no further commit, under `JOB HISTORY: Record step E attempt <N>` (SKILL.md § Commits, history commits), unless that
+   exact version is already committed: reuse that commit when it holds the plan and no other path; otherwise ask the
+   user. Never write this commit's SHA into the plan: `code-fix` lines name code commits only. An ignored plan gets no
+   commit and no marker.
 
 ## Additional plans
 
 Plan files you or a delegate created in the repository for this attempt — for example under `.claude/plans` for Claude
-Code — other than the Job's own plan. They get a planning commit of their own for every outcome, apart from the code
-and `JOB HISTORY` commits, since it proves nothing about the code.
+Code — other than the Job's own plan. They get a planning commit of their own, apart from the code and `JOB HISTORY`
+commits since it proves nothing about the code, for every outcome except after a failed isolation, which makes no
+further commit.
 
 - **Ownership is proven at creation.** Confirm each path is absent before creating it, and have every delegate name the
   exact paths it created. An untracked status, a diff, a timestamp or a filename never proves a file is this attempt's,
