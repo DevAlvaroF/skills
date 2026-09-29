@@ -11,12 +11,12 @@ them before and during the loop, not after.
 
 When exploring the codebase, read the `AGENTS.md` chain for the directory under test and for the test file's own
 directory (`apps/e2e` and `apps/web/supabase/tests` carry their own), and the glossary in `.mysdd/docs/CONTEXT.md`, as
-`.mysdd/docs/agents/domain.md` § Ground yourself first lists them. If that section is missing, tell the user to re-run
-`/makerkit-custom-setup-skills`, and until then read every AGENTS.md from the root down to each directory you touch, the
-ones they route you to, CONTEXT.md and the ADRs whose scope covers those paths. Test names and interface vocabulary
-match the project's language, and where the repo and this description differ, **follow the repo**. The ADRs whose
-`scope` covers the code under test are binding: a test that would pin behaviour contradicting one is a stop — flag it
-and ask.
+`.mysdd/docs/agents/domain.md` § Ground yourself first lists them. If that section is missing, tell the user in your
+reply to re-run `/makerkit-custom-setup-skills`, and until then read every AGENTS.md from the root down to each
+directory you touch, the ones they route you to, CONTEXT.md and the ADRs whose scope covers those paths. Test names and
+interface vocabulary match the project's language, and where the repo and this description differ, **follow the repo**.
+The ADRs whose `scope` covers the code under test are binding: a test that would pin behaviour contradicting one is a
+stop — flag it and ask.
 
 The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, boundaries
 over internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A
