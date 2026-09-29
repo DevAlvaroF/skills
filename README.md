@@ -282,7 +282,7 @@ by hand.
 .claude-plugin/marketplace.json   # defines the picker's three groups — generated
 scripts/gen-marketplace.mjs       # regenerates it
 skills/
-  makerkit-custom/<skill>/        # SKILL.md, optional references/, scripts/ and agents/openai.yaml
+  makerkit-custom/<skill>/        # SKILL.md, optional reference .md files and agents/openai.yaml
   modified-matt/<skill>/
   kanban/kanban-jobs/             # the flavour-neutral Job procedure: SKILL.md and STEP-A…E.md
 matt_submodule/skills             # upstream mattpocock/skills, for reference
@@ -297,25 +297,29 @@ matt_submodule/skills             # upstream mattpocock/skills, for reference
 3. Commit and push. Projects only see changes after the push, when they run
    `npx skills@latest update -p`.
 
-### Rules of thumb
+### Writing rules
 
+`AGENTS.md` holds them (`CLAUDE.md` imports it). In short:
+
+- Be exact only about formats something else parses, what counts as done, and
+  hard limits; state everything else as an outcome with its reason, and let
+  the agent pick the steps.
+- Guards and bundled scripts come from evidence — a real incident or eval
+  transcripts showing agents re-deriving a step — never pre-emptively.
+- `SKILL.md` holds the workflow; what only some runs need goes one level deep.
+- Skills are self-contained: no links into another skill's files.
+- prompt-kanban's size-budget test caps every file and group; raise a ceiling
+  only in a commit naming the incident. Measure a change with its
+  `npm run skill-evals` and report the token delta.
 - **The flavours are independent copies, not mirrors.** Port a fix to the
-  other flavour only if it's about generic skill mechanics; Makerkit-specific
-  fixes usually don't apply to `modified-matt`, and vice versa.
+  other flavour only if it's about generic skill mechanics.
 - Keep the flavour prefix on every flavour skill's name; `kanban-jobs` belongs
   to no flavour.
 - `description` is all the agent sees before loading a skill — write it as
-  trigger conditions ("Use when…"), not a summary.
-- Keep `SKILL.md` short (well under 500 lines) and put detail in reference
-  files linked one level deep from it. State each rule once and point at it
-  rather than copying it into every skill.
+  "Does X. Use when …".
 - Stick to frontmatter keys both agents understand: `name`, `description`,
   `license`, `allowed-tools`, `metadata`. The one exception is Claude Code's
   `disable-model-invocation`, which Codex ignores (see below).
-- The four tracker readers in each flavour bundle the same
-  `scripts/check-tracker-contract.sh`, byte for byte; change all eight
-  copies together, and raise the contract in the seeds, setup and every
-  reader's invocation at once. prompt-kanban's tests check both.
 
 ### Making a skill user-invoked only
 
