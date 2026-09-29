@@ -153,7 +153,8 @@ ADRs superseded: None.
 
 ## Commits
 
-Subjects are ≤72 characters. `<issue path>` is repo-root-relative, starting `.mysdd/features/`.
+Subjects you write are ≤72 characters. The fixed subjects that embed `<issue path>` (repo-root-relative, starting
+`.mysdd/features/`) keep the whole path however long: other skills match them exactly.
 
 | Operation | Subject | Body, trailers | Holds exactly | Local mode |
 |---|---|---|---|---|
