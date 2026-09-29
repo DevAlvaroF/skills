@@ -13,7 +13,7 @@ Never edit the number by hand.
 
 Each skill reads this file up to § Conventions (`sed -n '1,/^## Conventions/p' .mysdd/issue-tracker.md`), then only
 § Conventions, § Ignore policy and the sections its operation's row names, each in full, never the whole file. List
-them in `s`, separated by `|`:
+them in `s`, separated by `|`, and run each command on its own:
 
 ```sh
 awk -v s='Conventions|Ignore policy|Issue shape' '/^## /{p = (substr($0, 4) ~ s)} p' .mysdd/issue-tracker.md
