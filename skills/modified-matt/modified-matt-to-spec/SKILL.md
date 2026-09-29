@@ -22,8 +22,9 @@ ADR that the conversation never resolved. A spec that already exists is reviewed
    skill does not restate it. If the file is missing, stop and tell the user to run `/modified-matt-setup-skills`. Check
    its contract line with
    `sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4 "$(git rev-parse --show-toplevel)"`. If it exits
-   non-zero, write nothing: relay its message and have the user re-run `/modified-matt-setup-skills` (when the tracker
-   is behind) or update this skill (when the tracker is ahead).
+   non-zero, write nothing and relay its message: on exit 1 the tracker is behind, so have the user re-run
+   `/modified-matt-setup-skills`; on exit 3 the skills are behind, so have them run `npx skills update -p`, and update
+   the app too if its prompt named a lower number; on any other exit, report the error.
 
 2. Sketch out the boundaries at which you're going to test the feature. Existing boundaries should be preferred to new
    ones. Use the highest boundary possible. If new boundaries are needed, propose them at the highest point you can. The
@@ -150,7 +151,8 @@ open decision rather than assuming an answer.
 - Never delete the User Stories section, and never renumber a `US-NNN`: retire the story instead, per the template.
 - Append to the Decision log, redacted like the rest; never rewrite an earlier entry.
 - Don't implement anything.
-- Before you finish, the spec passes § Before you publish.
+- Before you finish, the spec passes § Before you publish, confirming its test boundaries with the user if they
+  weren't confirmed in step 2.
 
 Commit it only as the sections the tracker's Contents row for spec direct. Where they name no commit, leave the edit
 uncommitted: the `SPEC:` commit of `/modified-matt-to-issues` carries it.
