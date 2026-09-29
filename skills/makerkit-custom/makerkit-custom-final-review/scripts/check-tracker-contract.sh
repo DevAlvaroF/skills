@@ -1,22 +1,31 @@
 #!/bin/sh
-# check-tracker-contract.sh <expected> <project-root>
+# check-tracker-contract.sh <expected> [<project-root>]
 #
 # Checks that <project-root>/.mysdd/issue-tracker.md (CR stripped) holds exactly one
 # `Tracker contract` line, that it reads `Tracker contract: <digits>`, and that the
 # number equals <expected>. Leading zeros compare numerically: `Tracker contract: 04`
-# matches 4. Skills invoke it as `sh check-tracker-contract.sh ...` because installed
-# copies are mode 644. On a mismatch it prints what it found against what it expected,
-# and which side is behind, to stdout; the calling skill adds the remedy.
+# matches 4. <project-root> defaults to `git rev-parse --show-toplevel` run from the
+# current directory, so a skill can call it without a command substitution. Skills
+# invoke it as `sh check-tracker-contract.sh ...` because installed copies are mode 644.
+# On a mismatch it prints what it found against what it expected, and which side is
+# behind, to stdout; the calling skill adds the remedy.
 #
-# Exit: 0 match (silent) | 1 tracker missing, damaged or behind | 2 usage | 3 skill behind
+# Exit: 0 match (silent) | 1 tracker missing, damaged or behind | 3 skill behind
+#       2 usage, or no <project-root> given outside a Git work tree
 
-usage() { echo 'usage: sh check-tracker-contract.sh <expected> <project-root>' >&2; exit 2; }
+usage() { echo 'usage: sh check-tracker-contract.sh <expected> [<project-root>]' >&2; exit 2; }
 num() { printf '%s\n' "$1" | sed 's/^0*\([0-9]\)/\1/'; }
 
-[ "$#" -eq 2 ] && [ -n "$2" ] || usage
+[ "$#" -eq 1 ] || { [ "$#" -eq 2 ] && [ -n "$2" ]; } || usage
 case "$1" in '' | *[!0-9]*) usage ;; esac
 expected=$(num "$1")
-file="$2/.mysdd/issue-tracker.md"
+if [ "$#" -eq 2 ]; then
+  root=$2
+elif ! root=$(git rev-parse --show-toplevel 2>/dev/null) || [ -z "$root" ]; then
+  echo 'check-tracker-contract.sh: not inside a Git work tree; pass <project-root>' >&2
+  exit 2
+fi
+file="$root/.mysdd/issue-tracker.md"
 want="Tracker contract: $expected"
 
 if [ ! -f "$file" ] || [ ! -r "$file" ]; then

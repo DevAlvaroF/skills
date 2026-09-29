@@ -9,11 +9,10 @@ Implement the issues the user names, working from each issue and the spec it cam
 **Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for implement, then
 those sections in full, by the commands its § Contents gives, never the whole file. The file is the contract. This skill
 does not restate it. If the file is missing, stop and tell the user to run `/makerkit-custom-setup-skills`. Check its
-contract line with
-`sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4 "$(git rev-parse --show-toplevel)"`. If it exits
-non-zero, write nothing and relay its message: on exit 1 the tracker is behind, so have the user re-run
-`/makerkit-custom-setup-skills`; on exit 3 the skills are behind, so have them run `npx skills update -p`, and update
-the app too if its prompt named a lower number; on any other exit, report the error.
+contract line with `sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4`. If it exits non-zero, write
+nothing and relay its message: on exit 1 the tracker is behind, so have the user re-run `/makerkit-custom-setup-skills`;
+on exit 3 the skills are behind, so have them run `npx skills update -p`, and update the app too if its prompt named a
+lower number; on any other exit, report the error.
 
 Read each issue you're implementing first (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work
 from its `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. If an issue's `codeCommit` already holds a
