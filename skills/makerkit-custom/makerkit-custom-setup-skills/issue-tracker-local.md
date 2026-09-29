@@ -20,14 +20,14 @@ line's headings itself, matches each heading exactly, and exits 1 naming any it 
 the file is out of date: stop and have the user re-run `/makerkit-custom-setup-skills`.
 
 ```sh
-awk -v s='Conventions|Ignore policy|Issue shape' '
+awk -v s='Conventions|Ignore policy|Issue shape' -v d='|' '
 function t(x) { sub(/[ \r]+$/, "", x); return x }
-BEGIN { n = split(s, a, "|"); for (i = 1; i <= n; i++) w[t(a[i])] }
+BEGIN { n = split(s, a, d); for (i = 1; i <= n; i++) w[t(a[i])] }
 /^Every operation also reads: / && !c++ { v = t($0); sub(/^[^:]*: /, "", v)
-  if (v != "none") { n = split(v, a, "|"); for (i = 1; i <= n; i++) w[t(a[i])] } }
+  if (v != "none") { n = split(v, a, d); for (i = 1; i <= n; i++) w[t(a[i])] } }
 /^## / { h = t(substr($0, 4)); p = (h in w); if (p) got[h] }
 p
-END { for (h in w) if (!(h in got)) { print "missing section: " h > "/dev/stderr"; e = 1 }; exit e }
+END { for (h in w) if (!(h in got)) { print "missing section: " h; e = 1 }; exit e }
 ' .mysdd/issue-tracker.md
 ```
 
