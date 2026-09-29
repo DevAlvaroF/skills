@@ -39,17 +39,15 @@ The skill that sent you here says what to do while the docs sub-agent works.
 - **The binding ADRs** in `.mysdd/docs/adr/`: every ADR with no `scope` (or `scope` of `"/"`), plus every ADR with a
   `scope` entry matching a path you will touch. Skip any whose `status` begins `superseded`; read those only when
   reconciling decisions. An ADR with no frontmatter is repo-wide, and its status is its `**Status:**` line (`accepted`
-  when there is none). This prints every ADR's whole frontmatter in one read, however long its `scope`, or a legacy
-  ADR's `**Status:**` line. Pick the binding set from it and open only those in full:
+  when there is none). Run this from the repo root (the directory `git rev-parse --show-toplevel` prints). It prints
+  every ADR's whole frontmatter in one read, however long its `scope`, or a legacy ADR's `**Status:**` line. Pick the
+  binding set from it and open only those in full:
 
   ```sh
-  ( top=$(git rev-parse --show-toplevel) && cd "$top" || exit
-  if [ -d .mysdd/docs/adr ]; then
-    find .mysdd/docs/adr -maxdepth 1 -name '*.md' -print0 | sort -z | xargs -0 -r awk '{ sub(/\r$/, "") }
-      FNR == 1 { print "== " FILENAME; fm = hdr = ($0 ~ /^--- *$/); seen = 0; next }
-      fm { if ($0 ~ /^--- *$/) fm = 0; else print; next }
-      !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }'
-  fi )
+  [ ! -d .mysdd/docs/adr ] || find .mysdd/docs/adr -maxdepth 1 -name '*.md' -print0 | sort -z | xargs -0 -r awk '{ sub(/\r$/, "") }
+    FNR == 1 { print "== " FILENAME; fm = hdr = ($0 ~ /^--- *$/); seen = 0; next }
+    fm { if ($0 ~ /^--- *$/) fm = 0; else print; next }
+    !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }'
   ```
 
   Only a `---` on an ADR's first line opens frontmatter, so a horizontal rule further down a legacy ADR is never
