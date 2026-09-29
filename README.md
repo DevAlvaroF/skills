@@ -66,7 +66,7 @@ npx skills@latest update -p
 ```
 
 Commit the changes and restart your agents. When an update raises the
-tracker contract (now `Tracker contract: 4`), re-run the setup skill too:
+tracker contract (now `Tracker contract: 5`), re-run the setup skill too:
 until you do, the skills that read the tracker stop and say so.
 
 ### Remove or switch flavour
@@ -100,15 +100,15 @@ install the other one.
   then write specs and issues but never stage them, skip the `SPEC:` and
   `Closed Issue:` bookkeeping commits for them, and still name their paths
   in `Issue:` / `Spec:` trailers. The one exception is the final review's
-  `REVIEW HISTORY:` record: in local mode it becomes an isolated empty
-  marker commit, so the review still shows in history without its text.
+  `REVIEW HISTORY:` record: in local mode it becomes an empty marker
+  commit — its tree equals its parent's, your index untouched — so the
+  review still shows in history without its text.
 - Anything in between — a rule on one feature or its issues, a broad
   `.mysdd/` rule, a tracked file under an ignore rule — stops the skills
-  until you resolve it. Setup reports each rule by file and line and can
-  replace an overbroad rule in a committed `.gitignore` with
-  `.mysdd/features/`, then re-checks the result. It never edits
-  `.git/info/exclude` or a global excludes file, and no skill force-adds
-  or untracks a file.
+  until you resolve it. Setup reports each conflicting rule by file and
+  line and offers to fix one in a committed `.gitignore`; it never edits
+  `.git/info/exclude` or a global excludes file, only shows you the line.
+  No skill force-adds or untracks a file.
 
 ### Where decisions live (both flavours)
 
@@ -161,29 +161,23 @@ shape, statuses, record and commit formats) and
 share:
 
 - **Tracker contract.** `to-spec`, `to-issues`, `implement` and `final-review`
-  each run their bundled `scripts/check-tracker-contract.sh` and stop before
-  writing unless the tracker holds exactly one `Tracker contract: 4` line;
-  prompts 6 and 7 check the same line. Missing or lower: re-run setup.
-  Higher: update the skills or the app. Contract 4 adds two things setup
-  writes: a commit route that stops on **failed isolation** — a commit a hook
-  filled with a path that isn't the step's own ends the attempt
-  INCOMPLETE/BLOCKED with its SHA reported, never amended, reset or retried —
-  and the `Every operation also reads:` line in the tracker's `## Contents`,
-  which setup fills with the project's own tracker sections so every skill
-  reads them too.
+  read the tracker whole and stop before writing unless it holds exactly one
+  `Tracker contract: 5` line; prompts 6 and 7 check the same line. Missing or
+  lower: re-run setup. Higher: `npx skills update -p`. The tracker holds every
+  format, subject, hard limit and done rule the steps share.
 - **Status.** `ready-for-agent` → `done-coding-awaiting-final-review` →
   `done-final-review`. Step 4 seeds the first, step 5 sets the second, and
   only a COMPLETE step 7 sets the last. Step 6 never touches `status`.
-- **Committed or local.** The tracker's ignore probe runs before every write.
-  With the single rule `.mysdd/features/`, specs and issues are written but
-  never staged: the `SPEC:` commit carries only glossary and ADR changes
-  (none, no commit), there is no `Closed Issue:` commit, and step 6's record
-  commit becomes an empty marker (`commit-tree` on `HEAD`'s own tree,
-  published by a checked `update-ref`). Any other ignore state stops the
-  skill.
+- **Committed or local.** The mode resolves before every write. With the
+  single rule `.mysdd/features/`, specs and issues are written but never
+  staged: the `SPEC:` commit carries only glossary and ADR changes (none, no
+  commit), there is no `Closed Issue:` commit, and step 6's record commit
+  becomes the empty marker. Any other ignore state stops the skill.
 - **Review scope.** Step 6 reviews exactly the change: `codeCommit` plus every
   later commit whose `Issue:` trailer names the issue, minus bookkeeping
   commits. A loaded review skill gets those SHAs, never its default diff.
+  `final-review` names its own passes rather than pointing into `implement`'s
+  `REVIEW.md`, so it works installed alone.
 - **Approval.** Step 7 changes no code until you reply approving its triage.
   Copying the prompt or marking the step is not approval; a review with zero
   findings has nothing to approve.
@@ -191,12 +185,12 @@ share:
 | Step | Run by | Skills (app) | Reads | Writes | Commits |
 |---|---|---|---|---|---|
 | **1 Grill** | coder, auto mode | `grill-with-docs` (required, editable in Settings); it loads `domain-modeling` | glossary, ADRs scoped to the touched paths | glossary terms and ADRs as they settle, one question round at a time | nothing — step 4 commits them |
-| **2 PRD Spec** | coder, **same session** as 1 | `to-spec` (warns if missing) | the grill conversation, tracker | `.mysdd/features/<NN>-<slug>/spec.md`: `US-NNN` stories, test boundaries you confirmed, a redacted Decision log; you bind it in the app | nothing |
+| **2 PRD Spec** | coder, **same session** as 1 | `to-spec` (warns if missing) | the grill conversation, tracker, ADRs | `.mysdd/features/<NN>-<slug>/spec.md`: `US-NNN` stories, test boundaries you confirmed, a redacted Decision log; its `kanban-brief:` line binds it to the Brief | nothing |
 | **3 Review PRD Spec** | reviewer, fresh session | `reviewer` (warns if missing), `to-spec` (required) | `spec.md`, following `to-spec` § Reviewing an existing spec | edits `spec.md` in place, asking you about every gap rather than assuming; never cuts User Stories or renumbers an ID; only appends to the Decision log | nothing — step 4's `SPEC:` commit carries it |
-| **4 Spec to Issues** | coder, fresh session | `to-issues` | spec, existing issues (reconciled by `slug`, never regenerated) | one issue JSON per vertical slice: `ready-for-agent`, `blockedBy`, `testBoundaries`, `covers`, commit fields `null`; after your approval, ADRs for the spec's standing decisions | `SPEC: <subject>`, no trailers — spec, issues, glossary, ADRs |
-| **5 Implement** | coder, auto mode | `implement`, `tdd` | issue, its spec when `spec` isn't `null`, ADRs | code, its own two-axis review (`REVIEW.md`); then the issue: criteria ticked, `done-coding-awaiting-final-review`, `codeCommit`, an implementation record with `Deviations and tradeoffs:` | `CODE: <subject>` + `Issue:`/`Spec:` trailers — code and agreed ADRs only; the issue file stays uncommitted |
-| **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, every finding numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file (local: empty marker) |
-| **7 Fix Findings** (phase 2) | coder, fresh session, plan mode | `final-review` (required), `tdd` | latest phase 1 record, implementation record, earlier phase 2 records answering it | FIX / REJECT / DEFER per finding → your approval → fixes, checks; phase 2 record (`Outcome`, `Verdicts`, `Checks`, `Fix commit`, `Attempt plans`); `reviewCodeCommit`; `done-final-review` only on COMPLETE | `CODE REVIEW FIXES: <subject>` if code changed; `ATTEMPT PLANS: final review <issue path> attempt <K>` for plans it created; on COMPLETE, `Closed Issue: <issue path>` (issue + board file; none in local mode) |
+| **4 Spec to Issues** | coder, fresh session | `to-issues` | spec, existing issues (reconciled by `slug`, never regenerated) | one issue JSON per vertical slice: `ready-for-agent`, `blockedBy`, `testBoundaries`, `covers`, commit fields `null`; after your approval, ADRs added for the spec's standing decisions and retired for dropped ones | `SPEC: <subject>`, no trailers — spec, issues, glossary, ADRs (local: glossary and ADRs only) |
+| **5 Implement** | coder, auto mode | `implement`, `tdd` | issue, its spec when `spec` isn't `null`, ADRs | code, its own two-axis review (`REVIEW.md`); then the issue: criteria ticked, `done-coding-awaiting-final-review`, `codeCommit`, an implementation record with `Deviations and tradeoffs:` | `CODE: <subject>` + `Issue:`/`Spec:` trailers — code, agreed ADRs and `AGENTS.md` convention lines; the issue file stays uncommitted |
+| **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, `Findings` numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing, never changes `status` | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file (local: empty marker) |
+| **7 Fix Findings** (phase 2) | coder, fresh session, plan mode | `final-review` (required), `tdd` | latest phase 1 record, implementation record, earlier phase 2 records answering it | FIX / REJECT / DEFER per finding → your approval → fixes, checks; phase 2 record (attempt, `Answers`, `Outcome`, `Verdicts`, `Checks`, `Fix commit`, `Attempt plans`, `ADRs superseded`); `reviewCodeCommit`; `done-final-review` only on COMPLETE | `CODE REVIEW FIXES: <subject>` + trailers if code changed; `ATTEMPT PLANS: final review <issue path> attempt <K>` for plans it created, every outcome; on COMPLETE, `Closed Issue: <issue path>` (issue + board file if changed; none in local mode) |
 
 Step 7 always runs, even after a PASS with zero findings: the checks still
 have to pass, and only phase 2 closes an Issue. On the Agile board the card
@@ -222,17 +216,18 @@ Same steps, gates and commits under `makerkit-custom-*`, except:
   and any verification it adds included — plus the README of each app or
   package involved, and follow the repo where it differs. Final-review and tdd
   read the same `AGENTS.md` chain.
-- **Makerkit docs** (`docs/`, 150+ `.mdoc` files) are asked of a sub-agent,
-  never walked in context, and are never searched for a spec.
+- **Makerkit docs** (`docs/`, 150+ `.mdoc` files) are asked of one sub-agent,
+  briefed by `.mysdd/docs/agents/domain.md` § Makerkit docs, never walked in
+  context, and are never searched for a spec.
 - **Checks.** Step 5 and step 7 run root `AGENTS.md` § Verification in its
   order, plus what nested files add, whole-repo runs through a sub-agent, and
   say which list they actually ran.
 - **Reviews.** Step 5's `REVIEW.md` always runs the spec axis; standards
   belong to the `/reviewer` that § Verification names. Its Standards fallback
   (the smell baseline) runs only when no general review skill is named or
-  installed, or only a specialist one like `/rls-review`. Step 6 reviews
-  with whichever of the repo's `/reviewer`, `/rls-review` and the like is
-  loaded.
+  installed, or only a specialist one like `/rls-review`. Step 6's standards
+  pass is `/reviewer` on the same terms, plus `/rls-review` when the change
+  touches migrations or RLS policies, else the smell baseline run in place.
 - **Slicing.** A slice crossing migration, policy, types, action, page and
   tests is still one slice; a shared migration or RLS policy is done before
   work is split across sub-agents.
@@ -282,7 +277,7 @@ by hand.
 .claude-plugin/marketplace.json   # defines the picker's three groups — generated
 scripts/gen-marketplace.mjs       # regenerates it
 skills/
-  makerkit-custom/<skill>/        # SKILL.md, optional reference .md files and agents/openai.yaml
+  makerkit-custom/<skill>/        # SKILL.md, optional reference .md files and agents/openai.yaml — no scripts
   modified-matt/<skill>/
   kanban/kanban-jobs/             # the flavour-neutral Job procedure: SKILL.md and STEP-A…E.md
 matt_submodule/skills             # upstream mattpocock/skills, for reference
