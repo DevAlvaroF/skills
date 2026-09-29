@@ -7,8 +7,8 @@ disable-model-invocation: true
 Implement the issues the user names, working from each issue and the spec it came from.
 
 **Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for implement, then
-those sections in full. The file is the contract. This skill does not restate it. If the file is missing, stop and tell
-the user to run `/makerkit-custom-setup-skills`.
+those sections in full, by the commands its § Contents gives, never the whole file. The file is the contract. This skill
+does not restate it. If the file is missing, stop and tell the user to run `/makerkit-custom-setup-skills`.
 
 **Check its contract before any write.** `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'`
 must print 1, and this skill expects `Tracker contract: 3`. Otherwise stop, write nothing, and say which side is behind:

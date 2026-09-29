@@ -24,8 +24,9 @@ Standards fallback with the smell baseline, and its Spec pass scoped to this iss
 phase 1 fixes nothing.
 
 **Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for review phase 1
-or review phase 2, whichever you run, then those sections in full. The file is the contract. This skill does not restate
-it. If the file is missing, stop and tell the user to run `/makerkit-custom-setup-skills`.
+or review phase 2, whichever you run, then those sections in full, by the commands its § Contents gives, never the whole
+file. The file is the contract. This skill does not restate it. If the file is missing, stop and tell the user to run
+`/makerkit-custom-setup-skills`.
 
 **Check its contract before any write**, even when the user invoked this skill directly: the tracker is then the only
 statement of the rules. `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'` must print 1,
@@ -48,13 +49,15 @@ The user passes the issue path (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>
 that implemented it, the commit, and which phase to run. With no phase named, infer it from the issue, taking the first
 case that fits:
 
-- `status` is `done-final-review`: phase 2, whose step 3 (PHASE-2.md) says what is left.
-- The latest phase 1 record's bookkeeping is unfinished (PHASE-1.md): phase 1, to finish it.
+- `status` is `done-final-review`: phase 2, which says what is left.
+- The latest phase 1 record has no `REVIEW HISTORY:` commit for its attempt, or `reviewHistoryCommit` doesn't name that
+  commit: phase 1, to finish its bookkeeping.
 - The issue holds no review yet: phase 1.
-- The latest phase 1 record still describes the change (PHASE-2.md step 1) and no COMPLETE phase 2 record answers
-  it: phase 2.
+- The latest phase 1 record's reviewed commits start at `codeCommit` and cover every commit of the change below, and
+  no COMPLETE phase 2 record answers it: phase 2.
 
-Anything else, such as a stale review or an older record without labels, is ambiguous: ask. Say which phase you
+Decide from the issue and `git log` alone, and read only the chosen phase's file. Anything else, such as a stale
+review or an older record without labels, is ambiguous: ask. Say which phase you
 inferred and the role it gives you, and write nothing until the user confirms. Phase 2 never continues phase 1's
 session: if the user asks the session that ran phase 1 to go on fixing, tell them phase 2 is run by the coder in a
 fresh session.
