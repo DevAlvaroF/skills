@@ -71,7 +71,7 @@ phase 2 a closed status is not enough to stop on; PHASE-2.md step 3 says what it
 ':(exclude).mysdd/features' ':(exclude).mysdd/kanban-boards.json'`. The pathspec drops the code-free bookkeeping
 commits: a `REVIEW HISTORY:` commit touches only the issue file (a local-mode marker touches nothing), and a
 `Closed Issue:` commit only the issue and board files. It keeps an ADR-only fix. Don't rely on `reviewCodeCommit`: it
-holds only the latest round.
+holds only the latest round. Commits outside that list are not the change; don't open them.
 
 **Writing the issue**, in either phase, follows the tracker: run its ignore probe (§ Ignore policy) with the issue path
 as the target, parse the file, mutate the object, write the whole file back as strict JSON, and re-read it to confirm it
