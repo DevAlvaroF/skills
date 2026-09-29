@@ -5,6 +5,11 @@
     "sentinel: SENTINEL.txt still staged",
     "reflog: no amend/rebase/reset/checkout since <head:step>"
   ],
+  "every_job_step": [
+    "plan: the Job's <job-record> block parses with JobRecordSchema and planJobIds reads the Job",
+    "plan: every SHA the record holds (commits, each attempt's commit and reviewedCommits) is 40 lowercase hex and a commit",
+    "plan (B-E): attempts only grow and at most one commits key changed, against `before` = steps/<label>.plan-before, which `step --plan <plan>` writes"
+  ],
   "scenarios": [
     {
       "id": "mm-agile",
@@ -117,7 +122,7 @@
           "step": "plan-generate",
           "answers": "Approve the plan. Write it to .claude/plans/word-count.md.",
           "checks": [
-            "plan exists, owned by the Job (planJobIds), has ## Request"
+            "plan exists, owned by the Job (planJobIds), has ## Request, ends with the empty <job-record> block"
           ]
         },
         {
@@ -126,7 +131,7 @@
           "answers": "Accept your recommendations.",
           "checks": [
             "plan records plan-review and it resolves",
-            "### Step B entry"
+            "attempts gained one step B attempt whose commit is the plan-review SHA"
           ]
         },
         {
@@ -135,7 +140,7 @@
           "checks": [
             "plan records code, subject is the change commit",
             "npm test passes",
-            "### Step C entry inside the Job Record, not in ## Request"
+            "attempts gained one step C attempt, its commit the code SHA"
           ]
         },
         {
@@ -143,7 +148,8 @@
           "step": "code-review",
           "checks": [
             "plan records code-review",
-            "no source file changed"
+            "no source file changed",
+            "attempts gained one step D attempt whose reviewedCommits hold the code SHA"
           ]
         },
         {
@@ -153,7 +159,7 @@
           "checks": [
             "plan records code-fix only when E made a CODE REVIEW FIXES commit",
             "JOB HISTORY: Record step E attempt <N> holds only the plan",
-            "### Step E entry inside the Job Record"
+            "attempts gained one step E attempt; earlier attempts unchanged"
           ]
         }
       ]
@@ -162,7 +168,7 @@
       "id": "mm-jobs-ignored",
       "eval_id": 4,
       "flavour": "modified-matt + kanban",
-      "repo": "fixture node-app, `.claude/plans/` ignored, plan written by hand with the Job Record heading",
+      "repo": "fixture node-app, `.claude/plans/` ignored, plan written by hand ending with jobRecordTemplate(<job id>)",
       "steps": "B, D (after a hand-made code commit), E",
       "checks": [
         "each step records its commit (the ignored-plan marker)",

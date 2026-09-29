@@ -235,7 +235,7 @@ Same steps, gates and commits under `makerkit-custom-*`, except:
 ### Steps A–E: a Job (`kanban-jobs`)
 
 Flavour-neutral, installed beside either flavour. B–E require `kanban-jobs`,
-and their prompts stop unless its `SKILL.md` states `Job Record contract: 1`
+and their prompts stop unless its `SKILL.md` states `Job Record contract: 2`
 (the skill stops too on a prompt naming another number). Step E, like 7,
 changes no code before you approve its triage, and always runs. Step D
 reviews every code commit the plan records for this Job, live or superseded —
@@ -243,24 +243,40 @@ never `HEAD` or a range.
 
 | Step | Run by | Skills (app) | Reads | Writes | Commits |
 |---|---|---|---|---|---|
-| **A Generate Plan** | coder, fresh session, plan mode | none | the Job's title and description | a plan under `.claude/plans` ending with an empty `## Job Record <jobId>`; you bind it in the app | nothing |
-| **B Review Plan** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the plan, the code as it stands | edits the plan in place, open questions under `Open questions` above the record; entry `### Step B, attempt <N>` (Changes, Open questions), then its `plan-review` line | `REVIEW HISTORY: Record step B attempt <N>` — the plan alone (ignored plan: empty marker) |
-| **C Code** | coder, fresh session | `tdd`, `kanban-jobs` (required) | the plan and its answered questions | code, checks, self-review; entry (`Outcome`, Deviations and tradeoffs) and a `code` line when it committed | `CODE: <subject>` — code only, and only when COMPLETE; never the plan |
-| **D Review Code** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the Job's recorded code commits, the plan | no source change; entry (`Reviewed commits`, `Verdict`, numbered Findings), then its `code-review` line | `REVIEW HISTORY: Record step D attempt <N>` — the plan, whatever the verdict (ignored: marker) |
-| **E Fix Findings** | coder, fresh session, plan mode | `tdd`, `kanban-jobs` (required) | latest D entry's findings, latest C entry's deviations | FIX / REJECT / DEFER → your approval → fixes, checks; entry (`Outcome`, `Attempt plans`, Verdicts) and a `code-fix` line when it committed | `CODE REVIEW FIXES: <subject>` if COMPLETE with code; `ATTEMPT PLANS: step E <jobId> attempt <N>` for plans it created; `JOB HISTORY: Record step E attempt <N>` — the plan, every outcome (ignored: none, no marker) |
+| **A Generate Plan** | coder, fresh session, plan mode | none | the Job's title and description | a plan under `.claude/plans` ending with the empty `<job-record id="<jobId>">` block; you bind it in the app | nothing |
+| **B Review Plan** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the plan, the code as it stands | edits the plan in place, open questions under `Open questions` above the record; attempt `B` (`changes`, `openQuestions`), then its `commit` and `commits.plan-review` | `REVIEW HISTORY: Record step B attempt <N>` — the plan alone (ignored plan: empty marker) |
+| **C Code** | coder, fresh session | `tdd`, `kanban-jobs` (required) | the plan and its answered questions | code, checks, self-review; attempt `C` (`outcome`, `deviations`), with its `commit` and `commits.code` when it committed | `CODE: <subject>` — code only, and only when COMPLETE; never the plan |
+| **D Review Code** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the Job's recorded code commits, the plan | no source change; attempt `D` (`reviewedCommits`, `verdict`, `findings`), then its `commit` and `commits.code-review` | `REVIEW HISTORY: Record step D attempt <N>` — the plan, whatever the verdict (ignored: marker) |
+| **E Fix Findings** | coder, fresh session, plan mode | `tdd`, `kanban-jobs` (required) | latest D attempt's findings, latest C attempt's deviations | FIX / REJECT / DEFER → your approval → fixes, checks; attempt `E` (`outcome`, `attemptPlans`, `verdicts`), with its `commit` and `commits.code-fix` when it committed | `CODE REVIEW FIXES: <subject>` if COMPLETE with code; `ATTEMPT PLANS: step E <jobId> attempt <N>` for plans it created; `JOB HISTORY: Record step E attempt <N>` — the plan, every outcome (ignored: none, no marker) |
 
-**The Job Record.** Each Job owns one section of its plan, opened by the
-column-zero heading `## Job Record <jobId>` and running to the next level-one
-or level-two heading. Every attempt appends one entry,
-`### Step <X>, attempt <N>`, ending in a `#### CLI summary`; earlier entries
-are never edited, so a correction is a new attempt. B–E each own one
-recording line, `kanban-commit <jobId> <key>: <full SHA>`, keyed
-`plan-review`, `code`, `code-review` or `code-fix`. Writing one turns every
-earlier line for that key into `Superseded commit <jobId> <key>: <old SHA>`,
-so one stays live. Code steps add theirs after the code commit; review steps
-commit the entry first and then record that commit's SHA, left uncommitted.
-The app reads these lines to select each step's commit; marking E moves the
-Job to Done.
+**The Job Record.** Each Job owns one block of its plan: a column-zero
+`<job-record id="<jobId>">` line, one fenced `json` block, and a column-zero
+`</job-record>`. Step A writes it empty:
+
+````text
+<job-record id="<jobId>">
+
+```json
+{
+  "commits": { "plan-review": null, "code": null, "code-review": null, "code-fix": null },
+  "attempts": []
+}
+```
+
+</job-record>
+````
+
+Every attempt of B–E appends one object to `attempts` (`step`, `attempt`,
+`agent`, `commit`, `summary` and the step's own fields); earlier attempts are
+never edited, so a correction is a new attempt. `commits` holds each step's
+live SHA under `plan-review`, `code`, `code-review` or `code-fix`, and a new
+attempt overwrites its key: the old SHA survives in the attempt that made it.
+An agent parses the block, changes only its attempt and its key, and writes it
+back as valid JSON; a block that does not parse stops the step. Code steps set
+their key after the code commit; review steps commit the attempt first and then
+record that commit's SHA, left uncommitted. The app reads only `commits` to
+select each step's commit; marking E moves the Job to Done. Older plans'
+`## Job Record` headings and `kanban-commit` lines are no longer read.
 
 **Without prompt-kanban**, `/kanban-jobs` (`$kanban-jobs` in Codex) runs any
 step on a plan you name: it proposes the next step from the record, asks for

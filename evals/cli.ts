@@ -19,7 +19,7 @@ import { runChecks, type Check } from './verify'
  *
  *   npm run skill-evals -- repo <dir> --flavour modified-matt|makerkit-custom --skills new|old [--clone <src>]
  *   npm run skill-evals -- prompt <step-key> --templates new|old --subject <subject.json>
- *   npm run skill-evals -- step <repo> <run-dir> <label> <prompt-file>
+ *   npm run skill-evals -- step <repo> <run-dir> <label> <prompt-file> [--no-sentinel] [--plan <path>]
  *   npm run skill-evals -- answer <repo> <run-dir> <label> <text-or-@file>
  *   npm run skill-evals -- verify <repo> <run-dir> <checks.json>
  *   npm run skill-evals -- snapshot <repo> <run-dir> [<extra path>…]
@@ -225,7 +225,12 @@ function runStep(args: string[]): void {
   const dir = join(resolve(runDir), 'steps', label)
   rmSync(dir, { recursive: true, force: true })
   if (!args.includes('--no-sentinel')) stageSentinel(repo, label)
+  mkdirSync(join(resolve(runDir), 'steps'), { recursive: true })
   writeFileSync(join(resolve(runDir), 'steps', `${label}.head`), git(repo, ['rev-parse', 'HEAD']).trim(), { flag: 'w' })
+  // The Job's plan as the step found it, working tree and all: the `plan` check's
+  // `before`, against which attempts may only grow.
+  const plan = flag(args, 'plan')
+  if (plan && existsSync(join(repo, plan))) cpSync(join(repo, plan), join(resolve(runDir), 'steps', `${label}.plan-before`))
   runCodex(repo, dir, label, ['exec', '-C', repo, '-s', 'danger-full-access', '--json', '-o', join(dir, 'last.txt')],
     readFileSync(promptFile, 'utf8'), 1)
   rollUp(resolve(runDir))

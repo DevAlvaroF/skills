@@ -17,7 +17,8 @@ fails to import (another agent may be mid-edit in `src/`), wait a minute and ret
 - Write `eval_metadata.json` in the eval dir: `{"eval_id": <n>, "eval_name": "<scenario>", "prompt": "<one line>"}`.
 - Per step: write a `subject.json` (featureTitle, featureDescription, specPath, issuePath, planPath,
   briefId, jobId, commitSha, skills) in the run dir's `steps/`, render with
-  `prompt <step-key> --templates <new|old> --subject …`, save the prompt, run `step`.
+  `prompt <step-key> --templates <new|old> --subject …`, save the prompt, run `step` — for B–E
+  with `--plan <plan path>`, so the plan as the step found it lands in `steps/<label>.plan-before`.
 - `skills` = the Skill directory names the app ticks for that step (the step's fixed floor plus the
   obvious supporting ones), e.g. grill → `<fl>-grill-with-docs`; spec-generate → `<fl>-to-spec`;
   spec-review → `<fl>-to-spec`; spec-to-issues → `<fl>-to-issues`; implement → `<fl>-implement`,
@@ -47,7 +48,9 @@ After each step, write a `checks-<label>.json` and run `verify` (it appends to t
 known), `{"kind":"sentinel"}`, `{"kind":"reflog","since":…}`. Then the step's own checks from
 `evals.json` — Issue status and recorded fields (`issue`), plan records (`plan`), spec marker,
 `recorded-subject` (the recorded SHA names the commit this step made), and `file` patterns for the
-comment-record labels. Grade formats, done rules and hard limits, never wording. Where a check
+comment-record labels. A Job step's `plan` check (B–E) carries `"before": "<run>/steps/<label>.plan-before"`:
+it parses the `<job-record>` block with `JobRecordSchema`, checks every SHA in it is full and a
+commit, and that attempts only grew. Grade formats, done rules and hard limits, never wording. Where a check
 cannot be expressed in `verify`, check by hand and append a
 `{"text","passed","evidence"}` entry to `grading.json` yourself (keep the `summary` block
 consistent).

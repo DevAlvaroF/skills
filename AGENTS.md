@@ -12,12 +12,12 @@ depends on them:
 
 1. **Formats something else parses.** prompt-kanban reads the Issue JSON
    fields, the three statuses, `comments[{author, body}]`, the
-   `kanban-brief:` marker, `issues/archive/`, the plan's `## Job Record
-   <jobId>` section and its `kanban-commit <jobId> <key>: <sha>` and
-   `Superseded commit …` lines. Other skills read the comment-record labels,
-   the kanban-jobs entry skeletons, commit subjects, the `Issue:`/`Spec:`
-   trailers (final review finds the change by its `Issue:` trailer) and the ADR
-   frontmatter. Change one and something downstream silently stops finding it.
+   `kanban-brief:` marker, `issues/archive/`, and the plan's
+   `<job-record id="<jobId>">` block and its `commits`. Other skills read the
+   comment-record labels, the kanban-jobs attempt objects, commit subjects, the
+   `Issue:`/`Spec:` trailers (final review finds the change by its `Issue:`
+   trailer) and the ADR frontmatter. Change one and something downstream
+   silently stops finding it.
 2. **What counts as done.** Who sets each status; only a COMPLETE phase 2 sets
    `done-final-review`; every review commits its record; a recorded SHA is the
    commit this session made. The board's columns are derived from these, so a
@@ -50,8 +50,8 @@ adversarial review imagining a failure is not an incident.
 `SKILL.md` holds the workflow every run needs. What only some runs need goes in
 a reference file one level deep, with a line saying when to read it (setup's
 `UPGRADE.md`, final-review's `PHASE-1.md`/`PHASE-2.md`, kanban-jobs'
-`STEP-A…E.md`). Formats go by example — the JSON issue, the skeletons, the
-comment-record examples — because an example is the cheapest exact definition.
+`STEP-A…E.md`). Formats go by example — the JSON issue, the Job Record block and its
+attempt objects, the comment-record examples — because an example is the cheapest exact definition.
 
 ## Self-contained skills
 

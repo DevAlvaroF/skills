@@ -6,14 +6,14 @@ disable-model-invocation: true
 
 # Kanban Jobs
 
-Job Record contract: 1
+Job Record contract: 2
 
 A prompt naming another number was written for another format: stop before writing anything and say which side is
 behind (higher: run `npx skills update -p`; lower: update prompt-kanban).
 
-A **Job** is five steps, each in a fresh session working from the plan's records: **A** plan, **B** review the plan,
-**C** code, **D** review the code, **E** fix the findings. The record is the Job's own section of a markdown plan in
-the repository. Read this file and the step's file in full before writing anything:
+A **Job** is five steps, each in a fresh session working from the plan's record: **A** plan, **B** review the plan,
+**C** code, **D** review the code, **E** fix the findings. The record is the Job's `<job-record>` block in a markdown
+plan in the repository. Read this file and the step's file in full before writing anything:
 
 | Step | File | For |
 |---|---|---|
@@ -27,40 +27,51 @@ the repository. Read this file and the step's file in full before writing anythi
 
 A prompt-kanban prompt hands them over. Invoked directly, ask for anything missing rather than guess. The step: the
 user's, or propose the next from the record (after C comes D) and confirm. The plan: the user names it; never pick
-the newest plan silently, as it may be another Job's. The Job ID: the plan's one `## Job Record <jobId>` heading;
-with several, ask which; with none, generate a lowercase UUID v4 (the only shape the app reads) and add the heading.
-A skeleton's `<agent>` is the prompt's label or, by hand, your own name (Claude, Codex, …).
+the newest plan silently, as it may be another Job's. The Job ID: the id of the plan's one `<job-record>` block; with
+several, ask which; with none, generate a lowercase UUID v4 (the only shape the app reads) and add the block at the
+plan's end. An attempt's `agent` is the prompt's label or, by hand, your own name (Claude, Codex, …).
 
 ## The Job Record
 
-- **The section** opens with the column-zero heading `## Job Record <jobId>` and runs to the next level-one or
-  level-two heading or the end of the file. Missing: add it at the end. Duplicated: stop and report. Leave other
-  Jobs' sections alone.
-- **An entry** is the step file's skeleton, appended at the section's end, with level-four blocks so none ends the
-  section. `<N>` is one more than the section's largest attempt number for this step, or 1. Entries are never edited,
-  so the history stays trustworthy: a correction is a new attempt, and the user's answers go beside their question in
-  the planning content.
-- **The summary** goes under `#### CLI summary` with every line — blank lines and lines already starting
-  with ">" included — prefixed with exactly "> " and otherwise unchanged; end your reply with that same text. It
-  gives what was done or found, the actual verification output, blocked checks and open work.
-- **Line starts.** The app reads record lines and headings wherever they stand, fences included. So metadata stays
-  outside the quote, and no line of text you write under a level-four heading starts with "#", "kanban-commit" or
-  "Superseded commit": put such text in backticks.
+A new Job's block, in exactly the shape the app reads (both tags at column zero, one `json` fence between them):
+
+<job-record id="<jobId>">
+
+```json
+{
+  "commits": { "plan-review": null, "code": null, "code-review": null, "code-fix": null },
+  "attempts": []
+}
+```
+
+</job-record>
+
+- **`commits`** holds the live SHA per key, `null` or a full 40-character lowercase SHA; it is all the app reads.
+  B, C, D and E own `plan-review`, `code`, `code-review` and `code-fix`. A newer commit overwrites its key; the old
+  SHA survives in its attempt's `commit`.
+- **`attempts`** gets one object per attempt, appended, never edited or removed, so the history stays trustworthy:
+  a correction is a new attempt, and the user's answers go beside their question in the planning content. Each
+  holds `step`, `attempt` (the number `<N>`: one more than the largest `attempt` for that step, or 1), `agent`,
+  `commit` (the commit this attempt made, or `null`), `summary` and its step's fields, as its step file shows.
+- **`summary`** is your final summary as one JSON string: what was done or found, the actual verification output,
+  blocked checks and open work. End your reply with that same text.
+- **Writing it.** Parse the block, change only your attempt and your `commits` key, write the whole block back as
+  valid JSON with 2-space indent, then re-parse it. A block that doesn't parse or match this shape, or a second
+  block for the Job, stops the step before you write: it may hold the only copy of earlier attempts. Leave other
+  Jobs' blocks alone.
 - **One writer.** Only you, the coordinating session, write the plan, after delegates finish, from a fresh read, and
   reread to verify. If it changed under you in a conflicting way, stop.
 
-## Recording lines
+## Recording commits
 
-B, C, D and E each own one line, keyed `plan-review`, `code`, `code-review` and `code-fix`: exactly
-`kanban-commit <jobId> <key>: <full SHA>` directly under the entry's heading, the full 40-character SHA, unindented
-and bare — the app reads only that whole line. Write the SHA from Git's own output, never retyped: a run once dropped
-three characters by hand, and a short SHA is an unusable record. In the same write, turn every earlier line for your key into
-`Superseded commit <jobId> <key>: <old value>`, since two live lines that disagree are unreadable. If one is
-malformed, or two disagree, ask before recording.
+Write every SHA from Git's own output, never retyped: a run once dropped three characters, making the record
+unusable.
 
-- **C and E** add the line after their code commit. No code commit, no line.
-- **B and D** commit the entry without it, as a commit cannot hold its own SHA, then write that commit's SHA and leave
-  that one change for the next history commit. Never amend to carry it: that changes the SHA you just wrote.
+- **C and E** set `commit` and their key after their code commit. No code commit: `commit` stays `null` and the
+  key untouched.
+- **B and D** commit their attempt with `commit` still `null`, as a commit cannot hold its own SHA, then write that
+  commit's SHA into `commit` and their key and leave that one change for the next history commit. Never amend to
+  carry it: that changes the SHA you just wrote.
 
 ## Commits
 
@@ -102,6 +113,6 @@ ignored, never to cover a Git error or a failed commit. E makes no marker and sa
 
 ## Reporting
 
-Saving the entry, committing it and writing its SHA can each fail alone: before the summary in your reply, say on its
-own line which happened and which failed. A rerun reuses the saved entry, attempt number and commit, never
+Saving the attempt, committing it and writing its SHA can each fail alone: before the summary in your reply, say on
+its own line which happened and which failed. A rerun reuses the saved attempt, its number and commit, never
 duplicating them; if you can't tell which commit an earlier attempt made, ask.

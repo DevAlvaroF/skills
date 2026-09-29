@@ -1,8 +1,8 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { GitHistoryService } from '@main/services/git-history.service'
-import { IssueFileSchema, parseSpecMarker, planJobIds, readPlanRecord, type PlanRecordStepKey } from '@shared/domain'
+import { IssueFileSchema, JobRecordSchema, RECORDED_SHA_PATTERN, parseSpecMarker, planJobIds, readPlanRecord, type PlanRecordStepKey } from '@shared/domain'
 
 /**
  * The verifier: every assertion a scenario makes about a disposable repo, read
@@ -19,8 +19,13 @@ export type Check =
   | { kind: 'sentinel' }
   /** No history rewrite since `since`. */
   | { kind: 'reflog'; since: string }
-  /** The plan's records for this Job, each a real commit in HEAD's history. */
-  | { kind: 'plan'; path: string; jobId: string; recorded: PlanRecordStepKey[]; patterns?: string[] }
+  /**
+   * The Job's `<job-record>` block: it parses with `JobRecordSchema`, the Job owns the plan,
+   * each `recorded` key resolves in HEAD's history, and every SHA it holds is a full one.
+   * `before` (resolved from the working directory) is the plan as the step found it — `step
+   * --plan` writes it to `steps/<label>.plan-before` — and makes attempts only grow from it.
+   */
+  | { kind: 'plan'; path: string; jobId: string; recorded: PlanRecordStepKey[]; patterns?: string[]; before?: string }
   | { kind: 'spec-marker'; path: string; briefId: string }
   /** A file exists and every pattern (a regex, multiline) matches it. */
   | { kind: 'file'; path: string; patterns?: string[]; absent?: boolean }
@@ -56,6 +61,78 @@ function readIssue(repo: string, path: string) {
   } catch (error) {
     return { error: String(error) } as const
   }
+}
+
+/**
+ * The JSON inside this Job's `<job-record id="…">` block, read by the grammar the app
+ * parses: a column-zero opening line, blank lines, a ```json fence, the JSON, its closing
+ * fence, blank lines, a column-zero `</job-record>`. `null` when the plan has no block for
+ * the Job; an `error` when it has two, or one that breaks the grammar or the JSON.
+ */
+function jobRecordJson(contents: string, jobId: string): { value: unknown } | { error: string } | null {
+  const lines = contents.split('\n').map((line) => line.replace(/\r$/, ''))
+  const opens = lines.flatMap((line, index) => line === `<job-record id="${jobId}">` ? [index] : [])
+  if (opens.length === 0) return null
+  if (opens.length > 1) return { error: `${opens.length} blocks for this Job, at lines ${opens.map((index) => index + 1).join(', ')}` }
+  let at = opens[0]! + 1
+  const skipBlank = () => { while (at < lines.length && lines[at]!.trim() === '') at++ }
+  skipBlank()
+  if (lines[at] !== '```json') return { error: `line ${at + 1}: expected \`\`\`json, found ${JSON.stringify(lines[at] ?? '(end of file)')}` }
+  const start = ++at
+  while (at < lines.length && lines[at] !== '```') at++
+  if (at === lines.length) return { error: 'the json fence never closes' }
+  const json = lines.slice(start, at).join('\n')
+  at++
+  skipBlank()
+  if (lines[at] !== '</job-record>') return { error: `line ${at + 1}: expected </job-record>, found ${JSON.stringify(lines[at] ?? '(end of file)')}` }
+  try { return { value: JSON.parse(json) } } catch (error) { return { error: `invalid JSON: ${String(error)}` } }
+}
+
+type JsonRecord = { commits?: Record<string, unknown>; attempts?: Array<Record<string, unknown>> }
+
+/** Every SHA the record holds, with where it sits: `commits`, each attempt's `commit` and `reviewedCommits`. */
+function recordedShas(record: JsonRecord): Array<{ at: string; value: unknown }> {
+  const out = Object.entries(record.commits ?? {}).filter(([, value]) => value !== null).map(([key, value]) => ({ at: `commits.${key}`, value }))
+  for (const [index, attempt] of (Array.isArray(record.attempts) ? record.attempts : []).entries()) {
+    if (attempt?.commit != null) out.push({ at: `attempts[${index}].commit`, value: attempt.commit })
+    for (const [n, value] of (Array.isArray(attempt?.reviewedCommits) ? attempt.reviewedCommits : []).entries()) out.push({ at: `attempts[${index}].reviewedCommits[${n}]`, value })
+  }
+  return out
+}
+
+/** JSON with object keys sorted, so a rewrite that only reorders keys compares equal. */
+function canonical(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
+  if (value && typeof value === 'object') return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`).join(',')}}`
+  return JSON.stringify(value)
+}
+
+/**
+ * The writing rule, against the plan as the step found it: every earlier attempt is still
+ * there, unchanged and in order, new ones only follow them, and at most one `commits` key
+ * changed — the step's own — and never back to `null`.
+ */
+function attemptsGrow(beforePath: string, jobId: string, after: ReturnType<typeof jobRecordJson>): Expectation {
+  const text = `Job ${jobId.slice(0, 8)}'s attempts only grow, and at most one commits key changed`
+  if (!existsSync(beforePath)) return { text, passed: false, evidence: `no snapshot at ${beforePath}` }
+  const before = jobRecordJson(readFileSync(beforePath, 'utf8'), jobId)
+  if (!before || 'error' in before) return { text, passed: false, evidence: `before: ${before ? before.error : 'no block for this Job'}` }
+  if (!after || 'error' in after) return { text, passed: false, evidence: `after: ${after ? after.error : 'no block for this Job'}` }
+  const was = before.value as JsonRecord
+  const now = after.value as JsonRecord
+  const wasAttempts = Array.isArray(was.attempts) ? was.attempts : []
+  const nowAttempts = Array.isArray(now.attempts) ? now.attempts : []
+  const problems: string[] = []
+  if (nowAttempts.length < wasAttempts.length) problems.push(`${wasAttempts.length} attempts before, ${nowAttempts.length} now`)
+  wasAttempts.forEach((attempt, index) => {
+    if (index < nowAttempts.length && canonical(attempt) !== canonical(nowAttempts[index])) problems.push(`attempts[${index}] changed`)
+  })
+  const keys = new Set([...Object.keys(was.commits ?? {}), ...Object.keys(now.commits ?? {})])
+  const changed = [...keys].filter((key) => canonical(was.commits?.[key] ?? null) !== canonical(now.commits?.[key] ?? null))
+  if (changed.length > 1) problems.push(`commits changed: ${changed.join(', ')}`)
+  for (const key of changed) if (now.commits?.[key] == null) problems.push(`commits.${key} went back to null`)
+  return { text, passed: problems.length === 0,
+    evidence: problems.join(' | ') || `${wasAttempts.length} → ${nowAttempts.length} attempts; commits changed: ${changed.join(', ') || 'none'}` }
 }
 
 async function check(repo: string, item: Check, history: GitHistoryService): Promise<Expectation[]> {
@@ -133,15 +210,27 @@ async function check(repo: string, item: Check, history: GitHistoryService): Pro
       const full = join(repo, item.path)
       if (!existsSync(full)) return [{ text: `${item.path} exists`, passed: false, evidence: 'missing' }]
       const contents = readFileSync(full, 'utf8')
-      const out: Expectation[] = [{ text: `${item.path} is owned by Job ${item.jobId.slice(0, 8)}`, passed: planJobIds(contents).includes(item.jobId), evidence: planJobIds(contents).join(', ') || 'no Job Record' }]
-      // Every entry belongs under the Job's own column-zero heading, never above it: an
-      // inline copy of the heading in `## Request` once drew a Step C entry there.
-      const lines = contents.split('\n').map((line) => line.replace(/\r$/, ''))
-      const heading = lines.indexOf(`## Job Record ${item.jobId}`)
-      const end = lines.findIndex((line, index) => index > heading && /^#{1,2} /.test(line))
-      const stray = lines.flatMap((line, index) =>
-        /^### Step [A-E]\b/.test(line) && (heading === -1 || index < heading || (end !== -1 && index > end)) ? [`${index + 1}: ${line}`] : [])
-      out.push({ text: 'every ### Step entry sits inside this Job’s Job Record section', passed: heading !== -1 && stray.length === 0, evidence: stray.join(' | ') || `section starts at line ${heading + 1}` })
+      const job = item.jobId.slice(0, 8)
+      const owners = planJobIds(contents)
+      const out: Expectation[] = [{ text: `${item.path} is owned by Job ${job}`, passed: owners.includes(item.jobId), evidence: owners.join(', ') || 'no <job-record> block' }]
+      // One parse is the whole format check: an attempt cannot land outside the block, and a
+      // short or retyped SHA fails the schema (contract 5 once recorded a SHA 3 characters short).
+      const block = jobRecordJson(contents, item.jobId)
+      const parsed = block && 'value' in block ? JobRecordSchema.safeParse(block.value) : null
+      out.push({
+        text: `Job ${job}'s record block parses with JobRecordSchema`,
+        passed: parsed?.success === true,
+        evidence: !block ? 'no block for this Job' : 'error' in block ? block.error
+          : parsed!.success ? `${parsed!.data.attempts.length} attempts; ${Object.entries(parsed!.data.commits).map(([key, sha]) => `${key} ${sha?.slice(0, 8) ?? 'null'}`).join(', ')}`
+          : parsed!.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; '),
+      })
+      if (block && 'value' in block && block.value && typeof block.value === 'object') {
+        const shas = recordedShas(block.value as JsonRecord)
+        const bad = shas.filter(({ value }) => typeof value !== 'string' || !RECORDED_SHA_PATTERN.test(value) || tryGit(repo, ['cat-file', '-e', `${value}^{commit}`]) === null)
+        out.push({ text: `every SHA Job ${job}'s record holds is 40 lowercase hex and names a commit`, passed: bad.length === 0,
+          evidence: bad.map(({ at, value }) => `${at} = ${JSON.stringify(value)}`).join(' | ') || `${shas.length} SHAs, all full commits` })
+      }
+      if (item.before !== undefined) out.push(attemptsGrow(resolve(item.before), item.jobId, block))
       for (const key of item.recorded) {
         const record = readPlanRecord(contents, item.jobId, key)
         let passed = record.state === 'recorded'

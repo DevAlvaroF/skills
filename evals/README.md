@@ -20,7 +20,7 @@ check means what the app means. There, `npm run skill-evals` runs `cli.ts`.
    ```bash
    npm run skill-evals -- repo /tmp/pk-e2e/mm-jobs-new --flavour modified-matt --skills new
    npm run skill-evals -- prompt code --templates new --subject subject.json > prompt.txt
-   npm run skill-evals -- step /tmp/pk-e2e/mm-jobs-new $RUN C-code prompt.txt
+   npm run skill-evals -- step /tmp/pk-e2e/mm-jobs-new $RUN C-code prompt.txt --plan .claude/plans/word-count.md
    npm run skill-evals -- answer /tmp/pk-e2e/mm-jobs-new $RUN C-code "I approve your triage."
    npm run skill-evals -- verify /tmp/pk-e2e/mm-jobs-new $RUN checks.json
    npm run skill-evals -- snapshot /tmp/pk-e2e/mm-jobs-new $RUN .claude/plans
@@ -34,7 +34,10 @@ check means what the app means. There, `npm run skill-evals` runs `cli.ts`.
    transcripts (`steps/*/events-*.jsonl`) for wasted turns, not only outcomes.
 
 `step` stages a fresh `SENTINEL.txt` first (skip with `--no-sentinel`): a step
-that commits it, or unstages it, swept the user's work. Each step's
+that commits it, or unstages it, swept the user's work. With `--plan <path>` it
+also copies the Job's plan, as the step finds it, to
+`steps/<label>.plan-before`: the `plan` check's `before`, against which the Job
+Record's attempts may only grow. Each step's
 `timing.json` sums the token usage Codex reports per turn; the run's
 `timing.json` sums the steps.
 
@@ -46,8 +49,10 @@ that commits it, or unstages it, swept the user's work. Each step's
   removes the remote; the original is never touched.
 - Grade what the skills promise — formats, done rules, hard limits — never
   wording. A check that passes for old and new alike measures nothing; prefer
-  ones that caught a real failure (the Job Record placement and trailer checks
-  in `verify.ts` each did).
+  ones that caught a real failure (the trailer check in `verify.ts` did, and
+  the Job Record's full-SHA check answers a SHA once retyped 3 characters
+  short). The Job Record placement check went with Job Record contract 2: a
+  `<job-record>` block that parses cannot hold a misplaced attempt.
 
 ## Baseline (contract 5, 2026-09-29)
 
