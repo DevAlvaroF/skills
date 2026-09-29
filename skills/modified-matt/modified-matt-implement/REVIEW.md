@@ -12,7 +12,8 @@ findings.
 
 ## Collect the diff
 
-The review covers exactly the inventory [SKILL.md](./SKILL.md) keeps. If it is empty, there is nothing to review: stop
+Run from final-review, the change's `git show <sha>` commands replace the inventory; never diff `HEAD`. Otherwise, the
+review covers exactly the inventory [SKILL.md](./SKILL.md) keeps. If it is empty, there is nothing to review: stop
 and say so. **Stay out of the full diff yourself**: the inventory is its shape. Hand each sub-agent the inventory, mixed
 paths marked (part of their diff predates the run), and the *commands* that reproduce the diff, to run itself:
 `git --literal-pathspecs diff HEAD -- '<tracked path>' …` for the tracked paths, and a whole read of each new file,
@@ -78,13 +79,14 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 **Standards sub-agent prompt** should include:
 
 - The inventory and the commands from _Collect the diff_ (the commands, never the diff itself).
-- The list of standards-source files you found in step 2, **plus the smell baseline from step 2** pasted in full (the
-  sub-agent has no other access to it).
+- The list of standards-source files you found in step 2, the binding ADRs' paths (the Spec sub-agent's), **plus the
+  smell baseline from step 2** pasted in full (the sub-agent has no other access to it).
 - The brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the
-  standard (file + the rule); and (b) any baseline smell you spot — but check it against the standards-source files
-  first: if a documented rule endorses the exact pattern, drop it, don't report it. For anything you do report, name the
-  smell and quote the hunk. Distinguish hard violations from judgement calls: documented-standard breaches can be hard,
-  but baseline smells are always judgement calls. Skip anything tooling enforces. Under 400 words."
+  standard (file + the rule); and (b) any baseline smell you spot — but check it against the standards-source files and
+  ADRs first: if a documented rule or a binding ADR endorses the exact pattern, drop it, don't report it. For anything
+  you do report, name the smell and quote the hunk. Distinguish hard violations from judgement calls:
+  documented-standard breaches can be hard, but baseline smells are always judgement calls. Skip anything tooling
+  enforces. Under 400 words."
 
 **Spec sub-agent prompt** should include:
 
@@ -118,8 +120,9 @@ This step always runs — assessing refactor-worthiness is not something the use
 conditional on the diff looking messy.
 
 Take only the **Standards** sub-agent's findings (hard violations and smell-baseline hits from step 2). Spec findings
-are never auto-applied: they're about whether the code matches the spec's intent, which isn't a mechanical fix. For each
-Standards finding, use judgement, not a fixed rule, to decide:
+are never auto-applied: they're about whether the code matches the spec's intent, which isn't a mechanical fix. First
+drop any finding a binding ADR sanctions, and say which ADR. For each Standards finding left, use judgement, not a fixed
+rule, to decide:
 
 - **Fix now**, directly in the working tree, when it's small, local, and safe: a rename, extracting one duplicated
   shape, deleting a speculative-generality abstraction, collapsing a repeated switch. A fix-now that touches untested

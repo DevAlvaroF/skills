@@ -13,8 +13,10 @@ You are the coder, in a fresh session: work from the plan's records, not from me
    verdict. Ask when anything is missing, stale or unclear; never substitute session memory, `HEAD` or an invented
    empty list of findings.
 2. **Decide what this attempt has to do.** On every path, review and verify what a check rewrote (compare
-   `git status --porcelain` before and after); commit only rewrites in files an approved fix touched, and list the
-   rest, uncommitted, for the user.
+   `git status --porcelain` before and after); commit the rewrites in files of the Job's code commits — every one keyed
+   `code` or `code-fix`, live or superseded, as STEP-D step 1 collects them, not only this attempt's fixes — and list
+   the rest, uncommitted, for the user. A required check that passes only with a rewrite left uncommitted has not
+   passed: ask the user.
    - A COMPLETE attempt already recorded for this review: finish only its unfinished bookkeeping, repeating nothing.
      Check the additional plans before deciding nothing is left.
    - A current PASS with zero findings: there is nothing to triage and no approval to wait for. Run the applicable
@@ -36,7 +38,9 @@ You are the coder, in a fresh session: work from the plan's records, not from me
    that changes no code is COMPLETE with no code commit. Otherwise it is INCOMPLETE or BLOCKED.
 6. **Commit the code only when the attempt is COMPLETE with code changes**, under a subject starting
    `CODE REVIEW FIXES: ` (SKILL.md § Commits, code commits), and capture its full SHA straight away. If the code commit
-   fails, the attempt is INCOMPLETE or BLOCKED.
+   fails, the attempt is INCOMPLETE or BLOCKED. If the route stops on failed isolation, that commit gets no `code-fix`
+   line: record the attempt BLOCKED with its SHA and the foreign paths, and make no further commit, steps 7 and 9's
+   included.
 7. **Commit the additional plans** (below).
 8. **Record the attempt** at the end of this Job's section, with the recording line only when step 6 made a code
    commit (SKILL.md § Recording lines, code steps):
@@ -59,8 +63,8 @@ You are the coder, in a fresh session: work from the plan's records, not from me
    left undecided. With zero findings, write None.
 9. **Commit the plan for every outcome, even when code stays uncommitted**, under
    `JOB HISTORY: Record step E attempt <N>` (SKILL.md § Commits, history commits), unless that exact version is already
-   committed. Never write this commit's SHA into the plan: `code-fix` lines name code commits only. An ignored plan
-   gets no commit and no marker.
+   committed: reuse that commit when it holds the plan and no other path; otherwise ask the user. Never write this
+   commit's SHA into the plan: `code-fix` lines name code commits only. An ignored plan gets no commit and no marker.
 
 ## Additional plans
 
@@ -88,8 +92,9 @@ and `JOB HISTORY` commits, since it proves nothing about the code.
   a command.
 - **Retries** reuse the earlier attempt's inventory, code SHAs and verified planning commit — if more than one commit
   matches that subject or a recorded blob disagrees with it, ask — and commit its files only while provenance and blob
-  still match, never twice. A later change is reported, not committed. A new attempt never collects an earlier one's
-  files.
+  still match, never twice. Reuse a planning commit only while it holds those plans and no other path; otherwise ask
+  the user. Never reuse a SHA that failed isolation. A later change is reported, not committed. A new attempt never
+  collects an earlier one's files.
 
 Report the planning commit's SHA and paths, and each plan left uncommitted with its reason. If the project's
 instructions explicitly forbid this commit, point out the conflict and ask the user instead of following either.

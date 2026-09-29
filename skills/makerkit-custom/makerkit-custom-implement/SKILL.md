@@ -1,6 +1,6 @@
 ---
 name: makerkit-custom-implement
-description: "Implement, verify, commit and advance one or more issues from the project's issue tracker. Use when an issue under .mysdd/features/ is ready-for-agent and the user asks to implement it."
+description: "Implements, verifies, commits and advances one or more issues from the project's issue tracker. Use when an issue under .mysdd/features/ is ready-for-agent and the user asks to implement it."
 disable-model-invocation: true
 ---
 
@@ -8,16 +8,11 @@ Implement the issues the user names, working from each issue and the spec it cam
 
 **Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for implement, then
 those sections in full, by the commands its § Contents gives, never the whole file. The file is the contract. This skill
-does not restate it. If the file is missing, stop and tell the user to run `/makerkit-custom-setup-skills`.
-
-**Check its contract before any write.** `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'`
-must print 1, and this skill expects `Tracker contract: 3`. Otherwise stop, write nothing, and say which side is behind:
-
-- no such line, more than one, or a `Tracker contract` line of any other shape: the tracker is damaged or predates
-  contracts — re-run `/makerkit-custom-setup-skills`;
-- a number lower than 3: the tracker is behind — re-run `/makerkit-custom-setup-skills`;
-- a number higher than 3: these skills are behind — update them (`npx skills update -p`), and the tool whose prompt
-  drove this session too if that prompt named a lower number.
+does not restate it. If the file is missing, stop and tell the user to run `/makerkit-custom-setup-skills`. Check its
+contract line with
+`sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4 "$(git rev-parse --show-toplevel)"`. If it exits
+non-zero, write nothing: relay its message and have the user re-run `/makerkit-custom-setup-skills` (when the tracker is
+behind) or update this skill (when the tracker is ahead).
 
 Read each issue you're implementing first (`.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`) and work
 from its `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. If an issue's `codeCommit` already holds a
@@ -52,8 +47,12 @@ implement it here, one piece after another. The review, the commit and advancing
 
 Keep an explicit **inventory** of every path the work creates, edits or deletes: yours, a new one only once you've
 confirmed it was absent, and each sub-agent's, as its handoff names them; never infer it from `git status`. A path in
-the pre-existing dirty set that the work also edits goes in marked **mixed**. The review covers exactly the inventory,
-and the commit stages exactly its paths.
+the pre-existing dirty set that the work also edits goes in marked **mixed**. A file rewritten by a command a slice ran
+(typegen, `lint:fix`), found by comparing `git status --porcelain` from just before it and named in the handoff, joins
+the inventory when it belongs to the change; list any other in the report, uncommitted. An `AGENTS.md` convention line
+the issue carries (to-issues attaches one agreed at design time to the first issue that touches its area) is part of
+the work: write it into that `AGENTS.md`, whose path joins the inventory. The review covers exactly the inventory, and
+the commit stages exactly its paths.
 
 Run typechecking regularly and single test files regularly — those are short, and you need their output in hand to
 drive the next cycle. Run the full test suite once at the end, as one of step 2's whole-repo runs, through the sub-agent
@@ -102,7 +101,8 @@ commit exists.
 6. **Capture each commit's SHA as it lands.** Straight after each commit, before the next one, read its full
    40-character SHA and confirm its subject and `Issue:` trailer(s) are the ones you wrote. Keep an explicit
    issue → SHA mapping for the run: by the time the issues are updated, `HEAD` names only the last commit, so reading
-   it then would give every earlier issue the wrong SHA.
+   it then would give every earlier issue the wrong SHA. A commit the route stops on for failed isolation is not its
+   issue's commit: keep it out of the mapping, leave that issue open, and make no further commit.
 7. **Never push, never amend, never rebase.** One commit forward, nothing rewritten.
 
 ## Advance the issues

@@ -11,9 +11,9 @@ under a new attempt number.
    (`makerkit-custom-domain-modeling` § Superseding and removing): check the code against the replacement, not the spec
    line. Read the implementer's recorded deviations and tradeoffs, where the implementation record has them, as the
    implementer's stated reasons, not as proof. A loaded review skill is run on exactly the change's commits: hand it
-   their SHAs and a `git show <sha>` command for each, and override its default diff (`git diff HEAD`,
-   `git show HEAD`) — a review of any other diff is not this review. Hand review sub-agents the same commands and the
-   paths; never paste the diff or the spec in.
+   their SHAs, a `git show <sha>` command for each and the binding ADRs' paths, and override its default diff
+   (`git diff HEAD`, `git show HEAD`) — a review of any other diff is not this review. Hand review sub-agents the same
+   commands and paths; never paste the diff, an ADR or the spec in.
 2. **Verify, don't assume.** Check each acceptance criterion against what the code actually does. A verification you
    could not run — a live UI check with no way to drive the UI, a test that needs a service you don't have — is a
    **failure**, not a pass. Say what was blocked and why.

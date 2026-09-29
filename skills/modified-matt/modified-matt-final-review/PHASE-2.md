@@ -21,8 +21,8 @@ keep the inventory of additional plans that § Additional plans below describes.
    - **Zero findings.** A current, verified PASS whose record reads `Findings: None.` has nothing to triage, so skip
      step 4's approval — there is nothing for the user to approve — and go on with steps 6 to 10: run the applicable
      checks, settle the outcome, write the record with `Verdicts: None.` and the checks' actual results, and close only
-     on COMPLETE. With no fix there is no fix commit: step 7 lists any file a check rewrote, reviewed and verified but
-     uncommitted, and still runs § Additional plans.
+     on COMPLETE. With no fix, step 7 commits only what a check rewrote in the change's files, and still runs
+     § Additional plans.
    - **Closed by an older contract.** The status is already `done-final-review`, the review is a verified PASS with
      zero findings, and no phase 2 record answers it: phase 1 closed it under an earlier version of this contract. It
      stays closed. Say so and stop, without rewriting the issue or recording anything.
@@ -58,19 +58,24 @@ keep the inventory of additional plans that § Additional plans below describes.
    review had no findings: approving a DEFER, or having nothing to fix, waives no required check. Then review your own
    changes against the approved fixes. A required check that fails or cannot run, or a fix that falls short, means no
    success and no fix commit: skip step 7's fix commit (its § Additional plans operation still runs), leave the fixes
-   in the tree, and record each affected fix as unresolved in step 9.
+   in the tree, and record each affected fix as unresolved in step 9. A required check that passes only with a rewrite
+   step 7 leaves uncommitted has not passed: ask the user.
 7. **Commit completed, verified fixes**, on the current branch, whichever it is. Stage the files the approved fixes
-   changed, plus the ADR file(s) the user agreed to change, each by path — never `git add .mysdd/`, never `git add -A`
-   — with the checks' rewrites of those files. List any other file a check rewrote (a repo-wide `format:fix` or
-   `lint:fix`, say), found by comparing `git status --porcelain` from before step 6, and leave it uncommitted, as the
-   user's to decide. A commit touching only ADRs is a valid `CODE REVIEW FIXES: ` commit, not an empty one. Commit by
-   the route in `.mysdd/issue-tracker.md` § Commit message format, leaving anything else in the tree as you found it;
-   the message follows that section, with the `CODE REVIEW FIXES: ` header. If no file changed (no findings, every
-   finding rejected or deferred, or a finding was only a blocked verification that now runs), there is nothing to
-   commit: never make an empty commit to have something to record. Never push, amend or rebase. Right after
-   the fix commit, before any other commit, confirm it is yours — its parent is the `HEAD` you committed on and its
-   subject is the one you wrote — and capture its full 40-character SHA for step 9. Then, with or without a fix commit,
-   run § Additional plans: eligible plans get a planning-only commit of their own, never a place in this one.
+   changed, plus the ADR file(s) the user agreed to change, each by path — never `git add .mysdd/`, never `git add -A` —
+   with every rewrite the checks made (formatter, `lint:fix`, typegen output) in a file of the whole change: any commit
+   of the issue (SKILL.md's **The change**), not only the fixes. Find the rewrites by comparing `git status --porcelain`
+   from before step 6; list any outside the change and leave it uncommitted, as the user's to decide. A commit touching
+   only ADRs or only such rewrites is a valid `CODE REVIEW FIXES: ` commit, not an empty one. Commit by the route in
+   `.mysdd/issue-tracker.md` § Commit message format, leaving anything else in the tree as you found it; the message
+   follows that section, with the `CODE REVIEW FIXES: ` header. With nothing to stage (no findings, every finding
+   rejected or deferred, or a finding was only a blocked verification that now runs, and no rewrite in the change),
+   there is nothing to commit: never make an empty commit to have something to record. Never push, amend or rebase.
+   Right after the fix commit, before any other commit, confirm it is yours — its parent is the `HEAD` you committed on
+   and its subject is the one you wrote — and capture its full 40-character SHA for step 9. If the route stops on failed
+   isolation, that commit is not the fix commit: make no further commit, planning or close, and step 9 records the
+   outcome BLOCKED with its SHA and the foreign paths, never in `reviewCodeCommit` or `Fix commit:`. Otherwise, with or
+   without a fix commit, run § Additional plans: eligible plans get a planning-only commit of their own, never a place
+   in this one.
 8. **Settle the outcome.** It is **COMPLETE** only when every finding has an approved final disposition (FIXED,
    REJECTED or DEFERRED), every approved fix is verified and every required check passes. A triage that rejects or
    defers everything, with the user's approval, is complete without a code commit, and so is a review with no findings

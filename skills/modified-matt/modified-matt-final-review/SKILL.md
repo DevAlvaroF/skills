@@ -25,17 +25,10 @@ Spec scoped to this issue. Skip its _Assess refactors_ step: phase 1 fixes nothi
 **Read `.mysdd/issue-tracker.md` before you write anything:** its contract line and its Contents row for review phase 1
 or review phase 2, whichever you run, then those sections in full, by the commands its § Contents gives, never the whole
 file. The file is the contract. This skill does not restate it. If the file is missing, stop and tell the user to run
-`/modified-matt-setup-skills`.
-
-**Check its contract before any write**, even when the user invoked this skill directly: the tracker is then the only
-statement of the rules. `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'` must print 1,
-and this skill expects `Tracker contract: 3`. Otherwise stop, write nothing, and say which side is behind:
-
-- no such line, more than one, or a `Tracker contract` line of any other shape: the tracker is damaged or predates
-  contracts — re-run `/modified-matt-setup-skills`;
-- a number lower than 3: the tracker is behind — re-run `/modified-matt-setup-skills`;
-- a number higher than 3: these skills are behind — update them (`npx skills update -p`), and the tool whose prompt
-  drove this session too if that prompt named a lower number.
+`/modified-matt-setup-skills`. Check its contract line with
+`sh "<this skill's directory>/scripts/check-tracker-contract.sh" 4 "$(git rev-parse --show-toplevel)"`. If it exits
+non-zero, write nothing: relay its message and have the user re-run `/modified-matt-setup-skills` (when the tracker is
+behind) or update this skill (when the tracker is ahead).
 
 Read the glossary and the binding ADRs for the paths the change touches, per `.mysdd/docs/agents/domain.md`. ADRs are
 binding. The phase's role (independent reviewer, or coder) is the role you are acting in and nothing more. Where it
@@ -52,8 +45,9 @@ case that fits:
 - The latest phase 1 record has no `REVIEW HISTORY:` commit for its attempt, or `reviewHistoryCommit` doesn't name that
   commit: phase 1, to finish its bookkeeping.
 - The issue holds no review yet: phase 1.
-- The latest phase 1 record's reviewed commits start at `codeCommit` and cover every commit of the change below, and
-  no COMPLETE phase 2 record answers it: phase 2.
+- The latest phase 1 record's reviewed commits start at `codeCommit`, every commit of the change below is one it
+  reviewed or a fix commit an earlier phase 2 record answering it made, and no COMPLETE phase 2 record answers it:
+  phase 2.
 
 Decide from the issue and `git log` alone, and read only the chosen phase's file. Anything else, such as a stale
 review or an older record without labels, is ambiguous: ask. Say which phase you
