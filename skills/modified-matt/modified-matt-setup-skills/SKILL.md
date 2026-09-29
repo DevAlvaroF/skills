@@ -1,6 +1,6 @@
 ---
 name: modified-matt-setup-skills
-description: "Configure this repo for the engineering skills: set up its issue tracker and domain doc layout. Run once before first use of the other engineering skills."
+description: "Configures a repo for the engineering skills: sets up its local JSON issue tracker under .mysdd/ and its domain doc layout. Use when first adopting the engineering skills in a repo, or when another skill reports the tracker is behind and asks for a re-run."
 disable-model-invocation: true
 ---
 
@@ -136,8 +136,9 @@ Then write the generated files, using the seed templates in this skill folder as
 
 - If it doesn't exist, write it from the seed.
 - If it does, read it and compare against the seed. Apply what the seed adds or changes; leave everything else as the user left it. Sections the file has and the seed doesn't are the user's own additions: keep them unless they contradict a seed section, and say which ones you kept.
+- In the tracker, set the `Every operation also reads:` line in `## Contents` to the exact heading texts of the kept `##` sections, without the `## `, separated by `|`, so every operation reads them; with none kept it stays `none`. Name them in your report.
 - If the file and the seed are already equivalent, say so and write nothing.
-- **The tracker's `Tracker contract:` line goes last.** Apply every other seed change to `.mysdd/issue-tracker.md` first, and only then write the seed's `Tracker contract: 3` line under the title, so an upgrade stopped halfway never claims a contract the file doesn't hold. It replaces every existing `Tracker contract:` line, not just the first, and keeps the file's line endings. Then check that `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'` prints 1: the other skills stop on any other count or number. Report the contract before (none, when the file had no such line) and after.
+- **The tracker's `Tracker contract:` line goes last.** Apply every other seed change to `.mysdd/issue-tracker.md` first, and only then write the seed's `Tracker contract: 4` line under the title, so an upgrade stopped halfway never claims a contract the file doesn't hold. It replaces every existing `Tracker contract:` line, not just the first, and keeps the file's line endings. Then check that `tr -d '\r' < .mysdd/issue-tracker.md | awk '/^Tracker contract/ { n++ } /^Tracker contract: [0-9]+$/ { g++ } END { print n + 0, g + 0 }'` prints `1 1` (one line starts `Tracker contract`, and it is well formed) and that the line reads `Tracker contract: 4`: the other skills stop on anything else. Report the contract before (none, when the file had no such line) and after.
 
 Re-run the step 1 checks with the current inventory and targets before each migration write. Apply whatever migration the user approved in Section C, one file at a time. Re-read each issue, mutate the parsed object, and write the whole file back as strict JSON. Then add the frontmatter approved in Section D, one ADR at a time, re-running the checks with that ADR as a target before each write. Report per file what changed.
 

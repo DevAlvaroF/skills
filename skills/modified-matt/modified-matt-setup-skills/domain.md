@@ -11,15 +11,17 @@ How the engineering skills should consume this repo's domain documentation when 
   This prints every ADR's whole frontmatter in one read, however long its `scope`, or a legacy ADR's `**Status:**` line. Pick the binding set from it and open only those in full:
 
   ```sh
-  find .mysdd/docs/adr -maxdepth 1 -name '*.md' -exec awk '{ sub(/\r$/, "") }
-    FNR == 1 { print "== " FILENAME; fm = hdr = ($0 ~ /^--- *$/); seen = 0; next }
-    fm { if ($0 ~ /^--- *$/) fm = 0; else print; next }
-    !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }' {} + 2>/dev/null || true
+  if [ -d .mysdd/docs/adr ]; then
+    find .mysdd/docs/adr -maxdepth 1 -name '*.md' -print0 | sort -z | xargs -0 -r awk '{ sub(/\r$/, "") }
+      FNR == 1 { print "== " FILENAME; fm = hdr = ($0 ~ /^--- *$/); seen = 0; next }
+      fm { if ($0 ~ /^--- *$/) fm = 0; else print; next }
+      !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }'
+  fi
   ```
 
   Only a `---` on an ADR's first line opens frontmatter, so a horizontal rule further down a legacy ADR is never mistaken for it.
 
-If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The domain-modeling skill (reached via the grilling skill) creates them lazily when terms or decisions actually get resolved.
+If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The domain-modeling skill (reached via `/modified-matt-grill-with-docs`) creates them lazily when terms or decisions actually get resolved.
 
 ## File structure
 
@@ -58,6 +60,8 @@ When your output names a domain concept (in an issue title, a refactor proposal,
 If the concept you need isn't in the glossary yet, that's a signal: either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for the domain-modeling skill).
 
 ## ADRs are binding
+
+Within its scope, a binding ADR overrides the `AGENTS.md` rule it deviates from.
 
 When your output contradicts an ADR in the binding set, don't silently override it. Flag it and ask the user whether to change the plan or supersede the ADR:
 

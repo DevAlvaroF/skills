@@ -15,21 +15,21 @@ terms or decisions; the first bullet of § Ground yourself first says which to r
 
 Grill, to-spec, to-issues and implement send you here before they start. Read the project's own documentation:
 
-- every `AGENTS.md` from the repo root down to each directory the work touches, in order — `AGENTS.md`, then
-  `apps/web/AGENTS.md`, then `apps/web/app/[locale]/admin/AGENTS.md` and so on — including each one's `## Skills` and
-  any verification it adds, plus every `AGENTS.md` a file on that chain routes a touched concern to: the root's Key
-  Patterns table sends server actions to `packages/next/AGENTS.md` and the admin client to
-  `packages/supabase/AGENTS.md`. The root file is already loaded; read the rest directly, because not every agent
-  loads nested files. Add the vendored Next.js docs for anything Next.js. They're small and targeted. Where they and the
-  skill you are running differ, **follow the repo**.
+- every `AGENTS.md` from the repo root down to each directory the work touches, in order (e.g., `AGENTS.md`, then
+  `apps/web/AGENTS.md`, then `apps/web/app/[locale]/admin/AGENTS.md`), including each one's `## Skills` and any
+  verification it adds, plus every `AGENTS.md` a file on that chain routes a touched concern to (e.g., on the Supabase
+  kit, the root's Key Patterns table routes server actions to `packages/next/AGENTS.md` and the admin client to
+  `packages/supabase/AGENTS.md`). The root file is already loaded; read the rest directly, because not every agent
+  loads nested files. Add any vendored Next.js docs for anything Next.js. They're small and targeted. Where they and
+  the skill you are running differ, **follow the repo**.
 - the glossary and the ADRs whose `scope` covers the touched paths, per § Before exploring, read these. ADRs are
   binding.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
   piece is and how it fits. Read directly, and only for the pieces the feature touches.
-- the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It holds 150+
-  upstream Makerkit `.mdoc` files. Name the one or two topic directories the feature touches (`docs/billing`,
-  `docs/security`, `docs/data-fetching`, …) and ask the sub-agent how the feature is *meant* to work. If the repo has
-  no `docs/`, skip this.
+- the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It is upstream
+  Makerkit's docs only when it holds `.mdoc` files, often 150+. Name the one or two topic directories the feature
+  touches (e.g., `docs/billing`, `docs/security`) and ask the sub-agent how the feature is *meant* to work. If `docs/`
+  is missing or holds no `.mdoc` files, skip this.
 
 The skill that sent you here says what to do while the docs sub-agent works.
 
@@ -43,10 +43,12 @@ The skill that sent you here says what to do while the docs sub-agent works.
   ADR's `**Status:**` line. Pick the binding set from it and open only those in full:
 
   ```sh
-  find .mysdd/docs/adr -maxdepth 1 -name '*.md' -exec awk '{ sub(/\r$/, "") }
-    FNR == 1 { print "== " FILENAME; fm = hdr = ($0 ~ /^--- *$/); seen = 0; next }
-    fm { if ($0 ~ /^--- *$/) fm = 0; else print; next }
-    !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }' {} + 2>/dev/null || true
+  if [ -d .mysdd/docs/adr ]; then
+    find .mysdd/docs/adr -maxdepth 1 -name '*.md' -print0 | sort -z | xargs -0 -r awk '{ sub(/\r$/, "") }
+      FNR == 1 { print "== " FILENAME; fm = hdr = ($0 ~ /^--- *$/); seen = 0; next }
+      fm { if ($0 ~ /^--- *$/) fm = 0; else print; next }
+      !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }'
+  fi
   ```
 
   Only a `---` on an ADR's first line opens frontmatter, so a horizontal rule further down a legacy ADR is never
@@ -64,6 +66,8 @@ If the concept you need isn't in the glossary yet, that's a signal: either you'r
 use (reconsider) or there's a real gap (note it for `makerkit-custom-domain-modeling`).
 
 ## ADRs are binding
+
+Within its scope, a binding ADR overrides the `AGENTS.md` rule it deviates from.
 
 When your output contradicts an ADR in the binding set, don't silently override it. Flag it and ask the user whether to
 change the plan or supersede the ADR:

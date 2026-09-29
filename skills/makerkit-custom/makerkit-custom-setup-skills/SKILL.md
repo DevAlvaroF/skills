@@ -1,6 +1,6 @@
 ---
 name: makerkit-custom-setup-skills
-description: "Configure this repo for the engineering skills: set up its issue tracker and domain docs under .mysdd/, keep the tracker, docs and board file out of .gitignore, and map its AGENTS.md conventions. Run once before first use of the other engineering skills."
+description: "Configures a Makerkit repo for the engineering skills: sets up its issue tracker and domain docs under .mysdd/, keeps the tracker, docs and board file out of .gitignore, and maps its AGENTS.md conventions. Use when first adopting the engineering skills in a repo, or when another skill reports the tracker is behind and asks for a re-run."
 disable-model-invocation: true
 ---
 
@@ -27,7 +27,8 @@ the board file are never gitignored; feature files may be, but only by ignoring 
 Look at the current repo to understand its starting state. Read whatever exists; don't assume:
 
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` section in
-  either? Note whether `CLAUDE.md` is a real document or just an `@AGENTS.md` import line.
+  either? Note whether `CLAUDE.md` is a real document or just an `@AGENTS.md` import line, and any other convention
+  source, such as `.cursor/rules`.
 - The full `AGENTS.md` distribution: `find . -name AGENTS.md -not -path '*/node_modules/*' | sort`. In a Makerkit
   monorepo this returns the root file plus one per app and per package. Note which carry a `## Vocabulary` or
   `## Decisions` section: those are legacy entries for Section D.
@@ -77,7 +78,11 @@ Files a removed rule was hiding need a first commit.
 **Section B: Domain docs.** Prepare `.mysdd/docs/agents/domain.md` from the seed without asking. Then show the
 `AGENTS.md` map from step 1, annotating each path with a one-line note on what that subtree owns, taken from that file's
 own opening lines rather than guessed. That is the conventions map the other skills navigate; naming it here is how the
-user sees whether a subtree is undocumented.
+user sees whether a subtree is undocumented. List the other convention sources step 1 found, such as `.cursor/rules`.
+
+When the root `CLAUDE.md` is a real document without `@AGENTS.md` (Makerkit 2.x and earlier), an agent reading only
+`CLAUDE.md` never sees the root `AGENTS.md`: ask whether to add the `@AGENTS.md` import to `CLAUDE.md` or write the
+`## Agent skills` block into both.
 
 If `find` returned **no** `AGENTS.md` files at all, say so and ask whether to seed a root one before continuing —
 without it the `## Agent skills` block has nowhere to live.
@@ -145,8 +150,8 @@ Stop on any failed command or unresolved policy before writing. Repeat these che
 
 **Pick the file to edit:**
 
-- If `AGENTS.md` exists at the root, edit it. It is the file both Claude Code and Codex read, and in this repo
-  `CLAUDE.md` is only an `@AGENTS.md` import.
+- If `AGENTS.md` exists at the root, edit it. It is the file both Claude Code (through `CLAUDE.md`'s `@AGENTS.md`
+  import) and Codex read. For a root `CLAUDE.md` without that import, also apply the Section B answer.
 - Else if `CLAUDE.md` exists as a real document, edit that.
 - If neither exists, ask the user which one to create; don't pick for them.
 
@@ -175,8 +180,8 @@ Glossary in `.mysdd/docs/CONTEXT.md`, decisions as scoped ADRs in `.mysdd/docs/a
 
 Conventions live in a distribution of `AGENTS.md` files (root, per app/package, and deeper). Read every `AGENTS.md`
 from the root down to each directory you touch, in order, plus every one those files route a concern you touch to: the
-root is already loaded; read the rest directly, because not every agent loads nested files. Invoke the skills each
-one's `## Skills` section names, and run any verification it adds.
+root is already loaded; read the rest directly, because not every agent loads nested files. Invoke the skills a nested
+`AGENTS.md` names when writing code there, and run any verification it adds.
 ```
 
 Then write the generated files, creating directories as needed, from the seed templates in this skill folder:
@@ -190,13 +195,18 @@ Then write the generated files, creating directories as needed, from the seed te
 - If it does, read it and compare against the seed. Apply what the seed adds or changes; leave everything else as the
   user left it. Sections the file has and the seed doesn't are the user's own additions: keep them unless they
   contradict a seed section, and say which ones you kept.
+- In the tracker, set the `Every operation also reads:` line in `## Contents` to the exact heading texts of the kept
+  `##` sections, without the `## `, separated by `|`, so every operation reads them; with none kept it stays `none`.
+  Name them in your report.
 - If the file and the seed are already equivalent, say so and write nothing.
 - **The tracker's `Tracker contract:` line goes last.** Apply every other seed change to `.mysdd/issue-tracker.md`
-  first, and only then write the seed's `Tracker contract: 3` line under the title, so an upgrade stopped halfway
+  first, and only then write the seed's `Tracker contract: 4` line under the title, so an upgrade stopped halfway
   never claims a contract the file doesn't hold. It replaces every existing `Tracker contract:` line, not just the
   first, and keeps the file's line endings. Then check that
-  `tr -d '\r' < .mysdd/issue-tracker.md | grep -cE '^Tracker contract: [0-9]+$'` prints 1: the other skills stop on
-  any other count or number. Report the contract before (none, when the file had no such line) and after.
+  `tr -d '\r' < .mysdd/issue-tracker.md | awk '/^Tracker contract/ { n++ } /^Tracker contract: [0-9]+$/ { g++ } END { print n + 0, g + 0 }'`
+  prints `1 1` (one line starts `Tracker contract`, and it is well formed) and that the line reads
+  `Tracker contract: 4`: the other skills stop on anything else. Report the contract before (none, when the file had
+  no such line) and after.
 
 Re-run the step 1 checks with the current inventory and targets before each migration write. Apply the Section C
 migration one file at a time: re-read each issue, mutate the parsed object, and write the whole file back as strict
