@@ -1,159 +1,40 @@
 # Issue tracker: Local Files
 
-Tracker contract: 4
+Tracker contract: 5
 
-The line above is this file's contract version. Every skill that reads this file checks it before writing anything
-and stops on a mismatch. A lower number, or none, means re-running `/modified-matt-setup-skills`, which
-writes the line last. Never edit the number by hand.
+Read this file whole before any spec, issue or review work: the skills take their formats and commit rules from here.
+`/modified-matt-setup-skills` writes the contract line above; a skill expecting another number stops. Never edit it.
 
-## Contents
+## Layout
 
-Each skill reads this file up to § Conventions, then only § Conventions, § Ignore policy, the sections its operation's
-row names and those on the line below, each in full, never the whole file. Run each command on its own. The first:
+- A Feature is `.mysdd/features/<NN>-<feature-slug>/`, `NN` the next two-digit number after the highest on disk (`01`
+  when `.mysdd/features/` doesn't exist yet). A Feature-shaped directory directly under `.mysdd/` is the old layout:
+  never read or move it; stop and ask the user to move it under `.mysdd/features/` and fix its issues' `spec` paths.
+- The spec is `<feature>/spec.md`. Each issue is one strict-JSON file, `<feature>/issues/<NN>-<slug>.json`, numbered on
+  from the highest in `issues/` and `issues/archive/`. Ids and filenames never change and are never reused:
+  `blockedBy` addresses issues by them. An id found only under `issues/archive/` is a Retired Issue and counts as
+  resolved.
+- "Publish to the issue tracker" means create that file; "fetch the relevant issue" means read and parse it.
+- Change an issue by parsing it and writing the whole object back, every field present: other programs parse it.
+- Feature directories get deleted; the glossary and `.mysdd/docs/` stay, so they never name an issue, a `US-NNN`, a
+  spec or a Feature directory.
 
-```sh
-awk '/^## Conventions/ { exit } 1' .mysdd/issue-tracker.md
-```
+## Committed or local
 
-Then list § Conventions, § Ignore policy and the row's full headings in `s`, separated by `;`; the command adds the
-line's headings itself, matches each heading exactly, and exits 1 naming any it didn't find. A missing heading means
-the file is out of date: stop and have the user re-run `/modified-matt-setup-skills`.
+`.mysdd/issue-tracker.md`, `.mysdd/docs/` and `.mysdd/kanban-boards.json` are always committed, never ignored, so the
+config, decisions and board travel with the repo. Feature files are in one mode for every Feature:
 
-```sh
-awk -v s='Conventions;Ignore policy;Issue shape' -v d=';' -v e='|' '
-function t(x) { sub(/[ \r]+$/, "", x); return x }
-BEGIN { n = split(s, a, d); for (i = 1; i <= n; i++) w[t(a[i])] }
-/^Every operation also reads: / && !c++ { v = t($0); sub(/^[^:]*: /, "", v)
-  if (v != "none") { n = split(v, a, e); for (i = 1; i <= n; i++) w[t(a[i])] } }
-/^## / { h = t(substr($0, 4)); p = (h in w); if (p) got[h] }
-p
-END { for (h in w) if (!(h in got)) { print "missing section: " h; bad = 1 }; exit bad }
-' .mysdd/issue-tracker.md
-```
+- **Committed**: nothing under `.mysdd/features/` is ignored; specs and issues are committed per § Commits.
+- **Local**: `.mysdd/features/` is ignored as a whole and no Feature file is tracked; specs and issues are written,
+  never staged, and § Commits' local column applies.
 
-Every operation also reads: none
+Anything else is unresolved, never local: stop before writing, list the paths, and point to
+`/modified-matt-setup-skills`. Never force-add, untrack or edit an ignore rule to change the mode: it is the user's.
 
-| Operation | Sections beyond Conventions and Ignore policy |
-|---|---|
-| spec | When a skill says "publish to the issue tracker" |
-| issues | Issue shape, Commit message format, Committing a Spec and its Issues, When a skill says "publish to the issue tracker" |
-| implement | Issue shape, Comment records, Commit message format |
-| review phase 1 | Issue shape, Comment records, Commit message format, Recording a final review |
-| review phase 2 | Issue shape, Comment records, Commit message format, Committing additional plans, Closing an issue |
-
-This file is the schema of record for the spec, issues, implement and final-review skills. Those skills read the
-generated `.mysdd/issue-tracker.md` rather than carrying their own copy — so a schema change starts here.
-
-Specs for this repo live as markdown files under `.mysdd/features/`; **issues are JSON files**, so other software can
-read them without parsing prose.
-
-## Conventions
-
-- One feature per directory: `.mysdd/features/<NN>-<feature-slug>/`, where `NN` is a two-digit feature sequence number.
-  Number a new feature from the directories on disk in `.mysdd/features/` alone: start at `01` and increment the highest
-  existing number. When `.mysdd/features/` doesn't exist there are no features yet; the first one is `01`, and writing
-  it creates `.mysdd/features/`. Nothing else under `.mysdd/` is a feature
-- A directory directly under `.mysdd/` named like a feature (`.mysdd/01-foo/`) is the old layout. These skills never
-  read, number around or move it: stop, name each one, and tell the user to move it under `.mysdd/features/` and
-  update the `spec` path in each of its issues before continuing
-- The spec is `.mysdd/features/<NN>-<feature-slug>/spec.md` (markdown: it is prose, not an issue)
-- Implementation issues are one JSON file per issue at `.mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json`,
-  never a single combined issues file. The feature directory and issue filenames use independent `NN` sequences; issue
-  numbering starts at `01` and increments the highest existing number in that feature's `issues/` directory (including
-  `issues/archive/`). An issue's `id` and filename are **immutable once created**: never renumber an existing issue and
-  never reuse a retired number — the number is an address that `blockedBy` references depend on, not a position in the
-  running order.
-- Workflow state is the issue's `status` field (see the lifecycle below for the canonical state strings)
-- Comments and conversation history append to the issue's `comments` array, oldest first
-- Every file under `issues/` is strict JSON: no comments, no trailing commas, every field present. Parse it, mutate the
-  object, write the whole file back; never append loose text to an issue file
-- Feature directories are disposable: they get archived and deleted, while the glossary and `.mysdd/docs/` stay. So
-  no `CONTEXT.md` and nothing under `.mysdd/docs/` — the glossary, an ADR — names an issue, a `US-NNN`, a spec or a
-  feature directory
-
-## Ignore policy
-
-The **protected paths** — `.mysdd/issue-tracker.md`, everything under `.mysdd/docs/`, and the board-state file
-`.mysdd/kanban-boards.json` — are committed and never gitignored, so the generated config, the ADRs and the board
-travel with the repo. Feature files are in one of two modes, the same for every feature:
-
-- **Committed**: no rule ignores anything under `.mysdd/features/`. Specs and issues are staged by path and committed
-  as the sections below describe.
-- **Local**: the whole Features root is ignored, normally by the single rule `.mysdd/features/` (Git can't re-include a
-  file below an ignored directory, so a `!` exception under it has no effect). Specs and issues are written but never
-  staged: § Committing a Spec and its Issues, § Recording a final review and § Closing an issue say what happens
-  instead. Bookkeeping commits for feature files are skipped, with one exception: the final review's phase 1 makes an
-  empty marker commit, published by a checked ref update, in place of its review-record commit (§ Recording a final
-  review). Local mode governs Feature files only: an additional plan's planning commit (§ Committing additional plans)
-  answers to that plan's own ignore rules, not to this mode.
-
-Anything else is **unresolved**: rules that ignore some feature files but not others, a feature file tracked by git
-although a rule ignores it, or an ignored protected path. It is never read as local mode, so it permits no review
-marker either: stop before writing anything, list the paths, and let the user resolve it;
-`/modified-matt-setup-skills` can help. No skill ever force-adds (`git add -f`) or untracks (`git rm --cached`) a file,
-and none edits `.git/info/exclude` or a global excludes file.
-
-**The probe.** Before an operation writes or stages a spec, issue or protected document, rebuild the inventory
-from the repository root. Run these commands **separately**, capture each status, and stop if either fails (only exit
-0 is success). Do not pipe one Git command into another: the consumer's status can hide an inventory failure.
-
-```sh
-git ls-files --cached --others -z -- ':(glob).mysdd/docs/**/*.md' \
-  ':(glob).mysdd/features/*/spec.md' ':(glob).mysdd/features/*/issues/**/*.json'
-git ls-files --cached -z -- ':(glob).mysdd/features/*/spec.md' ':(glob).mysdd/features/*/issues/**/*.json'
-```
-
-The pathspecs select exactly the files these skills own: markdown under `.mysdd/docs/`, each feature's `spec.md`, and
-its issue JSON (`issues/archive/` included). Any other file there — a `.DS_Store`, an editor swap file, the user's own
-notes — is outside the policy whether or not a rule ignores it; never widen the pathspecs to take it in.
-
-The first command inventories tracked, untracked **and ignored** files; use no exclusion options such as
-`--exclude-standard`. Keep tracked-but-missing paths from the index. Parse NUL-delimited paths, deduplicate them, and
-preserve their bytes (including spaces, tabs, newlines and Git pathspec characters); never split lines or shell words.
-The second command supplies the tracked Feature set independently, even when those files are missing on disk.
-
-Build two separate sets before checking ignoredness:
-
-- **Protected documents**: every inventoried path under `.mysdd/docs/`, `.mysdd/issue-tracker.md`,
-  `.mysdd/kanban-boards.json`, and every documentation path the operation proposes to write or stage, including new
-  files. Setup includes its proposed tracker, domain config and instruction-file targets; domain work includes its
-  proposed glossary/ADR targets. A fixed ADR sentinel cannot replace this inventory.
-- **Feature files**: every inventoried path under `.mysdd/features/` plus every spec/issue path the operation proposes
-  to write or stage, including new files.
-- **Features-root probe**: the literal path `.mysdd/features/`, trailing slash included, kept apart from both sets.
-  Before the directory exists Git matches a directory rule only against the slashed spelling, so
-  `.mysdd/features` would read as not ignored and make a fresh local-mode repo look unresolved.
-
-Feed the union of both sets and the root probe as NUL-delimited stdin to this command, preserving its output and
-status independently of the inventory/trackedness commands:
-
-```sh
-git check-ignore --no-index --stdin -z
-```
-
-Exit **0** prints ignored paths as NUL-delimited records; exit **1** means none are ignored; any other exit is an
-error: stop and report it. An empty result from a failed Git command never means "not ignored" or "not tracked".
-Then classify the sets separately:
-
-- If **any protected document** is ignored, stop and report the paths; `/modified-matt-setup-skills` can help.
-  Protected documents must stay eligible for commit in both Feature modes; never count them as Feature targets.
-- If no Feature file and no Features-root probe is ignored, use **committed** mode.
-- If the Features-root probe and **every Feature file** are ignored, and the tracked Feature set is empty, use
-  **local** mode. Eligible documentation changes still follow their normal commit rules.
-- Any other mixture, including a tracked-but-ignored Feature file, is unresolved. Stop and report it.
-
-Rebuild the inventory and repeat **all** checks immediately before each write or stage, including documentation
-writes, and after any ignore-rule change. Include the current operation's proposed targets each time. Checks from
-setup or an earlier write do not cover new files, changed rules or a failed later command.
-
-`--no-index` makes a rule covering a tracked file visible; without it Git reports every tracked file as not ignored.
-Use `git check-ignore -v --no-index -- <path>` only to show the user which file and line is responsible, and check its
-status too. Never read ignoredness from verbose output or its exit status: it also prints a matching `!` negation,
-and exits 0, for a path that the negation keeps included.
+- Use `git check-ignore --no-index`: without it a tracked file always reads as not ignored.
+- Check the root as `.mysdd/features/`, slash included: before it exists Git matches directory rules only that way.
 
 ## Issue shape
-
-Implementation issues (written by the issues skill):
 
 ```json
 {
@@ -190,109 +71,65 @@ Implementation issues (written by the issues skill):
 }
 ```
 
-`spec` is the path to the spec this issue was broken out of, relative to the repository root and beginning with
-`.mysdd/features/`; `null` when there is no spec (issues drafted from a plan or conversation). `blockedBy` holds the
-`id` of each issue that gates this one, and is `[]` when the issue can start immediately. An id found only under
-`issues/archive/` is a **Retired Issue**, and counts as resolved for `blockedBy`. `testBoundaries` lists the
-public boundaries this issue's tests hit, confirmed with the user when the issue was drafted; `[]` when the issue has no
-dedicated tests. `covers` lists the `US-NNN` IDs from the spec's User Stories that this issue satisfies; `[]` when the
-issue satisfies no story directly, and always `[]` when `spec` is `null`. `codeCommit` is the full SHA of the commit
-that implemented the issue; `reviewHistoryCommit` the full SHA of the commit that recorded the latest phase 1 review
-(§ Recording a final review); and `reviewCodeCommit` the full SHA of the commit that applied the review fixes the user
-approved. Each is a single string or `null`, and each starts as `null`. Each has exactly one writer: only the implement
-skill writes `codeCommit`, when it commits; only the independent reviewer in phase 1 of the final review writes
-`reviewHistoryCommit`, after its review-record commit lands; only the coder in phase 2 of the final review — the
-coder's triage, run through `/modified-matt-final-review` by an LLM or by a human acting as the coder — writes
-`reviewCodeCommit`, when it commits approved fixes. Every skill carries the fields it doesn't own over verbatim. A later
-review overwrites `reviewHistoryCommit`, and a further round of review fixes overwrites `reviewCodeCommit` — the
-superseded SHAs stay reachable through git history and the `comments` trail.
-`comments` starts as `[]`; § Comment records defines the entries the implement and final-review skills append to it.
+`spec` is `null` for an issue drafted without one, and then `covers` is `[]`. `blockedBy`, `testBoundaries`, `covers`
+and `comments` may be `[]`. The three commit fields hold a full 40-character SHA or `null`; a later round overwrites
+its field.
 
-The successful local implementation and review lifecycle is:
+Each field has one writer; every other skill carries it over verbatim, because it may be the only copy:
+
+| Field | Writer |
+|---|---|
+| everything, with `status: ready-for-agent` | to-issues (a re-sync keeps each `done`) |
+| `acceptanceCriteria[].done`, `codeCommit`, `status: done-coding-awaiting-final-review` | implement, after its `CODE:` commit |
+| `testBoundaries` additions the user agreed | implement |
+| `reviewHistoryCommit` | final review phase 1, after its record commit |
+| `reviewCodeCommit` | final review phase 2, after its fix commit |
+| `status: done-final-review` | final review phase 2, only on `Outcome: COMPLETE` |
+| `comments` (append only) | implement, final review |
+
+## Status lifecycle
 
 ```text
 ready-for-agent -> done-coding-awaiting-final-review -> done-final-review
 ```
 
-`done-coding-awaiting-final-review` means coding, verification, and the implementing agent's own review are complete.
-The final review (`/modified-matt-final-review`, or a human acting in its roles) then runs in two phases, each in a
-fresh session. In **phase 1** the independent reviewer reviews the change and records every finding; it fixes nothing.
-In **phase 2** the coder — the implementing agent's role, not the reviewer's — triages every recorded finding with the
-user. Phase 1 never changes `status`, whatever its verdict: it records the review and commits that record
-(§ Recording a final review). **Only phase 2 sets `done-final-review`**, and only when its triage is COMPLETE: every
-finding has a final disposition the user approved (fixed, rejected or deferred), every approved fix is verified, and
-every required check passes. Phase 2 runs even when the review has zero findings, because the checks still have to pass
-before the issue closes; with nothing to triage, it skips only the user's approval of an empty triage. A triage that
-rejects or defers every finding, with the user's approval, completes without a code commit, and so does a review with
-zero findings when the checks change nothing.
-
-An issue that an earlier version of this contract closed in phase 1, on a verified PASS with zero findings, stays
-closed: it is not reopened, and its records are not rewritten to fit this lifecycle.
-
-Every review leaves the issue at `done-coding-awaiting-final-review` until phase 2 completes — do not return it to
-`ready-for-agent`, and do not re-run the implement skill on it. In phase 2 the coder applies only the fixes the user
-approved, produces the `CODE REVIEW FIXES:` commit when there is code to commit, and records its SHA in
-`reviewCodeCommit`; `codeCommit` keeps pointing at the implementation. A fix round is visible through
-`reviewCodeCommit` and the `comments` trail, never through a status change.
+The final review runs in two fresh sessions. Phase 1 records every finding, fixes nothing, and never changes `status`,
+whatever its verdict: untriaged findings can't close an issue. Phase 2 triages every finding with the user; only a
+COMPLETE triage sets `done-final-review`, and it runs even with zero findings, because the checks must still pass. A
+fix round never changes `status`, and a reviewed issue never returns to `ready-for-agent`.
 
 ## Comment records
 
-Three kinds of `comments` entry carry the work from the implementer to the independent reviewer and on to the coder's
-triage. Each is an ordinary entry — an `author` and a `body`, nothing more — and every identifier below lives in the
-`body` text, never in an added field. A review or triage record is recognised by the label its body opens with, and
-the implementation record by its `Deviations and tradeoffs:` part — never by an entry's `author` or its position in the
-array. Free text may follow the labelled lines. Never edit or remove a record once written: a correction is a new
-entry.
+A record is recognised by the label its body opens with, never by author or position; free text may follow. Never
+edit or remove one: a correction is a new entry.
 
-**Implementation record.** The implement skill's entry for its run. Beside the verification, the review outcome,
-anything left open and any ADR superseded, its body carries a part opening `Deviations and tradeoffs:` that lists each
-deviation from the issue or spec and each deliberate tradeoff, each with its reason, or reads
-`Deviations and tradeoffs: None.` It records what that run decided, never reasoning reconstructed afterwards. An older
-implementation comment, written before that part existed, is read for the reasons it states unambiguously; where it
-states none, the reasoning is unknown. It is never rewritten to add the part.
+**Implementation record** (implement): verification and its output, the review outcome, anything left open, each ADR
+superseded, and a part opening `Deviations and tradeoffs:` naming each deviation and deliberate tradeoff with its
+reason, or `Deviations and tradeoffs: None.`
 
-**Phase 1 review record.** The independent reviewer's entry for one final review. Its body opens with these lines, in
-this order:
+**Phase 1 review record**, these lines in order:
 
-- `Final review, phase 1, attempt <N>`, where `N` is one more than the number of phase 1 records already in `comments`
-  (count those records, not every comment).
-- `Reviewed commits: <SHAs>`: the full SHAs of the change reviewed — `codeCommit` and each fix commit since — oldest
-  first, separated by spaces.
-- `Verdict: PASS` or `Verdict: NEEDS FIXES`. PASS means every acceptance criterion was verified to hold, nothing was
-  blocked and no blocking finding remains; it does not mean there are no suggestions.
-- `Findings:` then one numbered line per finding: `BLOCKING` or `SUGGESTION`, the location where one applies, the
-  impact, and the correction asked for. A required verification that could not run is a `BLOCKING` finding that says
-  what was blocked and why, with no invented file or line. Only when there are no findings of either severity does the
-  line read `Findings: None.` instead.
+- `Final review, phase 1, attempt <N>`: one more than the phase 1 records already there.
+- `Reviewed commits: <SHAs>`: `codeCommit` and each fix commit since, full, oldest first, space-separated.
+- `Verdict: PASS` (every criterion verified, nothing blocked, no BLOCKING finding) or `Verdict: NEEDS FIXES`.
+- `Findings:` then numbered lines: `BLOCKING` or `SUGGESTION`, location, impact, correction; an unrunnable required
+  check is BLOCKING. `Findings: None.` when there are none.
 
-**Phase 2 triage record.** The coder's entry for one triage attempt. Its body opens with these lines, in this order:
+**Phase 2 triage record**, these lines in order:
 
-- `Final review, phase 2, attempt <K>`, where `K` is one more than the number of phase 2 records already in `comments`.
-- `Answers: phase 1 attempt <N>, reviewed commits <SHAs>`: the phase 1 record this triage answers, and the reviewed
-  SHAs copied from it.
-- `Outcome: COMPLETE`, `Outcome: INCOMPLETE` or `Outcome: BLOCKED`. COMPLETE means every finding has a final
-  disposition the user approved, every approved fix is verified and every required check passes; only a COMPLETE triage
-  closes the issue. INCOMPLETE means approved work is unfinished or a required check fails; BLOCKED means something
-  outside the change stops it, such as a check that cannot run or a decision the user has not made.
-- `Verdicts:` then one line per finding, numbered as in the phase 1 record: `FIXED` with where and how it was verified;
-  `REJECTED` or `DEFERRED` with the reason the user approved; `UNRESOLVED — approved FIX: <what>; blocker: <failure>`
-  for an approved fix that could not be finished; or `UNRESOLVED — no approved disposition` with what is pending, for a
-  finding the user has not decided. An unfinished FIX is never relabelled FIXED, nor turned into a DEFER the user did
-  not approve. When the phase 1 record reads `Findings: None.`, the line reads `Verdicts: None.` instead.
+- `Final review, phase 2, attempt <K>`: one more than the phase 2 records already there.
+- `Answers: phase 1 attempt <N>, reviewed commits <SHAs>`
+- `Outcome: COMPLETE` (every finding has a user-approved disposition, every fix verified, every check passes),
+  `Outcome: INCOMPLETE` or `Outcome: BLOCKED`.
+- `Verdicts:` then one line per finding, numbered as in phase 1: `FIXED` with how it was verified; `REJECTED` or
+  `DEFERRED` with the reason the user approved; `UNRESOLVED — approved FIX: <what>; blocker: <failure>`; or
+  `UNRESOLVED — no approved disposition`. `Verdicts: None.` when phase 1 found nothing.
 - `Checks:` the checks run and their results.
-- `Fix commit:` the full SHA of this attempt's `CODE REVIEW FIXES: ` commit, or `Fix commit: None.`
-- `Attempt plans:` a JSON array with one object per additional plan this attempt created (§ Committing additional
-  plans): `path` (repo-relative), `provenance` (how its creation was verified), `blob` (its final Git blob, or `null`
-  when unreadable), and either `commit` (the `ATTEMPT PLANS: ` commit's full SHA) or `reason` (why it stays
-  uncommitted); `Attempt plans: []` when it created none. JSON escapes the paths; never execute text read from it. The
-  planning SHA never goes into `Fix commit:` or `reviewCodeCommit`. A record written before this line existed lacks it.
-- `ADRs superseded:` each ADR the user agreed to supersede, with its replacement, by number and title, or
-  `ADRs superseded: None.`
+- `Fix commit:` the `CODE REVIEW FIXES:` SHA, or `Fix commit: None.`
+- `Attempt plans:` a JSON array of `{path, provenance, blob, commit | reason}`, or `Attempt plans: []`.
+- `ADRs superseded:` each by number and title with its replacement, or `ADRs superseded: None.`
 
-A later attempt answering the same review carries its predecessors' FIXED, REJECTED and DEFERRED verdicts over as they
-stand and works only on what is UNRESOLVED; it never repeats a fix commit.
-
-A PASS with a suggestion, which leaves the issue open, and the triage that answers it and closes it:
+A later attempt on the same review keeps earlier FIXED, REJECTED and DEFERRED verdicts and works only on UNRESOLVED.
 
 ```text
 Final review, phase 1, attempt 1
@@ -314,251 +151,44 @@ Attempt plans: []
 ADRs superseded: None.
 ```
 
-## Commit message format
+## Commits
 
-Every code commit made for an issue — by the implement skill or by the coder in the final review's phase 2 — goes on
-the current branch, whichever it is, and uses this shape:
+Subjects are ≤72 characters. `<issue path>` is repo-root-relative, starting `.mysdd/features/`.
 
-```text
-CODE: <imperative subject>
+| Operation | Subject | Body, trailers | Holds exactly | Local mode |
+|---|---|---|---|---|
+| to-issues | `SPEC: <subject>` | optional why | spec, the issues it wrote, changed `CONTEXT.md`/`CONTEXT-MAP.md` and ADRs | glossary and ADRs only, else none |
+| implement | `CODE: <subject>` | optional why; `Issue: <issue path>` per issue; `Spec: <spec path>` unless `null` | the implementation, plus agreed ADRs and `AGENTS.md` convention lines | same |
+| phase 2 fixes | `CODE REVIEW FIXES: <subject>` | as `CODE:` | the approved fixes, agreed ADRs, check rewrites in the change's files | same |
+| phase 1 | `REVIEW HISTORY: Record final review attempt <N>` | `Issue: <issue path>` | the issue file | empty marker: its tree equals its parent's, the user's index untouched |
+| phase 2 plans | `ATTEMPT PLANS: final review <issue path> attempt <K>` | none | plans this attempt provably created, not ignored or bound elsewhere | same |
+| phase 2 close | `Closed Issue: <issue path>` | none | the issue file, plus `.mysdd/kanban-boards.json` if changed | none: the status change is the close |
 
-<one to three lines on the why, when the change isn't self-evident>
+The code prefix follows `codeCommit`: `null` → `CODE: `, a SHA → `CODE REVIEW FIXES: `. One commit per issue where
+the work separates. Final review finds the change by its `Issue:` trailers, so write them in both modes.
 
-Issue: .mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json
-Spec: .mysdd/features/<NN>-<feature-slug>/spec.md
-```
+**Hard limits**:
 
-- The header prefix of a code commit is `CODE: ` or `CODE REVIEW FIXES: `. Pick it from the issue's `codeCommit`:
-  `null` means this is the implement skill's first-round commit, so `CODE: `; a SHA means the issue has already been
-  implemented and committed and this is the coder's fix commit from the final review's phase 2, so
-  `CODE REVIEW FIXES: `. The header follows `codeCommit`, never `status` — a fix round leaves the status where it is.
-  `SPEC: `, `REVIEW HISTORY: `, `ATTEMPT PLANS: ` and `Closed Issue: ` are the other subjects, but they are
-  bookkeeping, not code commits: they follow § Committing a Spec and its Issues, § Recording a final review,
-  § Committing additional plans and § Closing an issue, not this format.
-- The whole subject line, prefix included, is ≤72 characters.
-- One `Issue:` trailer per issue in the commit, repo-root-relative and beginning `.mysdd/features/`, in either mode:
-  the trailers are addresses, not staged files.
-- A code commit stages implementation files only, never anything under `.mysdd/`. The one exception is an ADR under
-  `.mysdd/docs/adr/` the user agreed to add or supersede for this issue: it goes into the same commit.
-- An `AGENTS.md` convention line agreed at design time rides in the `CODE: ` commit of the first issue that carries it.
-- A `Spec:` trailer only when the issue's `spec` is not `null`, deduped when several issues in one commit share a spec.
-- No tool or model attribution — no `Co-Authored-By` trailer, no "generated with" footer, no emoji badge. The message
-  must read the same whichever agent, or human, produced it.
+- Current branch only: it is the one the user chose.
+- Only your own paths; the user's staged work stays staged and out, because it's theirs to commit.
+- Never amend, rebase, reset or push: a recorded SHA would be orphaned, and publishing is the user's call.
+- Never force-add, untrack or edit ignore rules: that changes the mode the user chose.
+- No empty commit except the local marker: nothing to commit means no commit.
+- No `Co-Authored-By` or other attribution: the message reads the same whoever wrote it.
 
-A first-round commit:
+**Done rules**:
 
-```text
-CODE: Gate workspace switching behind the seat check
+- Every review commits its record (the marker in local mode), so `git log` alone shows it ran. The marker is never a
+  fallback for an unresolved mode or a failed commit.
+- The recorded SHA is the commit this session made, never a later `HEAD`.
+- A commit holding a path that isn't yours is never recorded: report its SHA and the foreign paths, end the attempt
+  INCOMPLETE or BLOCKED, and don't amend, reset or retry.
+- A commit can't hold its own SHA: write it to the issue afterwards, uncommitted; the issue's next commit carries it.
+- A saved record or status doesn't prove its commit landed: a retry makes only the missing commit.
 
-A member without an active seat could still switch into a workspace via the
-URL. The guard now runs before the loader resolves.
+**Pitfalls from real runs**:
 
-Issue: .mysdd/features/03-workspace-seats/issues/02-seat-guard.json
-Spec: .mysdd/features/03-workspace-seats/spec.md
-```
-
-A commit applying the review fixes the user approved on the same issue:
-
-```text
-CODE REVIEW FIXES: Seat guard — handle the revoked-seat race
-
-Issue: .mysdd/features/03-workspace-seats/issues/02-seat-guard.json
-Spec: .mysdd/features/03-workspace-seats/spec.md
-```
-
-**The commit route.** Every commit here that carries files — code, `SPEC: `, `REVIEW HISTORY: `, `ATTEMPT PLANS: `,
-`Closed Issue: ` — goes on the current branch the same way, with every path single-quoted in every command: zsh
-otherwise globs or rejects a `[locale]` or `(group)` segment. Never stage a directory or run `git add -A`.
-
-1. If `git status` reports a merge, cherry-pick, revert or rebase in progress, stop and report: the commit would fail
-   or land inside it. On a detached `HEAD`, commit there and say so in the report.
-2. Note `HEAD` itself (`git rev-parse --verify -q HEAD`; `unborn` when it fails on a branch with no commit yet) and
-   the staged paths: `git diff --cached --name-only --no-renames`, which names both paths of a staged `git mv`.
-3. `git --literal-pathspecs add -- '<path>'` each path that exists in the working tree, which also replaces a draft
-   already staged. A path deleted, or removed by `git rm` or `git mv`, gets no `add`; a rename commits both its paths.
-4. `git --literal-pathspecs commit --only -m "<subject>" -- '<paths>'`, adding one `-m "<paragraph>"` before `--` for
-   each further paragraph of the message. Literal mode stops `[`, `*` or `?` matching neighbours; `--only` leaves the
-   user's other staged work staged, not swept in. Nothing to commit means no commit, never an empty one.
-5. Once it has committed, read the new commit's SHA once with `git rev-parse HEAD`, and its parent and subject with
-   `git log -1 --format='%P%n%s' <sha>`. If the parent isn't the noted `HEAD` (after `unborn`: if it has one), or the
-   subject isn't yours, stop and report. Never search for the commit.
-6. Verify that SHA, never a later `HEAD`: `git diff-tree --root --no-commit-id --name-only -r <sha>` lists exactly your
-   paths, the user's index equals the commit for each of them
-   (`git --literal-pathspecs diff --cached --quiet <sha> -- '<paths>'`), and every noted path that isn't yours is
-   still staged; otherwise stop and report.
-7. A hook (lint-staged, a formatter) can change the commit. A commit holding any path that isn't yours has failed
-   isolation. Stop. Report its SHA, the foreign paths, and that the user's index still holds their pre-hook versions,
-   so a later commit would revert them. End the attempt INCOMPLETE/BLOCKED with the SHA in the report or record.
-   Don't treat the SHA as the step's commit, never amend, reset the branch or retry, and let the user decide what
-   happens next. When only your own paths leave the index disagreeing (a formatter rewrote your file), bring each to
-   the commit with `git --literal-pathspecs reset -q <sha> -- '<path>'`, unless it was a noted path: then stop and
-   report.
-
-## Committing a Spec and its Issues
-
-When the issues skill has published a feature's issues, it records the Spec, those issues and the decisions they rest on
-in one commit of its own. Run the probe (§ Ignore policy) on that spec, those issue files and the documentation files
-below right before staging:
-
-- The subject is `SPEC: <imperative subject>`, ≤72 characters prefix included. An optional body of one to three lines
-  may say why. No trailers.
-- Stage that feature's `spec.md`, the issue JSON files this run created or updated, each `CONTEXT.md` (root or
-  per-context) and `CONTEXT-MAP.md` this run or the spec's design session changed, and each ADR under
-  `.mysdd/docs/adr/` they added or changed, each by path. Stage a glossary file whole, and name any other uncommitted
-  edit it carries in the report. Never stage implementation files, `CLAUDE.md`, `AGENTS.md` or another feature's
-  files, and never `git add .mysdd/`; leave unrelated staged or working-tree changes out of the commit.
-- In **local** mode, stage no spec or issue file. The commit still carries the glossary and ADR changes above, under
-  the same `SPEC: ` subject; when there are none, make no commit.
-- Commit the staged paths by the route in § Commit message format.
-- The no-attribution rule in § Commit message format applies.
-- Never make an empty commit, and never amend.
-
-## Recording a final review
-
-Phase 1 of the final review never changes `status`. It records its review in the issue and commits that record in a
-commit of its own, so that anyone coming back later can tell from `git log` alone that the review happened, and so that
-tooling has a commit to point at. Run the probe (§ Ignore policy) on the issue file before writing the record and again
-before committing, then:
-
-1. **Save the record.** Append the phase 1 record (§ Comment records), write the whole file, and re-read it to confirm
-   it parses and holds the record.
-2. **Commit it.** Note `HEAD` first: the new commit's parent must be that commit. The message is
-
-   ```text
-   REVIEW HISTORY: Record final review attempt <N>
-
-   Issue: .mysdd/features/<NN>-<feature-slug>/issues/<NN>-<slug>.json
-   ```
-
-   where `<N>` is the record's phase 1 attempt number. No body and no other trailer; the no-attribution rule in
-   § Commit message format applies.
-
-   - In **committed** mode the commit holds exactly the whole issue file and nothing else, by the route in
-     § Commit message format. The file sits under `.mysdd/features/`, so the final review's change computation leaves
-     the commit out of the reviewed change.
-   - In **local** mode, positively established by the probe, there is nothing to stage, so make an **empty marker** in
-     place of the record commit with exactly these commands, from the repository root:
-
-     ```sh
-     parent=$(git rev-parse --verify HEAD)                 # noted before anything else
-     tree=$(git rev-parse "$parent^{tree}")
-     [ "$(git config --bool commit.gpgsign)" = true ] && sign=-S || sign=
-     new=$(git commit-tree "$tree" -p "$parent" -m "REVIEW HISTORY: Record final review attempt <N>" -m "Issue: <issue path>" $sign) &&
-     git update-ref -m "REVIEW HISTORY: Record final review attempt <N>" HEAD "$new" "$parent"   # refuses if HEAD moved
-     ```
-
-     On an unborn branch the first command fails and there is nothing to review: stop and report. The marker's tree is
-     its parent's by construction, and `update-ref` publishes it only while `HEAD` still names that parent, so it can
-     never land on another agent's commit and revert it; the user's index is never touched. If `update-ref` refuses,
-     stop and report it: never retry onto the new `HEAD` without deciding again. `commit-tree` runs no hooks, which is
-     acceptable for a commit that carries no content, and ignores `commit.gpgsign`, hence `-S`: if signing fails,
-     nothing is published; stop and report it, never retry unsigned. A plain `git commit --allow-empty` is never the
-     marker: it commits whatever the user has staged. The marker touches no path, so the change computation leaves it
-     out too.
-   - The marker exists only for a positively established local mode. It is never a fallback for an unresolved ignore
-     state, a failed hook, a permission or Git error, or a record that failed to save: each of those stops the phase
-     and is reported as it is. No review commit force-adds, edits an ignore rule, amends or pushes.
-3. **Record its SHA.** Take the full 40-character SHA the route read and verified, or the marker's `$new`, never
-   whatever `HEAD` is by then: another agent may have committed in the meantime. Write it into `reviewHistoryCommit`,
-   re-read the file, and leave that one change uncommitted. A commit cannot contain its own SHA, so never amend to carry
-   it: in committed mode the next commit of the issue file — normally phase 2's `Closed Issue:` commit — carries it. In
-   local mode it stays on disk only.
-
-Report the three outcomes separately: the record saved; the record committed with its SHA — in local mode, **local
-record saved; marker committed**; and the SHA written to `reviewHistoryCommit`.
-
-**Retries.** Each step's success stands on its own, and a retry does only what is unfinished:
-
-- A failed commit does not undo a saved record. The retry commits the record already saved, under the same attempt
-  number, and never appends a second record for the same review.
-- In committed mode, when a `REVIEW HISTORY:` commit for this attempt and issue already holds the saved record and no
-  other path, reuse its verified SHA. Make no new commit, and never an empty marker merely because nothing is left to
-  commit. If it holds any other path, it failed isolation (§ Commit message format): ask the user.
-- After the commit succeeded, a failed SHA write retries only that write, with the commit already identified: no new
-  record, commit or marker.
-- A later session that cannot identify the already-created commit unambiguously — none matches this attempt and issue,
-  or more than one does — stops and asks. Never substitute `HEAD`, which another agent may have moved, and never invent
-  a SHA.
-
-**What a local marker proves.** The marker carries no review text. The record lives only in the ignored issue file, so
-the marker cannot restore it on another clone or after the file is lost. Its SHA is evidence that a review was run and
-recorded here, not a copy of the findings and not proof that the review passed.
-
-## Committing additional plans
-
-An **additional plan** is a plan file that the coder in phase 2, or an agent it delegated to, created inside the
-repository for that triage attempt — for example under `.claude/plans` for Claude Code; an agent that writes no plan
-files simply has none. Phase 2 commits the eligible ones in a planning-only commit of their own, after
-capturing its fix commit's SHA and before writing its record, so the record carries the actual results. They never go
-into the `CODE REVIEW FIXES: ` or `Closed Issue:` commit, whose files stay as § Commit message format and
-§ Closing an issue give them. The operation runs for every outcome — no code change, zero findings, every finding
-rejected or deferred, checks blocked — and in both Feature modes, except after a failed isolation (§ Commit message
-format), which makes no further commit; a planning commit proves nothing about the code or the close.
-
-- **Provenance.** Only a path in the attempt's explicit inventory qualifies: its absence was confirmed before it was
-  created, or a delegate's handoff named it as created. An untracked status, a directory diff, a timestamp or a
-  filename never proves ownership, so a file that existed before, an earlier attempt's leftover included, never does.
-- **Eligibility.** Once every agent has finished, a plan bound to other work or another workflow's record, a non-plan
-  file, a deletion, a symlink, a path escaping the repository or the directory it was created in, and a file with
-  unexplained edits or unproven ownership are excluded and reported with their reason.
-- **Ignore probe.** From the repository root, the remaining repository-relative paths go NUL-delimited on stdin to
-  nonverbose `git check-ignore --no-index --stdin -z`, with no `--literal-pathspecs` (fatal there) and no leading `:`
-  (magic). Exit 0 lists ignored paths, 1 means none is ignored, and any other status is an error, reported as one and
-  never read as permission to add. An ignored plan, tracked or not, stays uncommitted with that reason. Each plan
-  answers to its own ignore rules, whatever the Feature mode (§ Ignore policy).
-- **The commit.** The subject is exactly `ATTEMPT PLANS: final review <issue path> attempt <K>`, the path
-  repo-root-relative and `K` the phase 2 attempt number. No body, no `Issue:` trailer and no attribution, so the final
-  review's change selection never counts it as code. It holds only the eligible plans, each rechecked just before,
-  committed by the route in § Commit message format. Verify too that it deletes nothing. With no eligible plan there
-  is no commit.
-- Never force-add, edit an ignore rule, untrack a file, make an empty commit, amend, push or roll back. If `HEAD` moved
-  or verification fails, stop and report the actual state.
-- **Retries.** A saved COMPLETE record or a landed close commit is not proof the plans were committed. A retry of the
-  same attempt reuses its inventory, fix SHA and verified planning commit, and commits a plan that attempt created only
-  while its provenance and recorded blob still agree. When the planning commit already holds exactly those files and
-  no other path, no new commit is made, and later changes are reported, not committed; otherwise ask the user. More
-  than one commit matching the attempt's planning subject, or a recorded blob that disagrees with the planning
-  commit's, means asking and committing nothing.
-  A new attempt never collects an earlier attempt's plans. Ambiguous identity or ownership means asking, not
-  guessing; earlier records stay as written, and no commit is made just to update prose.
-
-Report the planning commit's full SHA and paths, and each additional plan left uncommitted with its path and reason,
-apart from the code and close outcomes.
-
-## Closing an issue
-
-Only phase 2 of the final review closes an issue, and only when its triage is COMPLETE (§ Issue shape); phase 1 never
-does. Phase 2 sets `done-final-review` in the same write as its phase 2 record and then, in **committed** mode, records
-the close in one commit of its own. Run the probe (§ Ignore policy) on the issue file before writing the status and
-again before staging:
-
-- The subject is exactly `Closed Issue: <issue path>`, the path repo-root-relative and beginning `.mysdd/features/`
-  (`Closed Issue: .mysdd/features/03-workspace-seats/issues/02-seat-guard.json`). No body, no trailers.
-- Commit only that issue's JSON file, plus any `.mysdd/` board-state file the tooling keeps and has changed (for example
-  `.mysdd/kanban-boards.json`), by the route in § Commit message format. Never stage implementation files, a
-  `CONTEXT.md` or anything under `.mysdd/docs/`: those belong to the `SPEC: `, `CODE: ` and `CODE REVIEW FIXES: `
-  commits.
-- The issue file carries phase 1's uncommitted `reviewHistoryCommit` into this commit.
-- The no-attribution rule in § Commit message format applies.
-
-In **local** mode, make no commit: the status change is the whole close. Say so in the report — closed locally, no close
-commit — so that the missing commit doesn't read as an oversight. That covers the close alone: it never skips the
-planning commit of § Committing additional plans.
-
-**Retries.** The status is written before the close commit, so a saved `done-final-review` is not proof that the commit
-landed. Before a retry treats a COMPLETE phase 2 attempt as finished in committed mode, check that the latest commit
-touching the issue file is `Closed Issue: <issue path>`, holding that file, any board-state file and no other path,
-and that the file has no uncommitted change; a close commit holding another path means asking the user. If the close
-commit is missing, make only that commit: no new record, no new fix commit, and no second triage. A finished close
-says nothing about the attempt's additional plans: check them per § Committing additional plans.
-
-## When a skill says "publish to the issue tracker"
-
-Run the probe (§ Ignore policy) on the new file's path first. Then create it under
-`.mysdd/features/<NN>-<feature-slug>/`, creating `.mysdd/features/` and the feature directory if needed: a `.json`
-issue under `issues/`, or a markdown file for a spec.
-
-## When a skill says "fetch the relevant issue"
-
-Read the file at the referenced path and parse it as JSON. The user will normally pass the path or the issue number
-directly.
+- zsh globbing: quote every path; zsh expands or rejects `[locale]` and `(group)`. Use literal pathspecs too.
+- A bare `git commit` sweeps in the user's staged work: name your paths (`git commit --only -- <paths>`).
+- Hooks add paths: check what the new commit holds before recording it.
+- `HEAD` moves: another agent may commit next, so take the SHA from your own commit's output.

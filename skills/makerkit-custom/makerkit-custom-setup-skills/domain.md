@@ -26,12 +26,19 @@ Grill, to-spec, to-issues and implement send you here before they start. Read th
   binding.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that
   piece is and how it fits. Read directly, and only for the pieces the feature touches.
-- the Makerkit docs under `docs/` — **dispatch a sub-agent; never walk the tree in this context.** It is upstream
-  Makerkit's docs only when it holds `.mdoc` files, often 150+. Name the one or two topic directories the feature
-  touches (e.g., `docs/billing`, `docs/security`) and ask the sub-agent how the feature is *meant* to work. If `docs/`
-  is missing or holds no `.mdoc` files, skip this.
+- the Makerkit docs under `docs/`, through a sub-agent, per § Makerkit docs.
 
-The skill that sent you here says what to do while the docs sub-agent works.
+## Makerkit docs
+
+`docs/` is upstream Makerkit's product documentation when it holds `.mdoc` files, often 150+; if it is missing or
+holds none, skip this. Never walk it in your own context: it would crowd out the work. Dispatch one sub-agent, name the
+one or two topic directories the work touches (e.g., `docs/billing`, `docs/security`), and ask how the feature is
+*meant* to work there, answered briefly with the doc paths it relied on. Where its answer and the repo differ, follow
+the repo.
+
+Don't block on it: carry on with whatever doesn't depend on its answer — the frontier questions in a grilling, the
+slices or spec sections it can't change, the implementation parts it can't touch — and pick the rest up when it
+reports. Never hand a part that depends on its answer to another sub-agent before the answer is in.
 
 ## Before exploring, read these
 
@@ -39,19 +46,9 @@ The skill that sent you here says what to do while the docs sub-agent works.
 - **The binding ADRs** in `.mysdd/docs/adr/`: every ADR with no `scope` (or `scope` of `"/"`), plus every ADR with a
   `scope` entry matching a path you will touch. Skip any whose `status` begins `superseded`; read those only when
   reconciling decisions. An ADR with no frontmatter is repo-wide, and its status is its `**Status:**` line (`accepted`
-  when there is none). Run this from the repo root (the directory `git rev-parse --show-toplevel` prints). It prints
-  every ADR's whole frontmatter in one read, however long its `scope`, or a legacy ADR's `**Status:**` line. Pick the
-  binding set from it and open only those in full:
-
-  ```sh
-  [ ! -d .mysdd/docs/adr ] || find .mysdd/docs/adr -maxdepth 1 -name '*.md' -print0 | sort -z | xargs -0 -r awk '{ sub(/\r$/, "") }
-    FNR == 1 { print "== " FILENAME; fm = hdr = ($0 ~ /^--- *$/); seen = 0; next }
-    fm { if ($0 ~ /^--- *$/) fm = 0; else print; next }
-    !hdr && !seen && /^\*\*Status:\*\*/ { print; seen = 1 }'
-  ```
-
-  Only a `---` on an ADR's first line opens frontmatter, so a horizontal rule further down a legacy ADR is never
-  mistaken for it. A bracketed segment such as `[locale]` is a literal route segment, not a glob character class.
+  when there is none). Read every ADR's frontmatter first — only a `---` on its first line opens it — and open only
+  the binding ones in full. A bracketed `scope` segment such as `[locale]` is a literal route segment, not a glob
+  class.
 
 If any of these don't exist, **proceed silently**. Don't flag their absence and don't suggest creating them upfront:
 `makerkit-custom-domain-modeling` creates them lazily when terms or decisions actually get resolved.
