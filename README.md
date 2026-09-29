@@ -65,7 +65,9 @@ name, asking for whatever a prompt would have handed it.
 npx skills@latest update -p
 ```
 
-Commit the changes and restart your agents.
+Commit the changes and restart your agents. When an update raises the
+tracker contract (now `Tracker contract: 4`), re-run the setup skill too:
+until you do, the skills that read the tracker stop and say so.
 
 ### Remove or switch flavour
 
@@ -159,9 +161,16 @@ shape, statuses, record and commit formats) and
 share:
 
 - **Tracker contract.** `to-spec`, `to-issues`, `implement` and `final-review`
-  stop before writing unless the tracker holds exactly one
-  `Tracker contract: 2` line; prompts 6 and 7 check the same line. Missing or
-  lower: re-run setup. Higher: update the skills or the app.
+  each run their bundled `scripts/check-tracker-contract.sh` and stop before
+  writing unless the tracker holds exactly one `Tracker contract: 4` line;
+  prompts 6 and 7 check the same line. Missing or lower: re-run setup.
+  Higher: update the skills or the app. Contract 4 adds two things setup
+  writes: a commit route that stops on **failed isolation** — a commit a hook
+  filled with a path that isn't the step's own ends the attempt
+  INCOMPLETE/BLOCKED with its SHA reported, never amended, reset or retried —
+  and the `Every operation also reads:` line in the tracker's `## Contents`,
+  which setup fills with the project's own tracker sections so every skill
+  reads them too.
 - **Status.** `ready-for-agent` → `done-coding-awaiting-final-review` →
   `done-final-review`. Step 4 seeds the first, step 5 sets the second, and
   only a COMPLETE step 7 sets the last. Step 6 never touches `status`.
@@ -183,7 +192,7 @@ share:
 |---|---|---|---|---|---|
 | **1 Grill** | coder, auto mode | `grill-with-docs` (required, editable in Settings); it loads `domain-modeling` | glossary, ADRs scoped to the touched paths | glossary terms and ADRs as they settle, one question round at a time | nothing — step 4 commits them |
 | **2 PRD Spec** | coder, **same session** as 1 | `to-spec` (warns if missing) | the grill conversation, tracker | `.mysdd/features/<NN>-<slug>/spec.md`: `US-NNN` stories, test boundaries you confirmed, a redacted Decision log; you bind it in the app | nothing |
-| **3 Review PRD Spec** | reviewer, fresh session | `reviewer` (warns if missing), `to-spec` | `spec.md` | edits `spec.md` in place; never cuts User Stories or renumbers an ID | nothing |
+| **3 Review PRD Spec** | reviewer, fresh session | `reviewer` (warns if missing), `to-spec` (the prompt stops without it) | `spec.md`, following `to-spec` § Reviewing an existing spec | edits `spec.md` in place, asking you about every gap rather than assuming; never cuts User Stories or renumbers an ID; only appends to the Decision log | nothing — step 4's `SPEC:` commit carries it |
 | **4 Spec to Issues** | coder, fresh session | `to-issues` | spec, existing issues (reconciled by `slug`, never regenerated) | one issue JSON per vertical slice: `ready-for-agent`, `blockedBy`, `testBoundaries`, `covers`, commit fields `null`; after your approval, ADRs for the spec's standing decisions | `SPEC: <subject>`, no trailers — spec, issues, glossary, ADRs |
 | **5 Implement** | coder, auto mode | `implement`, `tdd` | issue, its spec when `spec` isn't `null`, ADRs | code, its own two-axis review (`REVIEW.md`); then the issue: criteria ticked, `done-coding-awaiting-final-review`, `codeCommit`, an implementation record with `Deviations and tradeoffs:` | `CODE: <subject>` + `Issue:`/`Spec:` trailers — code and agreed ADRs only; the issue file stays uncommitted |
 | **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, every finding numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file (local: empty marker) |
@@ -197,8 +206,10 @@ reaches Done once the file says `done-final-review` and steps 5–7 are marked.
 `/modified-matt-grill-with-docs`, then `/modified-matt-to-spec` in that
 session, `/modified-matt-to-issues`, `/modified-matt-implement`, and
 `/modified-matt-final-review` — it infers the phase from the Issue and asks
-you to confirm; phase 2 runs in a fresh coder session. Step 3 is the app's prompt around your review skill;
-by hand, ask any reviewer to edit `spec.md` in place.
+you to confirm; phase 2 runs in a fresh coder session. Step 3 is
+`to-spec` § Reviewing an existing spec: in a fresh session, ask
+`/modified-matt-to-spec` to review the spec at its path, and it interviews
+you and edits `spec.md` in place.
 
 ### Where Makerkit differs
 
@@ -271,7 +282,7 @@ by hand.
 .claude-plugin/marketplace.json   # defines the picker's three groups — generated
 scripts/gen-marketplace.mjs       # regenerates it
 skills/
-  makerkit-custom/<skill>/        # SKILL.md, optional references/ and agents/openai.yaml
+  makerkit-custom/<skill>/        # SKILL.md, optional references/, scripts/ and agents/openai.yaml
   modified-matt/<skill>/
   kanban/kanban-jobs/             # the flavour-neutral Job procedure: SKILL.md and STEP-A…E.md
 matt_submodule/skills             # upstream mattpocock/skills, for reference
@@ -299,7 +310,12 @@ matt_submodule/skills             # upstream mattpocock/skills, for reference
   files linked one level deep from it. State each rule once and point at it
   rather than copying it into every skill.
 - Stick to frontmatter keys both agents understand: `name`, `description`,
-  `license`, `allowed-tools`, `metadata`.
+  `license`, `allowed-tools`, `metadata`. The one exception is Claude Code's
+  `disable-model-invocation`, which Codex ignores (see below).
+- The four tracker readers in each flavour bundle the same
+  `scripts/check-tracker-contract.sh`, byte for byte; change all eight
+  copies together, and raise the contract in the seeds, setup and every
+  reader's invocation at once. prompt-kanban's tests check both.
 
 ### Making a skill user-invoked only
 
