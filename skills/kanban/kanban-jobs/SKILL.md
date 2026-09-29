@@ -103,13 +103,14 @@ commit. Identify your commit by its parent (the `HEAD` you noted first) and subj
    subject isn't yours, stop and report. Never search for the commit.
 6. Verify that SHA, never a later `HEAD`: `git diff-tree --root --no-commit-id --name-only -r <sha>` lists exactly your
    paths, `git --literal-pathspecs diff --cached --quiet <sha> -- '<those paths>'` succeeds, and every noted path that
-   isn't yours is still staged.
+   isn't yours is still staged; otherwise stop and report.
 7. A hook (lint-staged, a formatter) can change the commit. A commit holding any path that isn't yours has failed
    isolation. Stop. Report its SHA, the foreign paths, and that the user's index still holds their pre-hook versions,
    so a later commit would revert them. End the attempt INCOMPLETE/BLOCKED with the SHA in the report or record.
    Don't treat the SHA as the step's commit, never amend, reset the branch or retry, and let the user decide what
    happens next. When only your own paths leave the index disagreeing (a formatter rewrote your file),
-   `git --literal-pathspecs reset -q -- '<path>'` each; for a noted one, stop and report.
+   `git --literal-pathspecs reset -q <sha> -- '<path>'` each; for a noted one, stop and report. After a failed
+   isolation make no further commit, history or planning.
 
 **Code commits (C, E):** the step's prefix and an imperative subject, at most 72 characters in all, and optionally one
 to three lines of why. Stage this step's changes by path, never the Job's plan or unrelated changes, by the route.
