@@ -66,7 +66,7 @@ npx skills@latest update -p
 ```
 
 Commit the changes and restart your agents. When an update raises the
-tracker contract (now `Tracker contract: 5`), re-run the setup skill too:
+tracker contract (now `Tracker contract: 6`), re-run the setup skill too:
 until you do, the skills that read the tracker stop and say so.
 
 ### Remove or switch flavour
@@ -99,10 +99,10 @@ install the other one.
   ignore the whole root with the one rule `.mysdd/features/`; the skills
   then write specs and issues but never stage them, skip the `SPEC:` and
   `Closed Issue:` bookkeeping commits for them, and still name their paths
-  in `Issue:` / `Spec:` trailers. The one exception is the final review's
-  `REVIEW HISTORY:` record: in local mode it becomes an empty marker
-  commit — its tree equals its parent's, your index untouched — so the
-  review still shows in history without its text.
+  in `Issue:` / `Spec:` trailers. The exceptions are the spec review's and
+  the final review's `REVIEW HISTORY:` records: in local mode each becomes
+  an empty marker commit — its tree equals its parent's, your index
+  untouched — so the review still shows in history without its text.
 - Anything in between — a rule on one feature or its issues, a broad
   `.mysdd/` rule, a tracked file under an ignore rule — stops the skills
   until you resolve it. Setup reports each conflicting rule by file and
@@ -162,7 +162,7 @@ share:
 
 - **Tracker contract.** `to-spec`, `to-issues`, `implement` and `final-review`
   read the tracker whole and stop before writing unless it holds exactly one
-  `Tracker contract: 5` line; prompts 6 and 7 check the same line. Missing or
+  `Tracker contract: 6` line; prompts 3, 6 and 7 check the same line. Missing or
   lower: re-run setup. Higher: `npx skills update -p`. The tracker holds every
   format, subject, hard limit and done rule the steps share.
 - **Status.** `ready-for-agent` → `done-coding-awaiting-final-review` →
@@ -171,8 +171,8 @@ share:
 - **Committed or local.** The mode resolves before every write. With the
   single rule `.mysdd/features/`, specs and issues are written but never
   staged: the `SPEC:` commit carries only glossary and ADR changes (none, no
-  commit), there is no `Closed Issue:` commit, and step 6's record commit
-  becomes the empty marker. Any other ignore state stops the skill.
+  commit), there is no `Closed Issue:` commit, and steps 3 and 6's record
+  commits become the empty marker. Any other ignore state stops the skill.
 - **Review scope.** Step 6 reviews exactly the change: `codeCommit` plus every
   later commit whose `Issue:` trailer names the issue, minus bookkeeping
   commits. A loaded review skill gets those SHAs, never its default diff.
@@ -185,9 +185,9 @@ share:
 | Step | Run by | Skills (app) | Reads | Writes | Commits |
 |---|---|---|---|---|---|
 | **1 Grill** | coder, auto mode | `grill-with-docs` (required, editable in Settings); it loads `domain-modeling` | glossary, ADRs scoped to the touched paths | glossary terms and ADRs as they settle, one question round at a time | nothing — step 4 commits them |
-| **2 PRD Spec** | coder, **same session** as 1 | `to-spec` (warns if missing) | the grill conversation, tracker, ADRs | `.mysdd/features/<NN>-<slug>/spec.md`: `US-NNN` stories, test boundaries you confirmed, a redacted Decision log; its `kanban-brief:` line binds it to the Brief | nothing |
-| **3 Review PRD Spec** | reviewer, fresh session | `reviewer` (warns if missing), `to-spec` (required) | `spec.md`, following `to-spec` § Reviewing an existing spec | edits `spec.md` in place, asking you about every gap rather than assuming; never cuts User Stories or renumbers an ID; only appends to the Decision log | nothing — step 4's `SPEC:` commit carries it |
-| **4 Spec to Issues** | coder, fresh session | `to-issues` | spec, existing issues (reconciled by `slug`, never regenerated) | one issue JSON per vertical slice: `ready-for-agent`, `blockedBy`, `testBoundaries`, `covers`, commit fields `null`; after your approval, ADRs added for the spec's standing decisions and retired for dropped ones | `SPEC: <subject>`, no trailers — spec, issues, glossary, ADRs (local: glossary and ADRs only) |
+| **2 PRD Spec** | coder, **same session** as 1 | `to-spec` (warns if missing) | the grill conversation, tracker, ADRs | `.mysdd/features/<NN>-<slug>/spec.md`: `US-NNN` stories, test boundaries you confirmed, a redacted Decision log, ending with the empty `<spec-record>` block; its `kanban-brief:` line binds it to the Brief | nothing |
+| **3 Review PRD Spec** | reviewer, fresh session | `reviewer` (warns if missing), `to-spec` (required) | `spec.md`, following `to-spec`'s `REVIEW.md` | edits `spec.md` in place, asking you about every gap rather than assuming, open questions kept in the spec; never cuts User Stories or renumbers an ID; only appends to the Decision log. Once the spec passes: one attempt in its Spec Record, then its `commit` and `commits.spec-review`, left uncommitted | only once the spec passes: `REVIEW HISTORY: Record spec review attempt <N>` + `Spec:` — the spec alone (local: empty marker) |
+| **4 Spec to Issues** | coder, fresh session | `to-issues` | spec, existing issues (reconciled by `slug`, never regenerated) | one issue JSON per vertical slice: `ready-for-agent`, `blockedBy`, `testBoundaries`, `covers`, commit fields `null`; after your approval, ADRs added for the spec's standing decisions and retired for dropped ones | `SPEC: <subject>`, no trailers — spec (with step 3's SHA edit), issues, glossary, ADRs (local: glossary and ADRs only) |
 | **5 Implement** | coder, auto mode | `implement`, `tdd` | issue, its spec when `spec` isn't `null`, ADRs | code, its own two-axis review (`REVIEW.md`); then the issue: criteria ticked, `done-coding-awaiting-final-review`, `codeCommit`, an implementation record with `Deviations and tradeoffs:` | `CODE: <subject>` + `Issue:`/`Spec:` trailers — code, agreed ADRs and `AGENTS.md` convention lines; the issue file stays uncommitted |
 | **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, `Findings` numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing, never changes `status` | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file (local: empty marker) |
 | **7 Fix Findings** (phase 2) | coder, fresh session, plan mode | `final-review` (required), `tdd` | latest phase 1 record, implementation record, earlier phase 2 records answering it | FIX / REJECT / DEFER per finding → your approval → fixes, checks; phase 2 record (attempt, `Answers`, `Outcome`, `Verdicts`, `Checks`, `Fix commit`, `Attempt plans`, `ADRs superseded`); `reviewCodeCommit`; `done-final-review` only on COMPLETE | `CODE REVIEW FIXES: <subject>` + trailers if code changed; `ATTEMPT PLANS: final review <issue path> attempt <K>` for plans it created, every outcome; on COMPLETE, `Closed Issue: <issue path>` (issue + board file if changed; none in local mode) |
@@ -196,14 +196,27 @@ Step 7 always runs, even after a PASS with zero findings: the checks still
 have to pass, and only phase 2 closes an Issue. On the Agile board the card
 reaches Done once the file says `done-final-review` and steps 5–7 are marked.
 
+**The Spec Record.** A spec ends with one block like the Job Record below,
+with no id — the spec's path is its identity: a column-zero `<spec-record>`
+line, one fenced `json` block holding
+`{ "commits": { "spec-review": null }, "attempts": [] }`, and a column-zero
+`</spec-record>`. Step 2 writes it empty; a step 3 review adds it to a spec
+that predates it. Unlike steps 6, B and D, which record every verdict, step 3
+records nothing until the spec passes: then it appends one attempt
+(`attempt`, `agent`, `commit`, `summary`), commits the spec, and writes that
+commit's SHA into the attempt and `commits.spec-review`, uncommitted, for the
+spec's next commit to carry. The app reads only `commits` to select step 3's
+commit, and never writes the record. Literal examples are indented or
+`>`-quoted: column-zero tags anywhere make a second record.
+
 **Without prompt-kanban**, invoke the skills in the same order:
 `/modified-matt-grill-with-docs`, then `/modified-matt-to-spec` in that
 session, `/modified-matt-to-issues`, `/modified-matt-implement`, and
 `/modified-matt-final-review` — it infers the phase from the Issue and asks
 you to confirm; phase 2 runs in a fresh coder session. Step 3 is
-`to-spec` § Reviewing an existing spec: in a fresh session, ask
-`/modified-matt-to-spec` to review the spec at its path, and it interviews
-you and edits `spec.md` in place.
+`to-spec`'s `REVIEW.md`: in a fresh session, ask `/modified-matt-to-spec`
+to review the spec at its path, and it interviews you, edits `spec.md` in
+place and, once it passes, records and commits the review.
 
 ### Where Makerkit differs
 

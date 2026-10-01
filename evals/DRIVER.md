@@ -25,6 +25,12 @@ fails to import (another agent may be mid-edit in `src/`), wait a minute and ret
   `<fl>-tdd`; final-review → `<fl>-final-review`; review-fix → `<fl>-final-review`, `<fl>-tdd`;
   plan-generate → none; plan-review / code-review → `kanban-jobs`; code / code-fix → `kanban-jobs`, `<fl>-tdd`.
 - Setup has no app prompt: run it with the prompt `$<fl>-setup-skills` (answer its questions).
+- Scenarios 7+ (the Spec Record) skip it: create the repo with the scenario's `repo` line
+  (`--setup committed|local`), run its `seed` line if it has one, and pass `--spec <spec>` to `step`. A
+  scenario with `variants` runs each variant in its own repo and run dir, numbered in the order listed
+  (`run-1`, `run-2`, …, because `aggregate` reads the number), with the variant named in the step notes; `runs: 2`
+  means two independent repetitions, each from a fresh repo. Their checks are already `verify`
+  objects: substitute `<spec>`, `<head:LABEL>` and `<run>`, and write them to `checks-<label>.json`.
 - Steps 1 and 2 share one session: run 1 with `step`, then send step 2's rendered prompt with
   `answer … 1-grill @<prompt file>` — and record that in the step label notes.
 

@@ -3,11 +3,11 @@
 Read the section for each thing step 1 found. Show every change as a per-file delta and get the user's answer before
 writing: a local Feature file has no Git history, so there is no undo.
 
-## The tracker, to contract 5
+## The tracker, to contract 6
 
-Contract 5 readers read the tracker whole, so the new file is the seed with the project's own sections after it — not
+Contract 6 readers read the tracker whole, so the new file is the seed with the project's own sections after it — not
 the old file patched. This covers a tracker at any lower contract, and one with no `Tracker contract:` line at all,
-which predates contracts. A contract above 5 means this skill is older than the tracker: stop and have the user run
+which predates contracts. A contract above 6 means this skill is older than the tracker: stop and have the user run
 `npx skills update -p`.
 
 A section is the project's own, and kept in its original order, when the old `Every operation also reads:` line named
@@ -30,7 +30,7 @@ it, or its heading is neither in the seed nor one of these retired seed headings
 Every other section is replaced. When a replaced section holds text no seed had — the user's own edit — show it and
 ask whether to keep it as a section of its own, under a heading no seed uses, so the next upgrade keeps it too.
 
-Set `Tracker contract: 5` last, so an upgrade stopped halfway never claims a contract the file doesn't hold. Then the
+Set `Tracker contract: 6` last, so an upgrade stopped halfway never claims a contract the file doesn't hold. Then the
 file must hold exactly one `Tracker contract:` line, directly under the title, and keep its line endings. Report the
 contract before (or none) and after, and each section kept and dropped.
 

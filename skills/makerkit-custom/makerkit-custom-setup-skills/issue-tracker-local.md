@@ -1,6 +1,6 @@
 # Issue tracker: Local Files
 
-Tracker contract: 5
+Tracker contract: 6
 
 Read this file whole before any spec, issue or review work: the skills take their formats and commit rules from here.
 `/makerkit-custom-setup-skills` writes the contract line above; a skill expecting another number stops. Never edit it.
@@ -10,10 +10,10 @@ Read this file whole before any spec, issue or review work: the skills take thei
 - A Feature is `.mysdd/features/<NN>-<feature-slug>/`, `NN` the next two-digit number after the highest on disk (`01`
   when `.mysdd/features/` doesn't exist yet). A Feature-shaped directory directly under `.mysdd/` is the old layout:
   never read or move it; stop and ask the user to move it under `.mysdd/features/` and fix its issues' `spec` paths.
-- The spec is `<feature>/spec.md`. Each issue is one strict-JSON file, `<feature>/issues/<NN>-<slug>.json`, numbered on
-  from the highest in `issues/` and `issues/archive/`. Ids and filenames never change and are never reused:
-  `blockedBy` addresses issues by them. An id found only under `issues/archive/` is a Retired Issue and counts as
-  resolved.
+- The spec is `<feature>/spec.md`, ending with its Spec Record, which only to-spec writes. Each issue is one strict-JSON
+  file, `<feature>/issues/<NN>-<slug>.json`, numbered on from the highest in `issues/` and `issues/archive/`. Ids and
+  filenames never change and are never reused: `blockedBy` addresses issues by them. An id found only under
+  `issues/archive/` is a Retired Issue and counts as resolved.
 - "Publish to the issue tracker" means create that file; "fetch the relevant issue" means read and parse it.
 - Change an issue by parsing it and writing the whole object back, every field present: other programs parse it.
 - Feature directories get deleted; `.mysdd/docs/` stays, so nothing there names an issue, a `US-NNN`, a spec or a
@@ -158,6 +158,7 @@ Subjects you write are ≤72 characters. The fixed subjects that embed `<issue p
 
 | Operation | Subject | Body, trailers | Holds exactly | Local mode |
 |---|---|---|---|---|
+| spec review | `REVIEW HISTORY: Record spec review attempt <N>` | `Spec: <spec path>` | the spec | empty marker: its tree equals its parent's, the user's index untouched |
 | to-issues | `SPEC: <subject>` | optional why | spec, the issues it wrote, changed `.mysdd/docs/CONTEXT.md` and ADRs | glossary and ADRs only, else none |
 | implement | `CODE: <subject>` | optional why; `Issue: <issue path>` per issue; `Spec: <spec path>` unless `null` | the implementation, plus agreed ADRs and `AGENTS.md` convention lines | same |
 | phase 2 fixes | `CODE REVIEW FIXES: <subject>` | as `CODE:` | the approved fixes, agreed ADRs, check rewrites in the change's files | same |
@@ -181,12 +182,14 @@ them into separate `-m` paragraphs, and `Issue:` stopped being one).
 
 **Done rules**:
 
-- Every review commits its record (the marker in local mode), so `git log` alone shows it ran. The marker is never a
-  fallback for an unresolved mode or a failed commit.
+- Every review commits its record (the marker in local mode), so `git log` alone shows it ran; the spec review only
+  once the spec passes, keeping questions and answers in the spec until then, with no attempt or SHA. The marker is
+  never a fallback for an unresolved mode or a failed commit.
 - The recorded SHA is the commit this session made, never a later `HEAD`.
 - A commit holding a path that isn't yours is never recorded: report its SHA and the foreign paths, end the attempt
   INCOMPLETE or BLOCKED, and don't amend, reset or retry.
-- A commit can't hold its own SHA: write it to the issue afterwards, uncommitted; the issue's next commit carries it.
+- A commit can't hold its own SHA: write it to the issue or the Spec Record afterwards, uncommitted; that file's next
+  commit carries it.
 - A saved record or status doesn't prove its commit landed: a retry makes only the missing commit.
 
 **Pitfalls from real runs**:

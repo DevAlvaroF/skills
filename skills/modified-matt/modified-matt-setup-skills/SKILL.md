@@ -9,7 +9,7 @@ disable-model-invocation: true
 Scaffold what the engineering skills assume:
 
 - `.mysdd/issue-tracker.md`, from [issue-tracker-local.md](./issue-tracker-local.md): JSON issues under
-  `.mysdd/features/`, their formats and commit rules, at `Tracker contract: 5`.
+  `.mysdd/features/`, their formats and commit rules, at `Tracker contract: 6`.
 - `.mysdd/docs/agents/domain.md`, from [domain.md](./domain.md): where the glossary and the scoped ADRs live.
 - An `## Agent skills` block pointing at both.
 
@@ -23,7 +23,7 @@ Read what exists; don't assume: `CLAUDE.md` and `AGENTS.md` at the root and any 
 Feature directories directly under `.mysdd/`; monorepo signals (`pnpm-workspace.yaml`, a `workspaces` field, a
 populated `packages/*`); and what Git ignores and tracks under `.mysdd/`.
 
-If you found a tracker not at contract 5, existing issues or ADRs without frontmatter, read [UPGRADE.md](./UPGRADE.md)
+If you found a tracker not at contract 6, existing issues or ADRs without frontmatter, read [UPGRADE.md](./UPGRADE.md)
 now; a fresh repo never needs it.
 
 ## 2. Present and ask
@@ -67,7 +67,7 @@ Update an existing `## Agent skills` block in place, leaving the rest of the fil
 
 Write each generated file from its seed. An existing `domain.md` takes the seed's changes and keeps the user's own
 sections, named in the report; an existing tracker follows [UPGRADE.md](./UPGRADE.md). The tracker must end with
-exactly one `Tracker contract: 5` line, directly under the title: every reader stops on anything else.
+exactly one `Tracker contract: 6` line, directly under the title: every reader stops on anything else.
 
 ## 5. Done
 

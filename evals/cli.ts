@@ -8,6 +8,7 @@ import {
   blueprintsFor,
   isBlockingDiagnostic,
   renderStepPrompt,
+  specRecordTemplate,
   type WorkflowStepKey,
   type WorkflowStepNode,
 } from '@shared/domain'
@@ -17,9 +18,10 @@ import { runChecks, type Check } from './verify'
  * The skill-eval harness: disposable repos, the app's own Step prompts, one
  * Codex session per Step, and a verifier built on the app's parsers.
  *
- *   npm run skill-evals -- repo <dir> --flavour modified-matt|makerkit-custom --skills new|old [--clone <src>]
+ *   npm run skill-evals -- repo <dir> --flavour modified-matt|makerkit-custom --skills new|old [--clone <src>] [--setup committed|local]
+ *   npm run skill-evals -- seed-spec <repo> <spec path> --record none|empty|saved|committed|recorded|malformed|duplicate [--brief <id>] [--secret]
  *   npm run skill-evals -- prompt <step-key> --templates new|old --subject <subject.json>
- *   npm run skill-evals -- step <repo> <run-dir> <label> <prompt-file> [--no-sentinel] [--plan <path>]
+ *   npm run skill-evals -- step <repo> <run-dir> <label> <prompt-file> [--no-sentinel] [--plan <path>] [--spec <path>]
  *   npm run skill-evals -- answer <repo> <run-dir> <label> <text-or-@file>
  *   npm run skill-evals -- verify <repo> <run-dir> <checks.json>
  *   npm run skill-evals -- snapshot <repo> <run-dir> [<extra path>…]
@@ -91,9 +93,90 @@ function makeRepo(args: string[]): void {
       }
     }
   }
+  const setup = flag(args, 'setup')
+  if (setup !== undefined) writeSetup(dir, join(source, flavour, `${flavour}-setup-skills`), setup)
   git(dir, ['add', '-A'])
   git(dir, ['commit', '-q', '-m', clone ? 'Install the skills under test' : 'Initial commit'])
   process.stdout.write(`${dir} ${git(dir, ['rev-parse', 'HEAD']).trim()}\n`)
+}
+
+/**
+ * What the setup skill writes in a fresh repo, without a Codex session: its two seeds verbatim, from the skills
+ * under test so the tracker's contract matches its readers, and for `local` the one ignore rule that makes Feature
+ * files local. For scenarios that start past setup; setup itself stays a scenario step where it is under test.
+ */
+function writeSetup(dir: string, setupSkill: string, mode: string): void {
+  if (mode !== 'committed' && mode !== 'local') die('--setup committed|local')
+  mkdirSync(join(dir, '.mysdd/docs/agents'), { recursive: true })
+  cpSync(join(setupSkill, 'issue-tracker-local.md'), join(dir, '.mysdd/issue-tracker.md'))
+  cpSync(join(setupSkill, 'domain.md'), join(dir, '.mysdd/docs/agents/domain.md'))
+  if (mode === 'local') appendFileSync(join(dir, '.gitignore'), '.mysdd/features/\n')
+}
+
+/* ---------- seed-spec ---------- */
+
+const FIXTURE_SPEC = join(ROOT, 'vendor/skills/evals/fixtures/specs/slugify.md')
+const SECRET_LINE = '\nThe staging deploy key is AKIAIOSFODNN7EXAMPLE; keep it handy for the demo.\n'
+
+/** The empty record with `attempts` and `commits` replaced: the block a review leaves, built on the app's template. */
+function recordBlock(attempts: unknown[], sha: string | null): string {
+  const record = { commits: { 'spec-review': sha }, attempts }
+  return specRecordTemplate().replace(/```json\n[\s\S]*?\n```/, () => `\`\`\`json\n${JSON.stringify(record, null, 2)}\n\`\`\``)
+}
+
+const savedAttempt = (commit: string | null) => ({
+  attempt: 1, agent: 'Codex', commit,
+  summary: 'Reviewed the spec with the user; it passes the publish checks. No open questions.',
+})
+
+/**
+ * A spec in the state a scenario starts from, at `<repo>/<spec path>`, built from the fixture spec:
+ *
+ * - `none`: as a contract-5 Step 2 left it, with no record — a legacy spec.
+ * - `empty`: as Step 2 leaves it now, ending with `specRecordTemplate()`.
+ * - `saved`: a passing review saved attempt 1, `commit: null`, and was interrupted before committing.
+ * - `committed`: …and committed it (`REVIEW HISTORY: Record spec review attempt 1`, `Spec:` trailer), but was
+ *   interrupted before writing the SHA. The commit is made here, so it is `HEAD` before the step.
+ * - `recorded`: …and wrote that SHA into the attempt and `commits`, uncommitted: a finished first review.
+ * - `malformed`: the record's JSON does not parse. `duplicate`: a second, column-zero record precedes the real one.
+ *
+ * Every state but `committed`/`recorded` leaves the spec untracked, as Step 2 does. `--secret` then appends a
+ * secret-shaped line to Further Notes, uncommitted, for the publication check.
+ */
+function seedSpec(args: string[]): void {
+  const [repoArg, specPath] = args
+  if (!repoArg || !specPath) die('seed-spec <repo> <spec path> --record <state>')
+  const repo = resolve(repoArg)
+  const state = flag(args, 'record') ?? die('--record none|empty|saved|committed|recorded|malformed|duplicate')
+  const brief = flag(args, 'brief')
+  let spec = readFileSync(FIXTURE_SPEC, 'utf8')
+  if (brief) spec = spec.replace(/^(# .*\n)/, `$1\nkanban-brief: ${brief}\n`)
+  const withRecord = (block: string) => `${spec.trimEnd()}\n\n${block}\n`
+  const full = join(repo, specPath)
+  mkdirSync(dirname(full), { recursive: true })
+
+  switch (state) {
+    case 'none': writeFileSync(full, spec); break
+    case 'empty': writeFileSync(full, withRecord(specRecordTemplate())); break
+    case 'saved': writeFileSync(full, withRecord(recordBlock([savedAttempt(null)], null))); break
+    case 'committed':
+    case 'recorded': {
+      writeFileSync(full, withRecord(recordBlock([savedAttempt(null)], null)))
+      git(repo, ['add', '--', specPath])
+      git(repo, ['commit', '-q', '-m', 'REVIEW HISTORY: Record spec review attempt 1', '-m', `Spec: ${specPath}`, '--', specPath])
+      const sha = git(repo, ['rev-parse', 'HEAD']).trim()
+      if (state === 'recorded') writeFileSync(full, withRecord(recordBlock([savedAttempt(sha)], sha)))
+      break
+    }
+    case 'malformed': writeFileSync(full, withRecord(specRecordTemplate().replace('"attempts": []', '"attempts": [,]'))); break
+    case 'duplicate': writeFileSync(full, withRecord(`${specRecordTemplate()}\n\n${specRecordTemplate()}`)); break
+    default: die(`unknown --record ${state}`)
+  }
+  if (args.includes('--secret')) {
+    const text = readFileSync(full, 'utf8')
+    writeFileSync(full, text.replace('Not decided yet.\n', `Not decided yet.\n${SECRET_LINE}`))
+  }
+  process.stdout.write(`${full} ${git(repo, ['rev-parse', 'HEAD']).trim()}\n`)
 }
 
 /* ---------- prompt ---------- */
@@ -231,6 +314,9 @@ function runStep(args: string[]): void {
   // `before`, against which attempts may only grow.
   const plan = flag(args, 'plan')
   if (plan && existsSync(join(repo, plan))) cpSync(join(repo, plan), join(resolve(runDir), 'steps', `${label}.plan-before`))
+  // The same for a Feature's spec: the `spec` check's `before`.
+  const spec = flag(args, 'spec')
+  if (spec && existsSync(join(repo, spec))) cpSync(join(repo, spec), join(resolve(runDir), 'steps', `${label}.spec-before`))
   runCodex(repo, dir, label, ['exec', '-C', repo, '-s', 'danger-full-access', '--json', '-o', join(dir, 'last.txt')],
     readFileSync(promptFile, 'utf8'), 1)
   rollUp(resolve(runDir))
@@ -317,11 +403,12 @@ function aggregate(args: string[]): void {
 const [command, ...rest] = process.argv.slice(2)
 switch (command) {
   case 'repo': makeRepo(rest); break
+  case 'seed-spec': seedSpec(rest); break
   case 'prompt': renderPrompt(rest); break
   case 'step': runStep(rest); break
   case 'answer': answer(rest); break
   case 'verify': verify(rest); break
   case 'snapshot': snapshot(rest); break
   case 'aggregate': aggregate(rest); break
-  default: die('commands: repo | prompt | step | answer | verify | snapshot | aggregate')
+  default: die('commands: repo | seed-spec | prompt | step | answer | verify | snapshot | aggregate')
 }

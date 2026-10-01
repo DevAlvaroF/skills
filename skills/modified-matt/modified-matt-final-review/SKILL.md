@@ -12,7 +12,7 @@ grades fixes to its own findings and the coder works from the record, not memory
 - **Phase 2**: you are the coder. Triage each finding with the user, apply only approved fixes, run the checks, record
   the outcome and close on COMPLETE. It runs even after a clean PASS: only it closes, and the checks must still pass.
 
-Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 5` line: with none (or no file) or a
+Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 6` line: with none (or no file) or a
 lower number, stop and tell the user to re-run `/modified-matt-setup-skills`; with a higher one, stop and tell them to
 run `npx skills update -p`. Its § Comment records and § Commits define every record, subject and done rule used here,
 and § Committed or local must resolve before you write. Read the glossary and binding ADRs for the touched paths, per

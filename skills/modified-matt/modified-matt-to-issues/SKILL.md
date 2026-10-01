@@ -14,7 +14,7 @@ Break a plan, spec, or conversation into **issues**: tracer-bullet vertical slic
 ### 1. Gather context
 
 Work from the conversation; if the user passes a spec or issue path, read the whole file. Read
-`.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 5` line: with none (or no file) or a lower
+`.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 6` line: with none (or no file) or a lower
 number, stop and tell the user to re-run `/modified-matt-setup-skills`; with a higher one, stop and tell them to run
 `npx skills update -p`. Its § Layout, § Committed or local, § Issue shape and § Commits are the formats and rules this
 skill writes by.
@@ -70,8 +70,8 @@ Each issue follows § Issue shape exactly, as strict JSON with every field prese
 `done: false`, `comments: []` and the three commit fields `null`. `spec` is the Feature's `spec.md` path when this run
 started from a spec, else `null`. An `AGENTS.md` line the spec agreed rides on the first issue, in dependency order,
 whose slice touches its area, as an acceptance criterion naming that `AGENTS.md` and the line verbatim, so
-`/modified-matt-implement` commits it with the code. Never edit `spec.md`, and keep paths and snippets out, as in the
-spec.
+`/modified-matt-implement` commits it with the code. Never edit `spec.md`, its Spec Record included: the `SPEC:` commit
+carries it as the review left it. Keep paths and snippets out, as in the spec.
 
 #### Reconciling with existing issues
 

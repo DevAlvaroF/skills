@@ -14,7 +14,7 @@ sessions, so whoever judges the code never fixes it in the same breath:
   only it closes, and the checks must still pass.
 
 Read `.mysdd/issue-tracker.md` whole before writing anything: its issue shape, comment records and commit rules are
-the ones both phases write to. It must hold exactly one `Tracker contract: 5` line; missing, lower or none → stop and
+the ones both phases write to. It must hold exactly one `Tracker contract: 6` line; missing, lower or none → stop and
 tell the user to re-run `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
 ## Ground yourself first

@@ -16,7 +16,7 @@ Break a plan, spec, or conversation into **issues**: tracer-bullet vertical slic
 Work from what is already in the conversation. If the user passes a spec or issue path, read the whole file.
 
 Read `.mysdd/issue-tracker.md` whole before writing anything: its layout, issue shape and commit rules are the ones
-this skill writes to. It must hold exactly one `Tracker contract: 5` line; missing, lower or none → stop and tell the
+this skill writes to. It must hold exactly one `Tracker contract: 6` line; missing, lower or none → stop and tell the
 user to re-run `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
 ### 2. Ground yourself first
@@ -79,7 +79,8 @@ run started from one, else `null`; `testBoundaries` and `covers` are what step 4
 line or routing row the spec agreed rides on the first issue, in dependency order, that touches its area, as an
 acceptance criterion naming that `AGENTS.md` and the line verbatim, so `/makerkit-custom-implement` commits it with the
 code. No file paths or code snippets, beyond a trimmed prototype snippet that encodes a decision prose can't. Never
-modify `spec.md`: it is the user's reviewed record.
+modify `spec.md`, its Spec Record included: it is the user's reviewed record, and the `SPEC:` commit carries it as the
+review left it.
 
 #### Reconciling with existing issues
 

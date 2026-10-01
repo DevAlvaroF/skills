@@ -9,7 +9,7 @@ disable-model-invocation: true
 Scaffold what the engineering skills assume:
 
 - `.mysdd/issue-tracker.md`, from [issue-tracker-local.md](./issue-tracker-local.md): JSON issues under
-  `.mysdd/features/`, their formats and commit rules, at `Tracker contract: 5`.
+  `.mysdd/features/`, their formats and commit rules, at `Tracker contract: 6`.
 - `.mysdd/docs/agents/domain.md`, from [domain.md](./domain.md): how to ground yourself in the repo's `AGENTS.md`
   files, READMEs and Makerkit docs, and where the glossary (`.mysdd/docs/CONTEXT.md`) and scoped ADRs live.
 - An `## Agent skills` block in the root instruction file pointing at both.
@@ -27,7 +27,7 @@ convention sources such as `.cursor/rules`; `.mysdd/issue-tracker.md` and its `T
 `.mysdd/docs/agents/domain.md`; Features and issues under `.mysdd/features/`; old-layout Feature directories directly
 under `.mysdd/`; and what Git ignores and tracks under `.mysdd/`.
 
-If you found a tracker not at contract 5, existing issues, or an `AGENTS.md` with a `## Vocabulary` or `## Decisions`
+If you found a tracker not at contract 6, existing issues, or an `AGENTS.md` with a `## Vocabulary` or `## Decisions`
 section, read [UPGRADE.md](./UPGRADE.md) now; a fresh repo never needs it.
 
 ## 2. Present and ask
@@ -82,7 +82,7 @@ root is already loaded; read the rest directly, because not every agent loads ne
 
 Write each generated file from its seed. An existing `domain.md` takes the seed's changes and keeps the user's own
 sections, named in the report; an existing tracker follows [UPGRADE.md](./UPGRADE.md). The tracker must end with
-exactly one `Tracker contract: 5` line, directly under the title: every reader stops on anything else. Beyond the
+exactly one `Tracker contract: 6` line, directly under the title: every reader stops on anything else. Beyond the
 block, a root file seeded on request and the UPGRADE.md moves, leave every `AGENTS.md` alone.
 
 ## 5. Done

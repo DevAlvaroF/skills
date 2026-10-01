@@ -8,7 +8,7 @@ Implement the issues the user names, working from each issue and the spec it cam
 
 ## Before you start
 
-- Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 5` line: with none (or no file) or
+- Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 6` line: with none (or no file) or
   a lower number, stop and tell the user to re-run `/modified-matt-setup-skills`; with a higher one, stop and tell them
   to run `npx skills update -p`. Its § Issue shape, § Comment records and § Commits are the formats and rules this
   skill writes by, and § Committed or local must resolve before you write: unresolved, stop and list the paths.

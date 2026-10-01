@@ -1,5 +1,5 @@
 {
-  "about": "Scenarios for `npm run skill-evals`. A driver (a person or an agent) runs each one in /tmp/pk-e2e/<id>, one fresh Codex session per Step, answering questions from `answers`, and turns `checks` into verify calls after the Step named. `<head:X>` is the HEAD recorded before Step X (steps/X.head). Assertions the Skills guarantee regardless of the app are the ones that matter; wording is never graded.",
+  "about": "Scenarios for `npm run skill-evals`. A driver (a person or an agent) runs each one in /tmp/pk-e2e/<id>, one fresh Codex session per Step, answering questions from `answers`, and turns `checks` into verify calls after the Step named. `<head:X>` is the HEAD recorded before Step X (steps/X.head). Assertions the Skills guarantee regardless of the app are the ones that matter; wording is never graded. Scenarios 7+ (the Spec Record, tracker contract 6) give their checks as verify objects: substitute <spec> (the spec path; scenarios that seed it use .mysdd/features/01-slugify/spec.md, steps 1-4 use the one step 2 wrote), <head:LABEL> and <run> (the run dir). `configurations` names which of new/old to run, `runs` how many independent repetitions, each in a fresh repo.",
   "every_step": [
     "commits: every new commit descends from <head:step>, subject <= 72 chars, no attribution, SENTINEL.txt in none",
     "sentinel: SENTINEL.txt still staged",
@@ -197,6 +197,401 @@
         "kanban-jobs asks for the Job ID or plan it is missing rather than guessing",
         "final-review infers phase 1 and records it as in mm-agile step 6"
       ]
+    },
+    {
+      "id": "mm-spec",
+      "eval_id": 7,
+      "flavour": "modified-matt",
+      "configurations": ["new", "old"],
+      "runs": 2,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "why": "Steps 2-4 against the old skills and prompts: step 2 seeds an empty record, a passing step 3 makes exactly one review commit holding the spec with its trailer and records its full SHA uncommitted, step 4's SPEC: commit carries that edit without rewriting history.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Slugify",
+        "description": "Add slugify(text) to src/text.js: lower-case, ASCII letters and digits kept, runs of anything else become one hyphen, no leading or trailing hyphen. Export it and test it."
+      },
+      "steps": [
+        {
+          "label": "1-grill",
+          "step": "grill",
+          "answers": "Answer from the brief; keep it to one function; no Unicode transliteration; empty string returns empty string; no length cap.",
+          "verify": [
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:1-grill>"},
+            {"kind": "commits", "since": "<head:1-grill>", "count": 0}
+          ]
+        },
+        {
+          "label": "2-spec",
+          "step": "spec-generate",
+          "resume": "1-grill",
+          "verify": [
+            {"kind": "commits", "since": "<head:1-grill>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "spec", "path": "<spec>", "attempts": 0, "recorded": false, "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$"]},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]}
+          ]
+        },
+        {
+          "label": "3-spec-review",
+          "step": "spec-review",
+          "flags": "--spec <spec>",
+          "answers": "Accept your recommendations; no length cap; the test boundaries are right.",
+          "verify": [
+            {"kind": "commits", "since": "<head:3-spec-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record spec review attempt 1$"], "trailers": [["Spec: <spec>"]], "paths": [["<spec>"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:3-spec-review>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "before": "<run>/steps/3-spec-review.spec-before", "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$"], "worktree": "dirty", "committedAttempt": true},
+            {"kind": "recorded-subject", "specPath": "<spec>", "subject": "^REVIEW HISTORY: Record spec review attempt 1$"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]},
+            {"kind": "history", "since": "<head:3-spec-review>", "absent": "AKIA[0-9A-Z]{16}"}
+          ]
+        },
+        {
+          "label": "4-to-issues",
+          "step": "spec-to-issues",
+          "answers": "Approve the breakdown and the ADR changes.",
+          "flags": "--spec <spec>",
+          "verify": [
+            {"kind": "commits", "since": "<head:4-to-issues>", "count": 1, "subjects": ["^SPEC: "]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:4-to-issues>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "sha": "<the SHA step 3 recorded>", "before": "<run>/steps/4-to-issues.spec-before", "worktree": "clean"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]}
+          ],
+          "checks": [
+            "the SPEC: commit holds the spec and every issue file it wrote (fill `paths`)",
+            "every issues/*.json parses with IssueFileSchema, status ready-for-agent"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mk-spec",
+      "eval_id": 8,
+      "flavour": "makerkit-custom",
+      "configurations": ["new", "old"],
+      "runs": 2,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour makerkit-custom --skills <new|old> --setup committed",
+      "why": "Steps 2-4 against the old skills and prompts: step 2 seeds an empty record, a passing step 3 makes exactly one review commit holding the spec with its trailer and records its full SHA uncommitted, step 4's SPEC: commit carries that edit without rewriting history.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Slugify",
+        "description": "Add slugify(text) to src/text.js: lower-case, ASCII letters and digits kept, runs of anything else become one hyphen, no leading or trailing hyphen. Export it and test it."
+      },
+      "steps": [
+        {
+          "label": "1-grill",
+          "step": "grill",
+          "answers": "Answer from the brief; keep it to one function; no Unicode transliteration; empty string returns empty string; no length cap.",
+          "verify": [
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:1-grill>"},
+            {"kind": "commits", "since": "<head:1-grill>", "count": 0}
+          ]
+        },
+        {
+          "label": "2-spec",
+          "step": "spec-generate",
+          "resume": "1-grill",
+          "verify": [
+            {"kind": "commits", "since": "<head:1-grill>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "spec", "path": "<spec>", "attempts": 0, "recorded": false, "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$"]},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]}
+          ]
+        },
+        {
+          "label": "3-spec-review",
+          "step": "spec-review",
+          "flags": "--spec <spec>",
+          "answers": "Accept your recommendations; no length cap; the test boundaries are right.",
+          "verify": [
+            {"kind": "commits", "since": "<head:3-spec-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record spec review attempt 1$"], "trailers": [["Spec: <spec>"]], "paths": [["<spec>"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:3-spec-review>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "before": "<run>/steps/3-spec-review.spec-before", "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$"], "worktree": "dirty", "committedAttempt": true},
+            {"kind": "recorded-subject", "specPath": "<spec>", "subject": "^REVIEW HISTORY: Record spec review attempt 1$"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]},
+            {"kind": "history", "since": "<head:3-spec-review>", "absent": "AKIA[0-9A-Z]{16}"}
+          ]
+        },
+        {
+          "label": "4-to-issues",
+          "step": "spec-to-issues",
+          "answers": "Approve the breakdown and the ADR changes.",
+          "flags": "--spec <spec>",
+          "verify": [
+            {"kind": "commits", "since": "<head:4-to-issues>", "count": 1, "subjects": ["^SPEC: "]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:4-to-issues>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "sha": "<the SHA step 3 recorded>", "before": "<run>/steps/4-to-issues.spec-before", "worktree": "clean"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]}
+          ],
+          "checks": [
+            "the SPEC: commit holds the spec and every issue file it wrote (fill `paths`)",
+            "every issues/*.json parses with IssueFileSchema, status ready-for-agent"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-spec-local",
+      "eval_id": 9,
+      "flavour": "modified-matt",
+      "configurations": ["new", "old"],
+      "runs": 2,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup local",
+      "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record empty --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "Local mode: step 3 publishes a parent-tree marker with the index untouched and records the marker's SHA; no commit holds a Feature file.",
+      "steps": [
+        {
+          "label": "3-spec-review",
+          "step": "spec-review",
+          "flags": "--spec <spec>",
+          "answers": "No length cap: a slug can be any length. Accept your other recommendations; the test boundaries are right.",
+          "verify": [
+            {"kind": "commits", "since": "<head:3-spec-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record spec review attempt 1$"], "trailers": [["Spec: <spec>"]], "paths": [[]], "allowEmpty": [true]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:3-spec-review>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "before": "<run>/steps/3-spec-review.spec-before", "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$"]},
+            {"kind": "recorded-subject", "specPath": "<spec>", "subject": "^REVIEW HISTORY: Record spec review attempt 1$"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]},
+            {"kind": "history", "since": "<head:3-spec-review>", "absent": "AKIA[0-9A-Z]{16}"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-spec-legacy",
+      "eval_id": 10,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record none --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "A spec written before the record: step 3 adds the empty block at its end, then records attempt 1 as usual.",
+      "steps": [
+        {
+          "label": "3-spec-review",
+          "step": "spec-review",
+          "flags": "--spec <spec>",
+          "answers": "No length cap: a slug can be any length. Accept your other recommendations; the test boundaries are right.",
+          "verify": [
+            {"kind": "commits", "since": "<head:3-spec-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record spec review attempt 1$"], "trailers": [["Spec: <spec>"]], "paths": [["<spec>"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:3-spec-review>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "before": "<run>/steps/3-spec-review.spec-before", "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$"], "worktree": "dirty", "committedAttempt": true},
+            {"kind": "recorded-subject", "specPath": "<spec>", "subject": "^REVIEW HISTORY: Record spec review attempt 1$"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]},
+            {"kind": "history", "since": "<head:3-spec-review>", "absent": "AKIA[0-9A-Z]{16}"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-spec-rereview",
+      "eval_id": 11,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record recorded --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "A second review of the same spec after a finished first one (seeded: attempt 1 committed as <head:3-spec-review>, its SHA written, uncommitted): attempt 1 survives unchanged, attempt 2 gets its own commit, which also carries attempt 1's SHA edit.",
+      "steps": [
+        {
+          "label": "3-spec-review",
+          "step": "spec-review",
+          "flags": "--spec <spec>",
+          "answers": "No length cap: a slug can be any length. Accept your other recommendations; the test boundaries are right.",
+          "verify": [
+            {"kind": "commits", "since": "<head:3-spec-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record spec review attempt 2$"], "trailers": [["Spec: <spec>"]], "paths": [["<spec>"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:3-spec-review>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 2, "recorded": true, "before": "<run>/steps/3-spec-review.spec-before", "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$", "\"commit\": \"<head:3-spec-review>\""], "worktree": "dirty", "committedAttempt": true},
+            {"kind": "recorded-subject", "specPath": "<spec>", "subject": "^REVIEW HISTORY: Record spec review attempt 2$"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]},
+            {"kind": "history", "since": "<head:3-spec-review>", "absent": "AKIA[0-9A-Z]{16}"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-spec-resume",
+      "eval_id": 12,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "why": "Interrupted persistence: a rerun reuses the saved attempt's number and any commit that provably holds it, making only what is missing.",
+      "variants": [
+        {
+          "variant": "saved",
+          "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record saved --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+          "steps": [
+            {
+              "label": "3-spec-review",
+              "step": "spec-review",
+              "flags": "--spec <spec>",
+              "answers": "No length cap: a slug can be any length. Accept your other recommendations; the test boundaries are right.",
+              "verify": [
+                {"kind": "commits", "since": "<head:3-spec-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record spec review attempt 1$"], "trailers": [["Spec: <spec>"]], "paths": [["<spec>"]]},
+                {"kind": "sentinel"},
+                {"kind": "reflog", "since": "<head:3-spec-review>"},
+                {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "before": "<run>/steps/3-spec-review.spec-before", "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$"], "worktree": "dirty", "committedAttempt": true},
+                {"kind": "recorded-subject", "specPath": "<spec>", "subject": "^REVIEW HISTORY: Record spec review attempt 1$"},
+                {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+                {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]},
+                {"kind": "history", "since": "<head:3-spec-review>", "absent": "AKIA[0-9A-Z]{16}"}
+              ]
+            }
+          ]
+        },
+        {
+          "variant": "committed",
+          "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record committed --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+          "steps": [
+            {
+              "label": "3-spec-review",
+              "step": "spec-review",
+              "flags": "--spec <spec>",
+              "answers": "No length cap: a slug can be any length. Accept your other recommendations; the test boundaries are right.",
+              "verify": [
+                {"kind": "commits", "since": "<head:3-spec-review>", "count": 0},
+                {"kind": "sentinel"},
+                {"kind": "reflog", "since": "<head:3-spec-review>"},
+                {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "sha": "<head:3-spec-review>", "before": "<run>/steps/3-spec-review.spec-before", "worktree": "dirty", "committedAttempt": true},
+                {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+                {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-spec-open",
+      "eval_id": 13,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record empty --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "A question left open: the review stays unfinished — no attempt, no commit, the question still in the spec above the record.",
+      "steps": [
+        {
+          "label": "3-spec-review",
+          "step": "spec-review",
+          "flags": "--spec <spec>",
+          "answers": "I don't know yet; leave that question open, I'll decide later. Accept your other recommendations; the test boundaries are right.",
+          "verify": [
+            {"kind": "commits", "since": "<head:3-spec-review>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:3-spec-review>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 0, "recorded": false, "before": "<run>/steps/3-spec-review.spec-before", "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$", "[Ll]ength[\\s\\S]*^<spec-record>$"]},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-spec-broken",
+      "eval_id": 14,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "why": "A record the app cannot read stops the review before it writes anything: the file stays byte for byte, so earlier history is never replaced.",
+      "variants": [
+        {
+          "variant": "malformed",
+          "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record malformed --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+          "steps": [
+            {
+              "label": "3-spec-review",
+              "step": "spec-review",
+              "flags": "--spec <spec>",
+              "answers": "No length cap: a slug can be any length. Accept your other recommendations; the test boundaries are right.",
+              "verify": [
+                {"kind": "commits", "since": "<head:3-spec-review>", "count": 0},
+                {"kind": "sentinel"},
+                {"kind": "reflog", "since": "<head:3-spec-review>"},
+                {"kind": "spec", "path": "<spec>", "state": "unusable", "before": "<run>/steps/3-spec-review.spec-before", "unchanged": true}
+              ],
+              "checks": [
+                "the agent's reply names the broken record and stops rather than repairing it"
+              ]
+            }
+          ]
+        },
+        {
+          "variant": "duplicate",
+          "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record duplicate --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+          "steps": [
+            {
+              "label": "3-spec-review",
+              "step": "spec-review",
+              "flags": "--spec <spec>",
+              "answers": "No length cap: a slug can be any length. Accept your other recommendations; the test boundaries are right.",
+              "verify": [
+                {"kind": "commits", "since": "<head:3-spec-review>", "count": 0},
+                {"kind": "sentinel"},
+                {"kind": "reflog", "since": "<head:3-spec-review>"},
+                {"kind": "spec", "path": "<spec>", "state": "unusable", "before": "<run>/steps/3-spec-review.spec-before", "unchanged": true}
+              ],
+              "checks": [
+                "the agent's reply names the broken record and stops rather than repairing it"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-spec-secret",
+      "eval_id": 15,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record recorded --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b --secret",
+      "why": "The publication check precedes every step 3 commit, re-reviews included: a secret-shaped line added since the first review never reaches history.",
+      "steps": [
+        {
+          "label": "3-spec-review",
+          "step": "spec-review",
+          "flags": "--spec <spec>",
+          "answers": "Don't publish that key; I'll rotate it myself. No length cap: a slug can be any length. Accept your other recommendations; the test boundaries are right.",
+          "verify": [
+            {"kind": "commits", "since": "<head:3-spec-review>"},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:3-spec-review>"},
+            {"kind": "history", "since": "<head:3-spec-review>", "absent": "AKIA[0-9A-Z]{16}"},
+            {"kind": "spec", "path": "<spec>", "before": "<run>/steps/3-spec-review.spec-before"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]}
+          ],
+          "checks": [
+            "the agent names the secret-shaped line and where it is before any commit"
+          ]
+        }
+      ]
     }
+  ],
+  "every_spec_step": [
+    "spec (3): the spec's <spec-record> block parses with SpecRecordSchema (readSpecRecord) and keeps skill-check's promises: attempts numbered 1..N, each holding its commit, commits.spec-review the latest, nothing after </spec-record>",
+    "spec (3): every SHA the record holds is 40 lowercase hex and a commit",
+    "spec (3): attempts only grow against `before` = steps/<label>.spec-before, which `step --spec <spec>` writes; an earlier attempt may change only by gaining its commit"
   ]
 }

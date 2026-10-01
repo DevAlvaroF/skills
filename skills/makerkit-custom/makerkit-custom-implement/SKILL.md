@@ -7,7 +7,7 @@ disable-model-invocation: true
 Implement the issues the user names, working from each issue and the spec it came from.
 
 Read `.mysdd/issue-tracker.md` whole before writing anything: its issue shape, comment records and commit rules are
-the ones this skill writes to. It must hold exactly one `Tracker contract: 5` line; missing, lower or none → stop and
+the ones this skill writes to. It must hold exactly one `Tracker contract: 6` line; missing, lower or none → stop and
 tell the user to re-run `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
 Read each issue and work from its `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. An issue whose

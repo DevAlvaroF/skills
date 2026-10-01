@@ -12,16 +12,18 @@ depends on them:
 
 1. **Formats something else parses.** prompt-kanban reads the Issue JSON
    fields, the three statuses, `comments[{author, body}]`, the
-   `kanban-brief:` marker, `issues/archive/`, and the plan's
-   `<job-record id="<jobId>">` block and its `commits`. Other skills read the
-   comment-record labels, the kanban-jobs attempt objects, commit subjects, the
+   `kanban-brief:` marker, `issues/archive/`, the plan's
+   `<job-record id="<jobId>">` block and the spec's `<spec-record>` block, and
+   their `commits`. Other skills read the comment-record labels, the
+   kanban-jobs and Spec Record attempt objects, commit subjects, the
    `Issue:`/`Spec:` trailers (final review finds the change by its `Issue:`
    trailer) and the ADR frontmatter. Change one and something downstream
    silently stops finding it.
 2. **What counts as done.** Who sets each status; only a COMPLETE phase 2 sets
-   `done-final-review`; every review commits its record; a recorded SHA is the
-   commit this session made. The board's columns are derived from these, so a
-   vague done rule is a card in the wrong column.
+   `done-final-review`; every review commits its record — 6, B and D whatever
+   the verdict, the spec review (step 3) only once the spec passes; a recorded
+   SHA is the commit this session made. The board's columns are derived from
+   these, so a vague done rule is a card in the wrong column.
 3. **Hard limits.** Current branch only; only your own paths, the user's staged
    work stays staged and out; never amend, rebase, reset, push, force-add or
    untrack; no empty commit except the local-mode review marker; no attribution
@@ -49,9 +51,10 @@ adversarial review imagining a failure is not an incident.
 
 `SKILL.md` holds the workflow every run needs. What only some runs need goes in
 a reference file one level deep, with a line saying when to read it (setup's
-`UPGRADE.md`, final-review's `PHASE-1.md`/`PHASE-2.md`, kanban-jobs'
-`STEP-A…E.md`). Formats go by example — the JSON issue, the Job Record block and its
-attempt objects, the comment-record examples — because an example is the cheapest exact definition.
+`UPGRADE.md`, final-review's `PHASE-1.md`/`PHASE-2.md`, to-spec's `REVIEW.md`,
+kanban-jobs' `STEP-A…E.md`). Formats go by example — the JSON issue, the Job
+Record and Spec Record blocks and their attempt objects, the comment-record
+examples — because an example is the cheapest exact definition.
 
 ## Self-contained skills
 
@@ -74,6 +77,7 @@ size budget, and reports the pass rate and the token delta. A change that costs
 tokens needs a result that pays for them. `evals/README.md` holds the loop and the
 last baseline.
 
-After touching `kanban-jobs`, or to check a plan an agent wrote, run
-`npm run -s skill-check [plan.md…]` from the prompt-kanban checkout. It lives in
-`evals/`, never under `skills/`, so it is not installed with the skills.
+After touching `kanban-jobs` or `to-spec`, or to check a plan or a spec an
+agent wrote, run `npm run -s skill-check [plan.md… spec.md…]` from the
+prompt-kanban checkout. It lives in `evals/`, never under `skills/`, so it is
+not installed with the skills.

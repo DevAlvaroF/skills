@@ -6,12 +6,12 @@ disable-model-invocation: true
 
 Turn the current conversation and your understanding of the codebase into a spec. For a new spec, don't interview the
 user: synthesise what was already decided. If the design conversation isn't in this session, say so and ask where it
-is rather than inventing a decision log. A spec that already exists is reviewed instead: see § Reviewing an existing
-spec.
+is rather than inventing a decision log. A spec that already exists is reviewed instead: read [REVIEW.md](./REVIEW.md)
+too, before writing anything.
 
 ## Process
 
-1. Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 5` line: with none (or no file)
+1. Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 6` line: with none (or no file)
    or a lower number, stop and tell the user to re-run `/modified-matt-setup-skills`; with a higher one, stop and tell
    them to run `npx skills update -p`. Its § Layout and § Committed or local decide where the spec goes and whether it
    may be written at all.
@@ -21,8 +21,9 @@ spec.
 3. Sketch the boundaries you'll test at. Prefer existing ones, and the highest one possible; the fewer across the
    codebase the better, ideally one. Check with the user that they match their expectations.
 4. Write the spec from the template below as `spec.md` in a new Feature directory, named and numbered per § Layout.
-   If § Committed or local leaves the mode unresolved, write nothing and say why. A spec carries no status and this
-   skill makes no commit: `/modified-matt-to-issues` cuts it into issues, and its `SPEC:` commit carries the spec.
+   If § Committed or local leaves the mode unresolved, write nothing and say why. A spec carries no status, and
+   writing one makes no commit: its review commits it once it passes, and `/modified-matt-to-issues` cuts it into
+   issues.
 
 When the prompt gives you a `kanban-brief: <id>` line, put it on its own line directly under the spec's title, exactly
 as given, and keep a matching one that's already there: prompt-kanban binds the Brief to the spec by that line. If a
@@ -57,7 +58,7 @@ verbatim, naming the `AGENTS.md` it goes in). Aim each module deep, a small inte
 
 No file paths or code snippets: they go stale fast. The exception is a prototype snippet that encodes a decision more
 precisely than prose (a state machine, reducer, schema, type shape): inline its decision-rich part and say it came from
-a prototype.
+a prototype. The Spec Record is exempt too: a program reads it.
 
 ## Testing Decisions
 
@@ -82,6 +83,31 @@ keeps `.mysdd/docs/adr/` in step from this log.
 
 </spec-template>
 
+## The Spec Record
+
+The spec ends with its Spec Record, which prompt-kanban reads to find the review's commit. A new spec ends with it
+empty, exactly as written here; both tags stay at column zero, and nowhere else in the spec, since a second pair at
+column zero is a second record (indent an example):
+
+<spec-record>
+
+```json
+{
+  "commits": { "spec-review": null },
+  "attempts": []
+}
+```
+
+</spec-record>
+
+- It stays last, a new Decision-log entry going above it: rewriting the block whole then never touches the spec.
+- Only this skill writes it, and only a review changes it ([REVIEW.md](./REVIEW.md)); every other skill carries it as
+  it is, because it may hold the only copy of earlier reviews.
+- Parse it, change only your own attempt and the `spec-review` key, write the whole block back as valid JSON with
+  2-space indent, then re-parse it: a hand-edited fragment is how a record breaks.
+- A block that doesn't parse or match this shape, or a second one, stops the run before you write anything: it may
+  hold the only copy of earlier attempts.
+
 ## Before you publish
 
 Any "no" is a fix, not a caveat:
@@ -93,18 +119,4 @@ Any "no" is a fix, not a caveat:
 - No Implementation Decision contradicts a live binding ADR; one the user agreed to supersede already reads
   `superseded` and is named in the Decision log.
 - No paths or snippets beyond a prototype snippet and the `AGENTS.md` a convention line goes in.
-
-## Reviewing an existing spec
-
-When the spec already exists, review that `spec.md` adversarially with the user and edit it in place; don't write a new
-one. Do steps 1 and 2 first, and stop if the mode is unresolved. Find what is underspecified, what contradicts itself or
-a binding ADR, and what it has decided without saying so, and cut what isn't needed. Interview the user about every gap
-and open decision rather than guess: a guessed answer becomes a requirement nobody agreed to.
-
-- Never delete the User Stories section or renumber a `US-NNN`; retire a story instead, because issues point at it.
-- Only append to the Decision log, redacted like the rest: earlier entries are the record of why.
-- Keep any `kanban-brief:` line as it is.
-- Implement nothing.
-
-Before you finish, the spec passes § Before you publish, with its test boundaries confirmed by the user. Leave the edit
-uncommitted: the `SPEC:` commit of `/modified-matt-to-issues` carries it.
+- The spec ends with its Spec Record, which parses.

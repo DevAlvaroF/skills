@@ -7,10 +7,11 @@ disable-model-invocation: true
 Turn the current conversation and what you know of the codebase into a spec. Don't interview the user for a new spec:
 the design session already happened. If it isn't in this session's context, ask where it is rather than inventing a
 decision log. Stop only to confirm the test boundaries and for a binding-ADR contradiction the conversation never
-resolved. A spec that already exists is reviewed with the user instead (§ Reviewing an existing spec).
+resolved. A spec that already exists is reviewed with the user instead: read [REVIEW.md](./REVIEW.md) too, before
+writing anything.
 
 Read `.mysdd/issue-tracker.md` whole before writing anything: it defines the layout and modes used here. It must
-hold exactly one `Tracker contract: 5` line; missing, lower or none → stop and tell the user to re-run
+hold exactly one `Tracker contract: 6` line; missing, lower or none → stop and tell the user to re-run
 `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
 ## Ground yourself first
@@ -36,8 +37,8 @@ When the prompt gives you a `kanban-brief: <id>` line, put it on its own line di
 a matching one already there: prompt-kanban binds the spec to its Brief by that line. A marker naming another id, or a
 malformed one, is a conflict to report, never to overwrite.
 
-Don't commit the spec: in committed mode the `SPEC:` commit of `/makerkit-custom-to-issues` carries it with its
-issues, and in local mode it is never committed.
+Writing a new spec makes no commit: in committed mode its review commits it once it passes, and the `SPEC:` commit of
+`/makerkit-custom-to-issues` carries it on with its issues.
 
 <spec-template>
 
@@ -68,7 +69,7 @@ behaviour (`/makerkit-custom-tdd` has the rest).
 
 No file paths or code snippets: they go stale fast. The exception is a prototype snippet that encodes a decision more
 precisely than prose (state machine, reducer, schema, type shape), trimmed to the decision and noted as from a
-prototype.
+prototype. The Spec Record is exempt too: a program reads it.
 
 ## Testing Decisions
 
@@ -93,6 +94,31 @@ reads this log to keep `.mysdd/docs/adr/` in step.
 
 </spec-template>
 
+## The Spec Record
+
+The spec ends with its Spec Record, which prompt-kanban reads to find the review's commit. A new spec ends with it
+empty, exactly as written here; both tags stay at column zero, and nowhere else in the spec, since a second pair at
+column zero is a second record (indent an example):
+
+<spec-record>
+
+```json
+{
+  "commits": { "spec-review": null },
+  "attempts": []
+}
+```
+
+</spec-record>
+
+- It stays last, a new Decision-log entry going above it: rewriting the block whole then never touches the spec.
+- Only this skill writes it, and only a review changes it ([REVIEW.md](./REVIEW.md)); every other skill carries it as
+  it is, because it may hold the only copy of earlier reviews.
+- Parse it, change only your own attempt and the `spec-review` key, write the whole block back as valid JSON with
+  2-space indent, then re-parse it: a hand-edited fragment is how a record breaks.
+- A block that doesn't parse or match this shape, or a second one, stops the run before you write anything: it may
+  hold the only copy of earlier attempts.
+
 ## Before you publish
 
 Any "no" is a fix, not a caveat:
@@ -102,20 +128,4 @@ Any "no" is a fix, not a caveat:
 - Out of Scope is non-empty: a spec that excludes nothing hasn't been scoped.
 - The Decision log is redacted, and no path or snippet appears beyond the exceptions above.
 - No decision contradicts a live binding ADR; one the user agreed to supersede already reads `superseded`.
-
-## Reviewing an existing spec
-
-When the spec already exists, review that `spec.md` adversarially and edit it in place, grounded as above and once
-the mode resolves. Find what is
-underspecified, what contradicts itself or a binding ADR, and what it decided without saying so, and cut what isn't
-needed. Interview the user about every gap and open decision rather than guessing: a guessed answer becomes a decision
-nobody made.
-
-- Never delete the User Stories section or renumber a `US-NNN`: issues address stories by ID. Retire a story instead.
-- Only append to the Decision log, redacted like the rest: earlier entries are the record of what was decided.
-- Keep any `kanban-brief:` line as it is.
-- Implement nothing.
-- Finish only when the spec passes § Before you publish, confirming its test boundaries with the user if they never
-  were.
-
-Leave the edit uncommitted: in committed mode the `SPEC:` commit of `/makerkit-custom-to-issues` carries it.
+- The spec ends with its Spec Record, which parses.
