@@ -122,8 +122,8 @@ reason, or `Deviations and tradeoffs: None.`
 - `Outcome: COMPLETE` (every finding has a user-approved disposition, every fix verified, every check passes),
   `Outcome: INCOMPLETE` or `Outcome: BLOCKED`.
 - `Verdicts:` then one line per finding, numbered as in phase 1: `FIXED` with how it was verified; `REJECTED` or
-  `DEFERRED` with the reason the user approved; `UNRESOLVED — approved FIX: <what>; blocker: <failure>`; or
-  `UNRESOLVED — no approved disposition`. `Verdicts: None.` when phase 1 found nothing.
+  `DEFERRED` with the reason the user approved; or `UNRESOLVED — approved FIX: <what>; blocker: <failure>`.
+  `Verdicts: None.` when phase 1 found nothing.
 - `Checks:` the checks run and their results.
 - `Fix commit:` the `CODE REVIEW FIXES:` SHA, or `Fix commit: None.`
 - `Attempt plans:` a JSON array of `{path, provenance, blob, commit | reason}`, or `Attempt plans: []`.
@@ -158,11 +158,11 @@ Subjects you write are ≤72 characters. The fixed subjects that embed `<issue p
 
 | Operation | Subject | Body, trailers | Holds exactly | Local mode |
 |---|---|---|---|---|
-| spec review | `REVIEW HISTORY: Record spec review attempt <N>` | `Spec: <spec path>` | the spec | empty marker: its tree equals its parent's, the user's index untouched |
+| spec review | `REVIEW HISTORY: Record spec review attempt <N>` | `Spec: <spec path>` | the spec | the empty marker |
 | to-issues | `SPEC: <subject>` | optional why | spec, the issues it wrote, changed `.mysdd/docs/CONTEXT.md` and ADRs | glossary and ADRs only, else none |
 | implement | `CODE: <subject>` | optional why; `Issue: <issue path>` per issue; `Spec: <spec path>` unless `null` | the implementation, plus agreed ADRs and `AGENTS.md` convention lines | same |
 | phase 2 fixes | `CODE REVIEW FIXES: <subject>` | as `CODE:` | the approved fixes, agreed ADRs, check rewrites in the change's files | same |
-| phase 1 | `REVIEW HISTORY: Record final review attempt <N>` | `Issue: <issue path>` | the issue file | empty marker: its tree equals its parent's, the user's index untouched |
+| phase 1 | `REVIEW HISTORY: Record final review attempt <N>` | `Issue: <issue path>` | the issue file | the empty marker |
 | phase 2 plans | `ATTEMPT PLANS: final review <issue path> attempt <K>` | none | plans this attempt provably created, not ignored or bound elsewhere | same |
 | phase 2 close | `Closed Issue: <issue path>` | none | the issue file, plus `.mysdd/kanban-boards.json` if changed | none: the status change is the close |
 
@@ -170,6 +170,10 @@ The code prefix follows `codeCommit`: `null` → `CODE: `, a SHA → `CODE REVIE
 the work separates. Final review finds the change by its `Issue:` trailers, so write them in both modes, as the
 message's last paragraph with no blank line between them: Git reads only that block as trailers (a run once split
 them into separate `-m` paragraphs, and `Issue:` stopped being one).
+
+The **empty marker** (local mode): parent the `HEAD` you read, tree that parent's, the user's index untouched,
+published only while `HEAD` still names that parent, signed if the repository signs. A marker built from a stale tree
+once reverted another agent's commit.
 
 **Hard limits**:
 
@@ -187,7 +191,7 @@ them into separate `-m` paragraphs, and `Issue:` stopped being one).
   never a fallback for an unresolved mode or a failed commit.
 - The recorded SHA is the commit this session made, never a later `HEAD`.
 - A commit holding a path that isn't yours is never recorded: report its SHA and the foreign paths, end the attempt
-  INCOMPLETE or BLOCKED, and don't amend, reset or retry.
+  BLOCKED, and don't amend, reset or retry.
 - A commit can't hold its own SHA: write it to the issue or the Spec Record afterwards, uncommitted; that file's next
   commit carries it.
 - A saved record or status doesn't prove its commit landed: a retry makes only the missing commit.

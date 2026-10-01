@@ -17,27 +17,30 @@ or an assumed empty finding list. Keep the additional-plans inventory (below) fr
      plans commit — the status was written before them, so it doesn't prove they landed.
    - A NEEDS FIXES review with no findings, or a closed issue with undisposed findings: ask.
    - An earlier attempt's FIXED, REJECTED and DEFERRED verdicts stand; continue only its UNRESOLVED work.
-3. **Weigh every finding, then stop.** Being reviewed pulls you both ways — accept because it was raised, reject
-   because it criticises you — and neither is evidence. Check each claim against the code and requirements, then
-   present every finding by number with a proposed **FIX** (where, how), **REJECT** or **DEFER** (why), weighing the
-   recorded deviations. Then wait: change no code until the user replies approving the triage in so many words. Being
-   invoked, copying a prompt or marking a step complete is not approval. A decision contradiction offers fixing the
-   code or superseding the ADR per `/makerkit-custom-domain-modeling`, which needs the user's own agreement. Never edit
-   the spec. An undecided finding blocks COMPLETE.
+3. **Weigh every finding, then stop.** Being reviewed pulls you both ways — accept because it was raised, reject because
+   it criticises you — and neither is evidence. Check each claim against the code and requirements, then present every
+   finding by number with a proposed **FIX** (where, how), **REJECT** or **DEFER** (why), weighing the recorded
+   deviations. Then wait: change no code until the user replies approving the triage in so many words. Being invoked,
+   copying a prompt or marking a step complete is not approval. A decision contradiction offers fixing the code or
+   superseding the ADR per `/makerkit-custom-domain-modeling`, which needs the user's own agreement. Never edit the
+   spec. Keep asking until the user has said FIX, REJECT or DEFER for every finding, and never record one undecided:
+   nobody would act on it.
 4. **Implement the approved fixes**, nothing more, with `/makerkit-custom-tdd` where behaviour changes.
 5. **Check** with the root `AGENTS.md` § Verification in its order, plus what nested files add, whole-repo runs
    through a sub-agent reporting failures only. A review skill there sees only this attempt's fixes and the ADRs'
-   paths (`/rls-review` only when they touch migrations or policies); its findings are recorded UNRESOLVED, not fixed.
-   Checks run even with nothing fixed: no DEFER waives one. A failing check or short fix means no fix commit and
-   UNRESOLVED fixes left in the tree; one passing only with an uncommitted rewrite hasn't passed: ask.
+   paths (`/rls-review` only when they touch migrations or policies); its findings are triaged with the user as in
+   step 3, never recorded UNRESOLVED unasked. Checks run even with nothing fixed: no DEFER waives one. No fix commit
+   until the fixes are verified: a failing check or a fix that falls short is work to finish, not a place to stop. A
+   pass that needs an uncommitted rewrite hasn't passed: ask.
 6. **Commit verified fixes** as the `CODE REVIEW FIXES:` commit per § Commits, with its `Issue:` and `Spec:` trailers:
    the fixes, agreed ADRs, and `lint:fix`, typegen or formatter rewrites in the change's files — others are listed and
-   left as the user's. Nothing to stage, no commit. Take the SHA from your commit; a foreign path in it follows the done
-   rules, and the outcome is BLOCKED.
+   left as the user's. Nothing to stage, no commit. Take the SHA from your commit.
 7. **Settle the outcome.** **COMPLETE** only when every finding has an approved FIXED, REJECTED or DEFERRED, every fix
    is verified and every required check passes; zero findings, or all rejected or deferred with approval, completes
-   without a fix commit. Otherwise **INCOMPLETE** (approved work unfinished, a check failing) or **BLOCKED** (a check
-   that can't run, a decision not made).
+   without a fix commit. **INCOMPLETE** (an approved fix you can't finish, a check that keeps failing) or **BLOCKED**
+   (a check that can't run) only once the user, told what is left, agrees to stop there: a short fix is work to
+   finish, not an outcome. The one exception: a commit holding foreign paths stops the attempt at once and ends
+   BLOCKED, so nothing more is built on it before the user sees it.
 8. **Write the issue once**: `reviewCodeCommit` gets the fix SHA if there is one; append one phase 2 record per
    § Comment records. An approved FIX left unfinished is UNRESOLVED with its blocker, never FIXED or an unapproved
    DEFER. Set `done-final-review` only on COMPLETE: the board reads it as Done. A write failing after a commit is

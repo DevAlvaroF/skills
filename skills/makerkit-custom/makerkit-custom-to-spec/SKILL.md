@@ -31,14 +31,13 @@ Before exploring, read the project's own documentation, because where it and thi
 2. Sketch the boundaries the feature will be tested at: existing before new, as high and as few as possible — ideally
    one. Confirm them with the user.
 3. Write the spec from the template below as `spec.md` in the Feature directory § Layout names, once § Committed or
-   local resolves to a mode. A spec carries no status: `/makerkit-custom-to-issues` turns it into issues.
+   local resolves to a mode. A spec carries no status, and writing one makes no commit: in committed mode its review
+   commits it once it passes; in local mode, the tracker's empty marker records the review.
+   `/makerkit-custom-to-issues` cuts it into issues.
 
 When the prompt gives you a `kanban-brief: <id>` line, put it on its own line directly below the spec's title and keep
 a matching one already there: prompt-kanban binds the spec to its Brief by that line. A marker naming another id, or a
 malformed one, is a conflict to report, never to overwrite.
-
-Writing a new spec makes no commit: in committed mode its review commits it once it passes, and the `SPEC:` commit of
-`/makerkit-custom-to-issues` carries it on with its issues.
 
 <spec-template>
 
@@ -114,10 +113,6 @@ column zero is a second record (indent an example):
 - It stays last, a new Decision-log entry going above it: rewriting the block whole then never touches the spec.
 - Only this skill writes it, and only a review changes it ([REVIEW.md](./REVIEW.md)); every other skill carries it as
   it is, because it may hold the only copy of earlier reviews.
-- Parse it, change only your own attempt and the `spec-review` key, write the whole block back as valid JSON with
-  2-space indent, then re-parse it: a hand-edited fragment is how a record breaks.
-- A block that doesn't parse or match this shape, or a second one, stops the run before you write anything: it may
-  hold the only copy of earlier attempts.
 
 ## Before you publish
 

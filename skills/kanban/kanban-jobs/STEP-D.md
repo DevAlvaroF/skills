@@ -5,10 +5,10 @@ You are the reviewer, in a fresh session. Your key is `code-review`.
 1. **Collect the Job's whole change:** the `commit` of every C and E attempt, in order, and the live `commits.code`
    and `commits["code-fix"]`. Choose by record, never by subject, Git range or `HEAD`, which other work shares. If a
    given starting commit isn't this Job's live `commits.code`, or a recorded commit is missing or holds only
-   bookkeeping, report it and ask rather than claim a complete review.
+   bookkeeping, ask, and record nothing until it is answered: a committed review claims the Job's whole change.
 2. **Review adversarially**, each commit in its current context, against the plan: what doesn't do what the plan said,
    what it broke, what it decided without saying so. A loaded review skill runs on exactly these commits, not its
-   default diff. Change no source code.
+   default diff. Change no source code. A doubt about intent is a finding, not a question: E settles it with the user.
 3. **Decide.** A finding is BLOCKING when it is a regression, an unmet plan requirement, a broken documented project
    standard, a security or data-loss risk, or required verification that fails or is blocked; anything else is a
    SUGGESTION. PASS only when every applicable requirement is verified and nothing is BLOCKING.

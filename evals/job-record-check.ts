@@ -34,7 +34,7 @@ const STEPS = Object.keys(KEY_OF) as Step[]
 /** Every attempt's fields, and each step's own — the keys the step files' examples carry. */
 export const COMMON_FIELDS = ['step', 'attempt', 'agent', 'commit', 'summary'] as const
 export const STEP_FIELDS: Record<Step, readonly string[]> = {
-  B: ['changes', 'openQuestions'],
+  B: ['changes'],
   C: ['outcome', 'deviations'],
   D: ['reviewedCommits', 'verdict', 'findings'],
   E: ['reviewAttempt', 'reviewedCommits', 'outcome', 'verdicts', 'attemptPlans'],
@@ -65,7 +65,6 @@ export function attemptProblems(attempt: unknown, where: string, examples = fals
   if (!STEPS.includes(step)) return [`${where}: step ${JSON.stringify(attempt.step)} is not B, C, D or E`]
   const problems = [...missing(attempt, [...COMMON_FIELDS, ...STEP_FIELDS[step]])].map((field) => `${where}: step ${step} attempt has no "${field}"`)
   const list = (field: string) => field in attempt && !Array.isArray(attempt[field]) ? [`${where}: "${field}" is not an array`] : []
-  if (step === 'B') problems.push(...list('openQuestions'))
   if (step === 'D' || step === 'E') {
     problems.push(...list('reviewedCommits'))
     for (const [index, sha] of (Array.isArray(attempt.reviewedCommits) ? attempt.reviewedCommits : []).entries()) {

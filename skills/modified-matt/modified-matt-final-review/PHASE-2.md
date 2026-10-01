@@ -20,28 +20,32 @@ empty finding list. From the start, keep the inventory of additional plans (§ A
    toward rejecting it because it criticises your code; neither is evidence. Check each claim against the code and
    requirements, weigh `Deviations and tradeoffs:`, and propose per finding, by number, **FIX** (where and how),
    **REJECT** (why it fails or isn't worth its cost) or **DEFER** (where it belongs). Then wait for the user's explicit
-   reply approving the triage before changing code: being invoked, a copied prompt or a marked step is not approval,
-   and without it a fix changes code nobody agreed to. For an ADR contradiction offer both ways
-   out, fixing the code or superseding the ADR by `/modified-matt-domain-modeling`'s rules, and supersede only on the
-   user's own agreement. Never edit the spec. An undecided finding keeps the triage from completing.
+   reply approving the triage before changing code: being invoked, a copied prompt or a marked step is not approval, and
+   without it a fix changes code nobody agreed to. For an ADR contradiction offer both ways out, fixing the code or
+   superseding the ADR by `/modified-matt-domain-modeling`'s rules, and supersede only on the user's own agreement.
+   Never edit the spec. Keep asking until the user has said FIX, REJECT or DEFER for every finding, and never record one
+   undecided: nobody would act on it.
 4. **Implement the approved fixes**, nothing more, with `/modified-matt-tdd` where behaviour changes.
 5. **Check**: the project's typecheck, tests, lint and build, whole-suite runs through a failures-only sub-agent, even
-   with nothing fixed, since a DEFER waives no check. A failing or unrunnable check, or a fix that falls short, means no
-   fix commit: those fixes stay in the tree, UNRESOLVED. A pass that needs an uncommitted rewrite hasn't passed: ask.
+   with nothing fixed, since a DEFER waives no check. No fix commit until the fixes are verified: a failing check or a
+   fix that falls short is work to finish, not a place to stop. A pass that needs an uncommitted rewrite hasn't
+   passed: ask.
 6. **Commit verified fixes** as `CODE REVIEW FIXES:` per § Commits, with the ADRs the user agreed to change and the
    checks' rewrites in files of the change (list others and leave them: they're the user's). Nothing to stage, no
    commit. Take its SHA from the commit you made, then run § Additional plans either way.
 7. **Settle the outcome.** `Outcome: COMPLETE` only when every finding has a user-approved FIXED, REJECTED or DEFERRED,
-   every fix is verified and every check passes, with or without a code commit. Otherwise `Outcome: INCOMPLETE`
-   (approved work unfinished, a check failing) or `Outcome: BLOCKED` (a check can't run, a decision is missing, a
-   commit holds foreign paths).
+   every fix is verified and every check passes, with or without a code commit. `Outcome: INCOMPLETE` (an approved fix
+   you can't finish, a check that keeps failing) or `Outcome: BLOCKED` (a check that can't run) only once the user,
+   told what is left, agrees to stop there: a short fix is work to finish, not an outcome. The one exception: a commit
+   holding foreign paths stops the attempt at once and ends BLOCKED, so nothing more is built on it before the user
+   sees it.
 8. **Write the issue once.** The fix commit's SHA goes in `reviewCodeCommit`, never a later `HEAD` or the planning
    commit's; with none, leave it. Append the phase 2 record per § Comment records, labels in order:
    `Final review, phase 2, attempt <K>`, `Answers:`, `Outcome:`, `Verdicts:` (or `Verdicts: None.`), `Checks:`,
    `Fix commit:` (or `Fix commit: None.`), `Attempt plans:`, `ADRs superseded:`. An approved FIX not finished is
-   `UNRESOLVED — approved FIX: <what>; blocker: <failure>`, an undecided one `UNRESOLVED — no approved disposition`,
-   never FIXED or an unapproved DEFER. Set `done-final-review` only on COMPLETE, since that status moves the card to
-   Done. A failed write after a commit: report the SHAs and the error, commit nothing more.
+   `UNRESOLVED — approved FIX: <what>; blocker: <failure>`, never FIXED or an unapproved DEFER. Set `done-final-review`
+   only on COMPLETE, since that status moves the card to Done. A failed write after a commit: report the SHAs and the
+   error, commit nothing more.
 9. **Close on COMPLETE**: in committed mode the `Closed Issue: <issue path>` commit, which also carries the uncommitted
    `reviewHistoryCommit`; in local mode no commit, and say so. A failed close leaves record and status standing; a
    retry makes only that commit. Not COMPLETE: say what is unresolved; a later attempt continues from this record.
@@ -52,8 +56,8 @@ none), and apart, the `ATTEMPT PLANS:` SHA and paths and each plan left out with
 ## Additional plans
 
 Plan files you or a delegate created in the repository for this attempt, such as under `.claude/plans`. Own a path only
-from its creation (it was absent; delegates name theirs), never from `git status`, which would sweep up leftovers. After the fix commit, commit the eligible ones — created by this attempt, not
-ignored, not bound elsewhere — in their own `ATTEMPT PLANS: final review <issue path> attempt <K>` commit per
-§ Commits, for every outcome and in local mode too, unless a commit held foreign paths, which ends all committing.
-Record them as `Attempt plans:`; a failure becomes that plan's reason and never stops the record. A project rule
-forbidding the commit is a conflict: ask.
+from its creation (it was absent; delegates name theirs), never from `git status`, which would sweep up leftovers.
+After the fix commit, commit the eligible ones — created by this attempt, not ignored, not bound elsewhere — in their
+own `ATTEMPT PLANS: final review <issue path> attempt <K>` commit per § Commits, for every outcome and in local mode
+too, unless a commit held foreign paths, which ends all committing. Record them as `Attempt plans:`; a failure
+becomes that plan's reason and never stops the record. A project rule forbidding the commit is a conflict: ask.

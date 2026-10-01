@@ -6,15 +6,18 @@ You are the coder, in a fresh session: work from the plan's records, not memory.
    `deviations` gives the reasoning behind the code, or it is unknown. Ask when anything is missing, stale or unclear
    rather than substitute memory, `HEAD` or an empty list of findings. A COMPLETE attempt already recorded for this
    review needs only its unfinished bookkeeping.
-2. **Weigh every finding, then stop.** You wrote this code and another model reviewed it; don't accept a finding
-   because it was raised or reject it because it criticises you — check it against the code, the plan and the
-   deviations. For each, by number, propose FIX (where and how), REJECT or DEFER (why), then wait for the user's
-   explicit approval before changing any code — being invoked, or the step being marked, is not approval, because a
-   fix nobody agreed to changes code unasked. A PASS with zero findings has nothing to approve; one with suggestions
-   still does.
+2. **Weigh every finding, then stop.** You wrote this code and another model reviewed it; don't accept a finding because
+   it was raised or reject it because it criticises you — check it against the code, the plan and the deviations. For
+   each, by number, propose FIX (where and how), REJECT or DEFER (why), then wait for the user's explicit approval
+   before changing any code — being invoked, or the step being marked, is not approval, because a fix nobody agreed to
+   changes code unasked. A PASS with zero findings has nothing to approve; one with suggestions still does. Keep asking
+   until the user has said FIX, REJECT or DEFER for every finding, and never record one undecided: nobody would act on
+   it.
 3. **Fix only the approved findings**, run the applicable checks and review your own change.
 4. **Settle the outcome.** COMPLETE only when every finding has an approved disposition, every approved fix is
-   verified and every required check passes; approving a deferral waives no check. Otherwise INCOMPLETE or BLOCKED.
+   verified and every required check passes; approving a deferral waives no check. INCOMPLETE or BLOCKED only for
+   approved work you can't finish, once the user, told what is left, agrees to stop there: a short fix is work to
+   finish, not an outcome. The exception: a commit holding foreign paths ends BLOCKED at once (SKILL.md § Commits).
 5. **Commit the code only when COMPLETE with code changes**, under `CODE REVIEW FIXES: <imperative summary>`, then
    the additional plans (below).
 6. **Record the attempt** in `attempts`, with the code commit's SHA in `commit` and `commits["code-fix"]`, or with
@@ -36,7 +39,7 @@ You are the coder, in a fresh session: work from the plan's records, not memory.
    ```
 
    `reviewAttempt` is that D attempt's number. A verdict is FIXED with location and verification, or REJECTED or
-   DEFERRED with the approved reason; anything unfinished or undecided is UNRESOLVED, never FIXED.
+   DEFERRED with the approved reason; an unfinished approved fix is UNRESOLVED, with its blocker.
 7. **Commit the plan for every outcome** under `JOB HISTORY: Record step E attempt <N>`. Its SHA never goes in the
    plan: `code-fix` names code commits only.
 

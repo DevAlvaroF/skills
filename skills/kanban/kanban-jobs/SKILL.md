@@ -56,9 +56,8 @@ A new Job's block, in exactly the shape the app reads (both tags at column zero,
 - **`summary`** is your final summary as one JSON string: what was done or found, the actual verification output,
   blocked checks and open work. End your reply with that same text.
 - **Writing it.** Parse the block, change only your attempt and your `commits` key, write the whole block back as
-  valid JSON with 2-space indent, then re-parse it. A block that doesn't parse or match this shape, or a second
-  block for the Job, stops the step before you write: it may hold the only copy of earlier attempts. Leave other
-  Jobs' blocks alone.
+  valid JSON, then re-parse it. A block that doesn't parse or match this shape, or a second block for the Job, stops
+  the step before you write: it may hold the only copy of earlier attempts. Leave other Jobs' blocks alone.
 - **One writer.** Only you, the coordinating session, write the plan, after delegates finish, from a fresh read, and
   reread to verify. If it changed under you in a conflicting way, stop.
 
@@ -109,7 +108,8 @@ ignored, never to cover a Git error or a failed commit. E makes no marker and sa
   which another agent or a hook may have moved.
 - A commit holding a path that isn't yours (a hook can add one) has failed isolation: never record it. Stop, report
   its SHA and the foreign paths, end the attempt BLOCKED and commit nothing more; undoing it is the user's call.
-- B and D commit their record whatever changed or the verdict, so every review leaves a trace in history.
+- D commits its record whatever the verdict, and B whatever it changed once no question is open, so every finished
+  review leaves a trace in history.
 
 ## Reporting
 

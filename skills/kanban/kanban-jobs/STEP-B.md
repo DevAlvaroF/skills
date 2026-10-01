@@ -6,8 +6,10 @@ You are the reviewer, in a fresh session. Your key is `plan-review`.
    neither, ask) and the code as it stands, editing the planning content in place. Find what is underspecified,
    contradictory or unneeded, and what it decides without saying so. A loaded review skill works on the plan file,
    not a diff. Do not implement anything; ask rather than assume.
-2. **Keep open questions in the plan**, under an `Open questions` heading above the Job Record, where the user's
-   answers go: a question kept only in your attempt is lost to the next step.
+2. **Ask until nothing is open.** Keep each question, and the user's answer once given, in the plan under an
+   `Open questions` heading above the Job Record: the next step reads the plan, not this conversation. The review
+   finishes only when every question has the user's answer; until then record and commit nothing, because a
+   `plan-review` commit tells the app the plan is ready to code.
 3. **Leave the records as they are.** Revising the plan never clears a Job Record already in it.
 4. **Record the attempt** in `attempts`, `commit` still `null`:
 
@@ -18,8 +20,7 @@ You are the reviewer, in a fresh session. Your key is `plan-review`.
      "agent": "<agent>",
      "commit": null,
      "summary": "<your final summary>",
-     "changes": "<what you changed in the plan and why, or None.>",
-     "openQuestions": ["<every question still open; [] when none>"]
+     "changes": "<what you changed in the plan and why, and the questions the user answered, or None.>"
    }
    ```
 
