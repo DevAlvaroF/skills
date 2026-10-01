@@ -25,23 +25,28 @@ fails to import (another agent may be mid-edit in `src/`), wait a minute and ret
   `<fl>-tdd`; final-review → `<fl>-final-review`; review-fix → `<fl>-final-review`, `<fl>-tdd`;
   plan-generate → none; plan-review / code-review → `kanban-jobs`; code / code-fix → `kanban-jobs`, `<fl>-tdd`.
 - Setup has no app prompt: run it with the prompt `$<fl>-setup-skills` (answer its questions).
-- Scenarios 7+ (the Spec Record) skip it: create the repo with the scenario's `repo` line
-  (`--setup committed|local`), run its `seed` line if it has one, and pass `--spec <spec>` to `step`. A
-  scenario with `variants` runs each variant in its own repo and run dir, numbered in the order listed
-  (`run-1`, `run-2`, …, because `aggregate` reads the number), with the variant named in the step notes; `runs: 2`
-  means two independent repetitions, each from a fresh repo. Their checks are already `verify`
-  objects: substitute `<spec>`, `<head:LABEL>` and `<run>`, and write them to `checks-<label>.json`.
+- Scenarios 7+ skip it: create the repo with the scenario's `repo` line, run its `seed` line if it has one, and pass
+  the step's `flags` (`--spec <spec>`, `--plan <plan>`) to `step`. A scenario with `variants` runs each variant in its
+  own repo and run dir, numbered in the order listed (`run-1`, `run-2`, …, because `aggregate` reads the number), with
+  the variant named in the step notes; `runs: 2` means two independent repetitions, each from a fresh repo. Their
+  checks are already `verify` objects: substitute `<spec>`, `<plan>`, `<job>` (the scenario's `job.id`),
+  `<head:LABEL>` and `<run>`, and write them to `checks-<label>.json`.
+- A step with `then` is one session verified twice: verify its `verify` as `checks-<label>.json` once the step stops,
+  then send `then.answers` with `answer` in that same session and verify `then.verify` as
+  `checks-<label>-answered.json`.
 - Steps 1 and 2 share one session: run 1 with `step`, then send step 2's rendered prompt with
   `answer … 1-grill @<prompt file>` — and record that in the step label notes.
 
 ## Answering
 
-When Codex stops with a question, answer with `answer <repo> <run> <label> "<text>"`, using the
-scenario's canned answers; otherwise pick the recommended option. Approval gates (steps 7, E, and
-anything asking to approve a triage or plan): reply approving. Keep answers short and never tell
-Codex how to do the Git work. Cap a step at 8 turns; if it is still asking, record that as a failure
-and move on. A step that stops because a dependency is missing (tracker contract, skill file) is a
-finding, not something to work around — record it, then decide whether the rest can run.
+When Codex stops with a question, answer with `answer <repo> <run> <label> "<text>"`, using the scenario's canned
+answers; otherwise pick the recommended option. Approval gates (steps 7, E, and anything asking to approve a triage or
+plan): reply approving. An approval is not agreement to stop: asked to agree to end INCOMPLETE or BLOCKED, decline as
+the canned answer says, so the work continues. Keep answers short and never tell Codex how to do the Git work. Cap a
+step at 8 turns without progress; if it is still asking the same thing, record that as a failure and move on. A B or E
+question round that moves forward — a new question, a decision recorded — is progress, not a failure. A step that
+stops because a dependency is missing (tracker contract, skill file) is a finding, not something to work around —
+record it, then decide whether the rest can run.
 
 Codex steps can take many minutes: run `step`/`answer` with a 600000 ms Bash timeout, or in the
 background and wait for it.
@@ -57,8 +62,8 @@ known), `{"kind":"sentinel"}`, `{"kind":"reflog","since":…}`. Then the step's 
 comment-record labels. A Job step's `plan` check (B–E) carries `"before": "<run>/steps/<label>.plan-before"`:
 it parses the `<job-record>` block with `JobRecordSchema`, holds the record to `skill-check` (each
 attempt's fields, its numbering, every key naming its step's latest commit), checks every SHA in it
-is full and a commit, and that attempts only grew. Grade formats, done rules and hard limits, never wording. Where a check
-cannot be expressed in `verify`, check by hand and append a
+is full and a commit, and that attempts only grew. Grade formats, done rules and hard limits, never wording. Where a
+check cannot be expressed in `verify`, check by hand and append a
 `{"text","passed","evidence"}` entry to `grading.json` yourself (keep the `summary` block
 consistent).
 

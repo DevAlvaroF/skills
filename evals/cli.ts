@@ -7,6 +7,7 @@ import {
   blueprintFor,
   blueprintsFor,
   isBlockingDiagnostic,
+  jobRecordTemplate,
   renderStepPrompt,
   specRecordTemplate,
   type WorkflowStepKey,
@@ -20,6 +21,7 @@ import { runChecks, type Check } from './verify'
  *
  *   npm run skill-evals -- repo <dir> --flavour modified-matt|makerkit-custom --skills new|old [--clone <src>] [--setup committed|local]
  *   npm run skill-evals -- seed-spec <repo> <spec path> --record none|empty|saved|committed|recorded|malformed|duplicate [--brief <id>] [--secret]
+ *   npm run skill-evals -- seed-plan <repo> <plan path> --job <uuid>
  *   npm run skill-evals -- prompt <step-key> --templates new|old --subject <subject.json>
  *   npm run skill-evals -- step <repo> <run-dir> <label> <prompt-file> [--no-sentinel] [--plan <path>] [--spec <path>]
  *   npm run skill-evals -- answer <repo> <run-dir> <label> <text-or-@file>
@@ -176,6 +178,25 @@ function seedSpec(args: string[]): void {
     const text = readFileSync(full, 'utf8')
     writeFileSync(full, text.replace('Not decided yet.\n', `Not decided yet.\n${SECRET_LINE}`))
   }
+  process.stdout.write(`${full} ${git(repo, ['rev-parse', 'HEAD']).trim()}\n`)
+}
+
+/* ---------- seed-plan ---------- */
+
+const FIXTURE_PLAN = join(ROOT, 'vendor/skills/evals/fixtures/plans/word-count.md')
+
+/**
+ * A Job's plan as step A leaves it, at `<repo>/<plan path>`: the fixture plan ending with `jobRecordTemplate(job)`,
+ * untracked. The fixture leaves one question in its Notes (does `--` count as a word?) for step B to ask.
+ */
+function seedPlan(args: string[]): void {
+  const [repoArg, planPath] = args
+  if (!repoArg || !planPath) die('seed-plan <repo> <plan path> --job <uuid>')
+  const repo = resolve(repoArg)
+  const job = flag(args, 'job') ?? die('--job <uuid>')
+  const full = join(repo, planPath)
+  mkdirSync(dirname(full), { recursive: true })
+  writeFileSync(full, `${readFileSync(FIXTURE_PLAN, 'utf8').trimEnd()}\n\n${jobRecordTemplate(job)}\n`)
   process.stdout.write(`${full} ${git(repo, ['rev-parse', 'HEAD']).trim()}\n`)
 }
 
@@ -404,11 +425,12 @@ const [command, ...rest] = process.argv.slice(2)
 switch (command) {
   case 'repo': makeRepo(rest); break
   case 'seed-spec': seedSpec(rest); break
+  case 'seed-plan': seedPlan(rest); break
   case 'prompt': renderPrompt(rest); break
   case 'step': runStep(rest); break
   case 'answer': answer(rest); break
   case 'verify': verify(rest); break
   case 'snapshot': snapshot(rest); break
   case 'aggregate': aggregate(rest); break
-  default: die('commands: repo | seed-spec | prompt | step | answer | verify | snapshot | aggregate')
+  default: die('commands: repo | seed-spec | seed-plan | prompt | step | answer | verify | snapshot | aggregate')
 }

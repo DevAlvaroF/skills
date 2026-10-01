@@ -2,8 +2,8 @@
 
 Measures these skills end to end: prompt-kanban's own Step prompts, run
 through the Codex CLI in disposable repos, checked with prompt-kanban's own
-parsers. It exists so a change to a skill is measured — pass rate, tokens and
-wall time, new against old — rather than argued.
+parsers. It exists so a change to a skill is measured — its pass rate, and
+tokens and wall time where it claims a saving — rather than argued.
 
 It runs from a **prompt-kanban checkout** holding this repo at
 `vendor/skills`: it renders prompts and reads Issues, plans and commits with
@@ -12,11 +12,13 @@ check means what the app means. There, `npm run skill-evals` runs `cli.ts`.
 
 ## Loop
 
-1. Snapshot the skills you are about to change into the checkout's gitignored
+1. Pick the scenarios the change calls for (`../AGENTS.md`, "Measure a change
+   by what it can move"). Only if one runs `old`, snapshot the skills you are
+   about to change into the checkout's gitignored
    `.skill-evals/baseline/old_skill/`, and the prompt templates into
    `.skill-evals/baseline/old_prompts.json` (the `prompt --templates old`
    source).
-2. For each scenario in `evals.json`, and for `new` and `old`:
+2. For each of those scenarios, and each configuration it names:
    ```bash
    npm run skill-evals -- repo /tmp/pk-e2e/mm-jobs-new --flavour modified-matt --skills new
    npm run skill-evals -- prompt code --templates new --subject subject.json > prompt.txt
@@ -28,7 +30,9 @@ check means what the app means. There, `npm run skill-evals` runs `cli.ts`.
    with `RUN=.skill-evals/iteration-N/eval-<id>/<new_skill|old_skill>/run-1`.
    `DRIVER.md` is the brief for an agent driving one scenario.
 3. `npm run skill-evals -- aggregate .skill-evals/iteration-N` writes
-   `benchmark.json`/`.md` through skill-creator's `aggregate_benchmark`.
+   `benchmark.json`/`.md` through skill-creator's `aggregate_benchmark`. Its
+   delta compares configurations, so with `new` alone it means nothing:
+   compare the pass rate with the baseline table below instead.
 4. Review with skill-creator's `eval-viewer/generate_review.py` (Python ≥3.10;
    `--static <file>.html` writes a standalone page), and read the Codex
    transcripts (`steps/*/events-*.jsonl`) for wasted turns, not only outcomes.
@@ -78,6 +82,18 @@ npm run skill-evals -- answer /tmp/pk-e2e/mm-spec-local-new $RUN 3-spec-review "
 npm run skill-evals -- verify /tmp/pk-e2e/mm-spec-local-new $RUN checks.json
 ```
 
+## The open plan question (scenario 16)
+
+`mm-jobs-b-open` runs step B alone on the plan step A leaves.
+`seed-plan <repo> <plan path> --job <uuid>` writes `fixtures/plans/word-count.md`
+ending with `jobRecordTemplate(<uuid>)`, untracked as step A leaves it, and
+prints the plan's full path and `HEAD`. The fixture's Notes leave one question
+open (does `--` count as a word?). Its step has `then`, so one session is
+verified twice: once B stops with the answer withheld — no commit, no attempt,
+the question under `Open questions` above the record — and again after the
+answer settles it: one `REVIEW HISTORY: Record step B attempt 1` commit holding
+the plan alone, `plan-review` recorded, and no attempt carrying `openQuestions`.
+
 ## skill-check
 
 `npm run -s skill-check` checks the skills' own statement of the Job Record —
@@ -110,6 +126,12 @@ for bundling one into the skill. It reads blocks with the app's own
   `danger-full-access`.
 - A scenario that clones a real project clones it with `--no-hardlinks` and
   removes the remote; the original is never touched.
+- Run what the change calls for, by `../AGENTS.md`'s tiers: new only and one
+  run by default, because the checks grade formats and are stable; re-run a
+  failure once before calling it a bug. Old against new only for a claimed
+  token saving, since tokens vary about 60% run to run: report a delta only
+  beyond ~50%, else "no measurable change". A new check runs `old` once to
+  prove it discriminates, then new only.
 - Grade what the skills promise — formats, done rules, hard limits — never
   wording. A check that passes for old and new alike measures nothing; prefer
   ones that caught a real failure (the trailer check in `verify.ts` did, and
@@ -137,6 +159,11 @@ the key be named to the user; the review deleted it before publishing and none r
 Saved resume first failed 24/25 — the resume rewrote the saved attempt's summary — which is why
 REVIEW.md says a resumed attempt keeps its text. Step 3's recording costs tokens the old skill never
 spends; in mm-spec-local it is about 3× old's.
+
+After the strict-triage fixes (iteration c6c, one run, new only): mm-spec-local 23/23, resume saved
+25/25, mm-jobs A–E 82/82, all within the token noise band. b-open 29/29 new; old, once, 36/41,
+failing the first pass by committing with the question open. In that A–E run D found nothing, so E's
+triage went unexercised.
 
 ## Baseline (contract 5, 2026-09-29)
 

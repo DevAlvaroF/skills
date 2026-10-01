@@ -20,10 +20,16 @@ depends on them:
    trailer) and the ADR frontmatter. Change one and something downstream
    silently stops finding it.
 2. **What counts as done.** Who sets each status; only a COMPLETE phase 2 sets
-   `done-final-review`; every review commits its record — 6, B and D whatever
-   the verdict, the spec review (step 3) only once the spec passes; a recorded
-   SHA is the commit this session made. The board's columns are derived from
-   these, so a vague done rule is a card in the wrong column.
+   `done-final-review`; a review or triage finishes only once no question is
+   open; every review commits its record — 6 and D whatever the verdict, B
+   once its questions are answered, the spec review (step 3) once the spec
+   passes; in 7 and E every finding ends FIXED, REJECTED or DEFERRED by the
+   user's decision, and the agent keeps asking rather than record one
+   undecided; INCOMPLETE or BLOCKED is only for approved work that can't be
+   finished, once the user agrees — except a commit holding a path that isn't
+   the agent's, which stops at once and ends BLOCKED, as a hard limit, not a
+   choice; a recorded SHA is the commit this session made. The board's columns
+   are derived from these, so a vague done rule is a card in the wrong column.
 3. **Hard limits.** Current branch only; only your own paths, the user's staged
    work stays staged and out; never amend, rebase, reset, push, force-add or
    untrack; no empty commit except the local-mode review marker; no attribution
@@ -67,15 +73,28 @@ its invocation (`/modified-matt-implement`) instead.
 prompt-kanban's `tests/unit/domain/skills-size-budget.test.ts` holds a ceiling
 per file and per group (`modified-matt`, `makerkit-custom`, `kanban`), and
 allows only `*.md` and `agents/openai.yaml` under `skills/`. Raise a ceiling
-only in a commit that names the incident the extra text answers.
+only in a commit that names the incident the extra text answers. Splitting text
+into a new file moves its bytes, it doesn't earn a ceiling: the group still
+pays for them.
 
-## Measure every change
+## Measure a change by what it can move
 
-A change to a skill runs the harness in `evals/` (from a prompt-kanban checkout,
-`npm run skill-evals`) — at least the affected scenario, new against old — and the
-size budget, and reports the pass rate and the token delta. A change that costs
-tokens needs a result that pays for them. `evals/README.md` holds the loop and the
-last baseline.
+Every change passes the size budget, `skill-check`, `npm run typecheck` and
+`npm test`: they are cheap and deterministic. The harness in `evals/` (from a
+prompt-kanban checkout, `npm run skill-evals`) runs only as far as a change can
+move a graded result; `evals/README.md` holds the loop and the baseline.
+
+- **Wording or procedure only:** no evals, because the checks grade formats,
+  done rules and hard limits, never wording.
+- **A parsed format, done rule, hard limit or verbatim command:** its seeded
+  single-step scenario(s), new skills only, one run, against the README
+  baseline. The checks grade formats, so they are stable and one run is
+  evidence; re-run a failure once to tell a flake from a bug.
+- **A contract bump or a release:** one full chain per affected group, new
+  only, one run, because the chain is where steps hand each other the record.
+- **Old against new** only when a change claims to save tokens, since tokens
+  vary about 60% from run to run. Report a token delta only beyond ~50%;
+  otherwise say "no measurable change".
 
 After touching `kanban-jobs` or `to-spec`, or to check a plan or a spec an
 agent wrote, run `npm run -s skill-check [plan.md… spec.md…]` from the

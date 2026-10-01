@@ -201,13 +201,14 @@ with no id — the spec's path is its identity: a column-zero `<spec-record>`
 line, one fenced `json` block holding
 `{ "commits": { "spec-review": null }, "attempts": [] }`, and a column-zero
 `</spec-record>`. Step 2 writes it empty; a step 3 review adds it to a spec
-that predates it. Unlike steps 6, B and D, which record every verdict, step 3
-records nothing until the spec passes: then it appends one attempt
-(`attempt`, `agent`, `commit`, `summary`), commits the spec, and writes that
-commit's SHA into the attempt and `commits.spec-review`, uncommitted, for the
-spec's next commit to carry. The app reads only `commits` to select step 3's
-commit, and never writes the record. Literal examples are indented or
-`>`-quoted: column-zero tags anywhere make a second record.
+that predates it. Steps 6 and D record every verdict; B and step 3 record
+nothing while a question is open, and step 3 nothing until the spec passes:
+then it appends one attempt (`attempt`, `agent`, `commit`, `summary`),
+commits the spec, and writes that commit's SHA into the attempt and
+`commits.spec-review`, uncommitted, for the spec's next commit to carry. The
+app reads only `commits` to select step 3's commit, and never writes the
+record. Literal examples are indented or `>`-quoted: column-zero tags
+anywhere make a second record.
 
 **Without prompt-kanban**, invoke the skills in the same order:
 `/modified-matt-grill-with-docs`, then `/modified-matt-to-spec` in that
@@ -257,7 +258,7 @@ never `HEAD` or a range.
 | Step | Run by | Skills (app) | Reads | Writes | Commits |
 |---|---|---|---|---|---|
 | **A Generate Plan** | coder, fresh session, plan mode | none | the Job's title and description | a plan under `.claude/plans` ending with the empty `<job-record id="<jobId>">` block; you bind it in the app | nothing |
-| **B Review Plan** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the plan, the code as it stands | edits the plan in place, open questions under `Open questions` above the record; attempt `B` (`changes`, `openQuestions`), then its `commit` and `commits.plan-review` | `REVIEW HISTORY: Record step B attempt <N>` — the plan alone (ignored plan: empty marker) |
+| **B Review Plan** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the plan, the code as it stands | edits the plan in place, questions and the user's answers under `Open questions` above the record; once none is open, attempt `B` (`changes`), then its `commit` and `commits.plan-review` | `REVIEW HISTORY: Record step B attempt <N>` — the plan alone (ignored plan: empty marker) |
 | **C Code** | coder, fresh session | `tdd`, `kanban-jobs` (required) | the plan and its answered questions | code, checks, self-review; attempt `C` (`outcome`, `deviations`), with its `commit` and `commits.code` when it committed | `CODE: <subject>` — code only, and only when COMPLETE; never the plan |
 | **D Review Code** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the Job's recorded code commits, the plan | no source change; attempt `D` (`reviewedCommits`, `verdict`, `findings`), then its `commit` and `commits.code-review` | `REVIEW HISTORY: Record step D attempt <N>` — the plan, whatever the verdict (ignored: marker) |
 | **E Fix Findings** | coder, fresh session, plan mode | `tdd`, `kanban-jobs` (required) | latest D attempt's findings, latest C attempt's deviations | FIX / REJECT / DEFER → your approval → fixes, checks; attempt `E` (`outcome`, `attemptPlans`, `verdicts`), with its `commit` and `commits.code-fix` when it committed | `CODE REVIEW FIXES: <subject>` if COMPLETE with code; `ATTEMPT PLANS: step E <jobId> attempt <N>` for plans it created; `JOB HISTORY: Record step E attempt <N>` — the plan, every outcome (ignored: none, no marker) |
@@ -334,8 +335,11 @@ evals/                            # end-to-end skill evals through Codex, run fr
 - `SKILL.md` holds the workflow; what only some runs need goes one level deep.
 - Skills are self-contained: no links into another skill's files.
 - prompt-kanban's size-budget test caps every file and group; raise a ceiling
-  only in a commit naming the incident. Measure a change with its
-  `npm run skill-evals` and report the token delta.
+  only in a commit naming the incident. Every change passes the budget,
+  `skill-check`, typecheck and tests; evals run only as far as a change can
+  move a graded result — none for wording, the seeded scenario for a format,
+  done rule, hard limit or verbatim command, a full chain per group for a
+  contract bump, old against new only for a claimed token saving.
 - **The flavours are independent copies, not mirrors.** Port a fix to the
   other flavour only if it's about generic skill mechanics.
 - Keep the flavour prefix on every flavour skill's name; `kanban-jobs` belongs

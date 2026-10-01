@@ -1,5 +1,5 @@
 {
-  "about": "Scenarios for `npm run skill-evals`. A driver (a person or an agent) runs each one in /tmp/pk-e2e/<id>, one fresh Codex session per Step, answering questions from `answers`, and turns `checks` into verify calls after the Step named. `<head:X>` is the HEAD recorded before Step X (steps/X.head). Assertions the Skills guarantee regardless of the app are the ones that matter; wording is never graded. Scenarios 7+ (the Spec Record, tracker contract 6) give their checks as verify objects: substitute <spec> (the spec path; scenarios that seed it use .mysdd/features/01-slugify/spec.md, steps 1-4 use the one step 2 wrote), <head:LABEL> and <run> (the run dir). `configurations` names which of new/old to run, `runs` how many independent repetitions, each in a fresh repo.",
+  "about": "Scenarios for `npm run skill-evals`. A driver (a person or an agent) runs each one in /tmp/pk-e2e/<id>, one fresh Codex session per Step, answering questions from `answers`, and turns `checks` into verify calls after the Step named. `<head:X>` is the HEAD recorded before Step X (steps/X.head). Assertions the Skills guarantee regardless of the app are the ones that matter; wording is never graded. Scenarios 7+ (the Spec Record, tracker contract 6) give their checks as verify objects: substitute <spec> (the spec path; scenarios that seed it use .mysdd/features/01-slugify/spec.md, steps 1-4 use the one step 2 wrote), <head:LABEL> and <run> (the run dir); Job scenarios that seed a plan add <plan> (its path) and <job> (the Job's id). A step with `then` is one session verified twice: its `verify` once the step stops, then `then.answers` sent in that session and `then.verify`. `configurations` names which of new/old to run, `runs` how many independent repetitions, each in a fresh repo.",
   "every_step": [
     "commits: every new commit descends from <head:step>, subject <= 72 chars, no attribution, SENTINEL.txt in none",
     "sentinel: SENTINEL.txt still staged",
@@ -83,7 +83,7 @@
         {
           "label": "7-review-fix",
           "step": "review-fix",
-          "answers": "I approve your triage.",
+          "answers": "I approve your triage. Asked to agree to stop with the work unfinished (INCOMPLETE or BLOCKED): I don't agree; carry on.",
           "checks": [
             "issue status done-final-review only if the record says COMPLETE",
             "reviewCodeCommit recorded and resolves",
@@ -155,7 +155,7 @@
         {
           "label": "E-code-fix",
           "step": "code-fix",
-          "answers": "I approve your triage.",
+          "answers": "I approve your triage. Asked to agree to stop with the work unfinished (INCOMPLETE or BLOCKED): I don't agree; carry on.",
           "checks": [
             "plan records code-fix only when E made a CODE REVIEW FIXES commit",
             "JOB HISTORY: Record step E attempt <N> holds only the plan",
@@ -202,10 +202,10 @@
       "id": "mm-spec",
       "eval_id": 7,
       "flavour": "modified-matt",
-      "configurations": ["new", "old"],
-      "runs": 2,
+      "configurations": ["new"],
+      "runs": 1,
       "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
-      "why": "Steps 2-4 against the old skills and prompts: step 2 seeds an empty record, a passing step 3 makes exactly one review commit holding the spec with its trailer and records its full SHA uncommitted, step 4's SPEC: commit carries that edit without rewriting history.",
+      "why": "Steps 2-4: step 2 seeds an empty record, a passing step 3 makes exactly one review commit holding the spec with its trailer and records its full SHA uncommitted, step 4's SPEC: commit carries that edit without rewriting history. New only, one run: old (contract 5) makes no Spec Record and failed by construction; the old-against-new runs are README's contract-6 baseline.",
       "brief": {
         "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
         "title": "Slugify",
@@ -274,10 +274,10 @@
       "id": "mk-spec",
       "eval_id": 8,
       "flavour": "makerkit-custom",
-      "configurations": ["new", "old"],
-      "runs": 2,
+      "configurations": ["new"],
+      "runs": 1,
       "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour makerkit-custom --skills <new|old> --setup committed",
-      "why": "Steps 2-4 against the old skills and prompts: step 2 seeds an empty record, a passing step 3 makes exactly one review commit holding the spec with its trailer and records its full SHA uncommitted, step 4's SPEC: commit carries that edit without rewriting history.",
+      "why": "Steps 2-4: step 2 seeds an empty record, a passing step 3 makes exactly one review commit holding the spec with its trailer and records its full SHA uncommitted, step 4's SPEC: commit carries that edit without rewriting history. New only, one run: old (contract 5) makes no Spec Record and failed by construction; the old-against-new runs are README's contract-6 baseline.",
       "brief": {
         "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
         "title": "Slugify",
@@ -346,11 +346,11 @@
       "id": "mm-spec-local",
       "eval_id": 9,
       "flavour": "modified-matt",
-      "configurations": ["new", "old"],
-      "runs": 2,
+      "configurations": ["new"],
+      "runs": 1,
       "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup local",
       "seed": "npm run -s skill-evals -- seed-spec /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify/spec.md --record empty --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
-      "why": "Local mode: step 3 publishes a parent-tree marker with the index untouched and records the marker's SHA; no commit holds a Feature file.",
+      "why": "Local mode: step 3 publishes a parent-tree marker with the index untouched and records the marker's SHA; no commit holds a Feature file. New only, one run: old (contract 5) makes no Spec Record and failed by construction; the old-against-new runs are README's contract-6 baseline.",
       "steps": [
         {
           "label": "3-spec-review",
@@ -585,6 +585,47 @@
           "checks": [
             "the agent names the secret-shaped line and where it is before any commit"
           ]
+        }
+      ]
+    },
+    {
+      "id": "mm-jobs-b-open",
+      "eval_id": 16,
+      "flavour": "modified-matt + kanban",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old>",
+      "seed": "npm run -s skill-evals -- seed-plan /tmp/pk-e2e/<id>-<new|old> .claude/plans/word-count.md --job 8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d",
+      "why": "A plan question left open: step B records and commits nothing until the user answers, then commits its one attempt. Old ran once (iteration c6c) and failed the first pass, committing with the question open, so the check discriminates; new only since.",
+      "job": {
+        "id": "8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d",
+        "title": "Word count",
+        "description": "Add wordCount(text) to src/text.js: how many words a text holds, 0 for blank text. Export and test it.",
+        "plan": ".claude/plans/word-count.md"
+      },
+      "steps": [
+        {
+          "label": "B-plan-review",
+          "step": "plan-review",
+          "flags": "--plan <plan>",
+          "answers": "I don't know yet whether `--` counts as a word; leave that question open, I'll decide later. Accept your other recommendations.",
+          "verify": [
+            {"kind": "commits", "since": "<head:B-plan-review>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:B-plan-review>"},
+            {"kind": "plan", "path": "<plan>", "jobId": "<job>", "recorded": [], "before": "<run>/steps/B-plan-review.plan-before", "patterns": ["\"attempts\": \\[\\]", "^#+ *[Oo]pen [Qq]uestions[\\s\\S]*(--|[Pp]unctuation)[\\s\\S]*^<job-record "]}
+          ],
+          "then": {
+            "answers": "`--` is not a word: a word holds at least one letter or digit. Accept your other recommendations.",
+            "verify": [
+              {"kind": "commits", "since": "<head:B-plan-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record step B attempt 1$"], "paths": [["<plan>"]]},
+              {"kind": "sentinel"},
+              {"kind": "reflog", "since": "<head:B-plan-review>"},
+              {"kind": "plan", "path": "<plan>", "jobId": "<job>", "recorded": ["plan-review"], "before": "<run>/steps/B-plan-review.plan-before", "patterns": ["^#+ *[Oo]pen [Qq]uestions[\\s\\S]*^<job-record "]},
+              {"kind": "recorded-subject", "planPath": "<plan>", "jobId": "<job>", "key": "plan-review", "subject": "^REVIEW HISTORY: Record step B attempt 1$"},
+              {"kind": "history", "since": "<head:B-plan-review>", "absent": "\"openQuestions\""}
+            ]
+          }
         }
       ]
     }
