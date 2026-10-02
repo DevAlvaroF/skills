@@ -23,6 +23,9 @@ plan in the repository. Read this file and the step's file in full before writin
 | D | [STEP-D.md](./STEP-D.md) | reviewing the code |
 | E | [STEP-E.md](./STEP-E.md) | triaging and fixing the findings |
 
+Let whole-repo checks (full suite, build, lint) reach you as failures and a verdict only, through a sub-agent where you
+have one: a full log crowds out the plan and the record you write from.
+
 ## Inputs
 
 A prompt-kanban prompt hands them over. Invoked directly, ask for anything missing rather than guess. The step: the

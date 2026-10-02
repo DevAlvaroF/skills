@@ -12,12 +12,14 @@ If the latest phase 1 record already reviewed the change as it stands but its `R
      Generality, Message Chains, Middle Man, Refused Bequest.
    - **Spec**: the issue's scope, the spec and its Decision log when `spec` isn't `null`, and the binding ADRs. An ADR
      change in the diff stands only if the implementation record shows the user agreed; its replacement then outranks
-     the spec line. `Deviations and tradeoffs:` gives the implementer's reasons, not proof.
+     the spec line. `Deviations and tradeoffs:` gives the implementer's reasons, not proof. Report each acceptance
+     criterion met, unmet or unverified, with its evidence.
 
    A loaded review skill (such as `/modified-matt-implement`'s review) may run the passes instead, on exactly these
    commits: override a default of `git diff HEAD` or `git show HEAD`, since another diff is another review.
-2. **Verify, don't assume.** Check each acceptance criterion against what the code does. A verification you couldn't
-   run (no way to drive the UI, a missing service) is a failure, not a pass: say what was blocked and why.
+2. **Verify, don't assume.** Every acceptance criterion needs evidence: take it from the Spec pass and verify here only
+   what it left open. One nobody could verify (no way to drive the UI, a missing service) is a failure, not a pass: say
+   what was blocked and why.
 3. **Decide.** BLOCKING is what should stop the change landing: a regression, a missing or wrong requirement, a broken
    documented standard, a contradiction of a live ADR or an unsuperseded spec decision, a security or data-loss risk, a
    blocked required verification. The rest is SUGGESTION. `Verdict: PASS` needs every criterion verified, nothing
