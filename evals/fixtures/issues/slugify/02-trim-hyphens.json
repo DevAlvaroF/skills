@@ -1,0 +1,27 @@
+{
+  "id": "02",
+  "slug": "trim-hyphens",
+  "title": "No leading or trailing hyphen",
+  "status": "ready-for-agent",
+  "spec": ".mysdd/features/01-slugify/spec.md",
+  "whatToBuild": "A slug from slugify never starts or ends with a hyphen, however the title starts or ends, so slugs join cleanly into paths.",
+  "blockedBy": [
+    "01"
+  ],
+  "testBoundaries": [
+    "slugify through the exported function in test/text.test.js with node:test, asserting on the returned string only"
+  ],
+  "covers": [
+    "US-003"
+  ],
+  "codeCommit": null,
+  "reviewHistoryCommit": null,
+  "reviewCodeCommit": null,
+  "acceptanceCriteria": [
+    {
+      "text": "slugify('  Hello, World!  ') returns 'hello-world'",
+      "done": false
+    }
+  ],
+  "comments": []
+}

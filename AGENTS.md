@@ -88,13 +88,17 @@ move a graded result; `evals/README.md` holds the loop and the baseline.
   done rules and hard limits, never wording.
 - **A parsed format, done rule, hard limit or verbatim command:** its seeded
   single-step scenario(s), new skills only, one run, against the README
-  baseline. The checks grade formats, so they are stable and one run is
-  evidence; re-run a failure once to tell a flake from a bug.
+  baseline; every step but 0, 1, 2 and A has one. The checks grade formats,
+  so they are stable and one run is evidence; re-run a failure once to tell a
+  flake from a bug.
 - **A contract bump or a release:** one full chain per affected group, new
   only, one run, because the chain is where steps hand each other the record.
 - **Old against new** only when a change claims to save tokens, since tokens
-  vary about 60% from run to run. Report a token delta only beyond ~50%;
-  otherwise say "no measurable change".
+  vary about 60% from run to run. Run it on seeded single steps, because both
+  sides then start from byte-identical input, and only within one contract:
+  skip it when the seeded format changed, since old fails a seed of the new
+  format by construction. Report a token delta only beyond ~50%; otherwise say
+  "no measurable change".
 
 After touching `kanban-jobs` or `to-spec`, or to check a plan or a spec an
 agent wrote, run `npm run -s skill-check [plan.md… spec.md…]` from the

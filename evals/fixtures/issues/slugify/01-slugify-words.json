@@ -1,0 +1,35 @@
+{
+  "id": "01",
+  "slug": "slugify-words",
+  "title": "Slugify letters, digits and separators",
+  "status": "ready-for-agent",
+  "spec": ".mysdd/features/01-slugify/spec.md",
+  "whatToBuild": "A library user calls slugify(text) from src/text.js and gets the title lower-cased, its ASCII letters and digits kept, and every run of any other character turned into one hyphen; an empty string gives an empty string.",
+  "blockedBy": [],
+  "testBoundaries": [
+    "slugify through the exported function in test/text.test.js with node:test, asserting on the returned string only"
+  ],
+  "covers": [
+    "US-001",
+    "US-002",
+    "US-004"
+  ],
+  "codeCommit": null,
+  "reviewHistoryCommit": null,
+  "reviewCodeCommit": null,
+  "acceptanceCriteria": [
+    {
+      "text": "slugify('Hello World 2') returns 'hello-world-2'",
+      "done": false
+    },
+    {
+      "text": "Every run of characters other than ASCII letters and digits becomes one hyphen",
+      "done": false
+    },
+    {
+      "text": "slugify('') returns ''",
+      "done": false
+    }
+  ],
+  "comments": []
+}

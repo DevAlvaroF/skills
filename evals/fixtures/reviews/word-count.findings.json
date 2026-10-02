@@ -1,0 +1,16 @@
+[
+  {
+    "n": 1,
+    "severity": "BLOCKING",
+    "location": "src/text.js:8",
+    "impact": "Words separated by a tab or a newline count as one: wordCount('one\\ttwo') returns 1, not 2, though the plan splits on whitespace. The tests use spaces only, so they pass.",
+    "correction": "Split on runs of any whitespace (/\\s+/) and test a tab- and a newline-separated text."
+  },
+  {
+    "n": 2,
+    "severity": "SUGGESTION",
+    "location": "src/text.js:7",
+    "impact": "wordCount(null) and wordCount(undefined) throw a TypeError instead of returning 0.",
+    "correction": "Return 0 when text is not a string, and test it."
+  }
+]

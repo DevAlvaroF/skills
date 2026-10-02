@@ -1,5 +1,5 @@
 {
-  "about": "Scenarios for `npm run skill-evals`. A driver (a person or an agent) runs each one in /tmp/pk-e2e/<id>, one fresh Codex session per Step, answering questions from `answers`, and turns `checks` into verify calls after the Step named. `<head:X>` is the HEAD recorded before Step X (steps/X.head). Assertions the Skills guarantee regardless of the app are the ones that matter; wording is never graded. Scenarios 7+ (the Spec Record, tracker contract 6) give their checks as verify objects: substitute <spec> (the spec path; scenarios that seed it use .mysdd/features/01-slugify/spec.md, steps 1-4 use the one step 2 wrote), <head:LABEL> and <run> (the run dir); Job scenarios that seed a plan add <plan> (its path) and <job> (the Job's id). A step with `then` is one session verified twice: its `verify` once the step stops, then `then.answers` sent in that session and `then.verify`. `configurations` names which of new/old to run, `runs` how many independent repetitions, each in a fresh repo.",
+  "about": "Scenarios for `npm run skill-evals`. A driver (a person or an agent) runs each one in /tmp/pk-e2e/<id>, one fresh Codex session per Step, answering questions from `answers`, and turns `checks` into verify calls after the Step named. `<head:X>` is the HEAD recorded before Step X (steps/X.head). Assertions the Skills guarantee regardless of the app are the ones that matter; wording is never graded. Scenarios 7+ (the Spec Record, tracker contract 6) give their checks as verify objects: substitute <spec> (the spec path; scenarios that seed it use .mysdd/features/01-slugify/spec.md, steps 1-4 use the one step 2 wrote), <head:LABEL> and <run> (the run dir); Job scenarios that seed a plan add <plan> (its path) and <job> (the Job's id); scenarios that seed a Feature add <issue>, the step's `issue` or, at step 4, the issue file with id 01 it wrote under .mysdd/features/01-slugify/issues/. A seeded scenario's `seed` runs before its first step, and <head:seed> is the HEAD it prints; a step's `issue` and `commitSha` go in its subject.json. A step with `then` is one session verified twice: its `verify` once the step stops, then `then.answers` sent in that session and `then.verify`; `checks` beside either are checked by hand and appended to grading.json. `configurations` names which of new/old to run, `runs` how many independent repetitions, each in a fresh repo.",
   "every_step": [
     "commits: every new commit descends from <head:step>, subject <= 72 chars, no attribution, SENTINEL.txt in none",
     "sentinel: SENTINEL.txt still staged",
@@ -624,6 +624,296 @@
               {"kind": "plan", "path": "<plan>", "jobId": "<job>", "recorded": ["plan-review"], "before": "<run>/steps/B-plan-review.plan-before", "patterns": ["^#+ *[Oo]pen [Qq]uestions[\\s\\S]*^<job-record "]},
               {"kind": "recorded-subject", "planPath": "<plan>", "jobId": "<job>", "key": "plan-review", "subject": "^REVIEW HISTORY: Record step B attempt 1$"},
               {"kind": "history", "since": "<head:B-plan-review>", "absent": "\"openQuestions\""}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "mm-jobs-c",
+      "eval_id": 17,
+      "flavour": "modified-matt + kanban",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old>",
+      "seed": "npm run -s skill-evals -- seed-plan /tmp/pk-e2e/<id>-<new|old> .claude/plans/word-count.md --job 8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d --at C",
+      "why": "Step C alone on a settled plan: one CODE: commit holding the code and never the plan, and one C attempt whose SHA is that commit in `code`.",
+      "job": {
+        "id": "8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d",
+        "title": "Word count",
+        "description": "Add wordCount(text) to src/text.js: how many words a text holds, 0 for blank text. Export and test it.",
+        "plan": ".claude/plans/word-count.md"
+      },
+      "steps": [
+        {
+          "label": "C-code",
+          "step": "code",
+          "flags": "--plan <plan>",
+          "verify": [
+            {"kind": "commits", "since": "<head:C-code>", "count": 1, "subjects": ["^CODE: "], "paths": [["src/text.js", "test/text.test.js"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:C-code>"},
+            {"kind": "plan", "path": "<plan>", "jobId": "<job>", "recorded": ["plan-review", "code"], "before": "<run>/steps/C-code.plan-before", "attempts": 2},
+            {"kind": "recorded-subject", "planPath": "<plan>", "jobId": "<job>", "key": "code", "subject": "^CODE: "}
+          ],
+          "checks": [
+            "npm test passes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-jobs-d",
+      "eval_id": 18,
+      "flavour": "modified-matt + kanban",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old>",
+      "seed": "npm run -s skill-evals -- seed-plan /tmp/pk-e2e/<id>-<new|old> .claude/plans/word-count.md --job 8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d --at D",
+      "why": "Step D alone on the seeded code commit: one history commit holding only the plan, whatever the verdict, so no source changed, and a D attempt reviewing exactly `commits.code`.",
+      "job": {
+        "id": "8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d",
+        "title": "Word count",
+        "description": "Add wordCount(text) to src/text.js: how many words a text holds, 0 for blank text. Export and test it.",
+        "plan": ".claude/plans/word-count.md"
+      },
+      "steps": [
+        {
+          "label": "D-code-review",
+          "step": "code-review",
+          "flags": "--plan <plan>",
+          "commitSha": "<head:seed>",
+          "verify": [
+            {"kind": "commits", "since": "<head:D-code-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record step D attempt 1$"], "paths": [["<plan>"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:D-code-review>"},
+            {"kind": "plan", "path": "<plan>", "jobId": "<job>", "recorded": ["plan-review", "code", "code-review"], "before": "<run>/steps/D-code-review.plan-before", "attempts": 3, "patterns": ["\"reviewedCommits\": \\[[^\\]]*\"<head:seed>\""]},
+            {"kind": "recorded-subject", "planPath": "<plan>", "jobId": "<job>", "key": "code-review", "subject": "^REVIEW HISTORY: Record step D attempt 1$"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-jobs-e-triage",
+      "eval_id": 19,
+      "flavour": "modified-matt + kanban",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old>",
+      "seed": "npm run -s skill-evals -- seed-plan /tmp/pk-e2e/<id>-<new|old> .claude/plans/word-count.md --job 8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d --at E --findings some",
+      "why": "Closes the c6c gap: D found nothing there, so E's strict triage went unexercised. With one finding decided and one not, E must keep asking rather than change code or record an undecided finding, then fix, reject and record once both are decided.",
+      "job": {
+        "id": "8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d",
+        "title": "Word count",
+        "description": "Add wordCount(text) to src/text.js: how many words a text holds, 0 for blank text. Export and test it.",
+        "plan": ".claude/plans/word-count.md"
+      },
+      "steps": [
+        {
+          "label": "E-code-fix",
+          "step": "code-fix",
+          "flags": "--plan <plan>",
+          "answers": "Finding 1: FIX it as you propose; I approve that. Finding 2: I haven't decided yet; don't fix or record it until I do.",
+          "verify": [
+            {"kind": "commits", "since": "<head:E-code-fix>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:E-code-fix>"},
+            {"kind": "plan", "path": "<plan>", "jobId": "<job>", "recorded": ["plan-review", "code", "code-review"], "before": "<run>/steps/E-code-fix.plan-before", "attempts": 3}
+          ],
+          "then": {
+            "answers": "Finding 2: REJECT it; capitalize doesn't guard against null either, and callers pass strings. Asked to agree to stop with the work unfinished (INCOMPLETE or BLOCKED): I don't agree; carry on.",
+            "verify": [
+              {"kind": "commits", "since": "<head:E-code-fix>", "count": 2, "subjects": ["^CODE REVIEW FIXES: ", "^JOB HISTORY: Record step E attempt 1$"], "paths": [["src/text.js", "test/text.test.js"], ["<plan>"]]},
+              {"kind": "sentinel"},
+              {"kind": "reflog", "since": "<head:E-code-fix>"},
+              {"kind": "plan", "path": "<plan>", "jobId": "<job>", "recorded": ["plan-review", "code", "code-review", "code-fix"], "before": "<run>/steps/E-code-fix.plan-before", "attempts": 4, "patterns": ["\"step\": \"E\"[\\s\\S]*\"outcome\": \"COMPLETE\"", "\"result\": \"FIXED\"", "\"result\": \"REJECTED\""]},
+              {"kind": "recorded-subject", "planPath": "<plan>", "jobId": "<job>", "key": "code-fix", "subject": "^CODE REVIEW FIXES: "}
+            ],
+            "checks": [
+              "npm test passes",
+              "wordCount('one\\ttwo') is 2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "mm-agile-4",
+      "eval_id": 20,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify --at 4 --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "Step 4 alone on a reviewed spec: one SPEC: commit carries the spec's uncommitted SHA edit, so the record still names the review commit and the spec is clean, and the issues it writes start ready-for-agent.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Slugify",
+        "description": "Add slugify(text) to src/text.js: lower-case, ASCII letters and digits kept, runs of anything else become one hyphen, no leading or trailing hyphen. Export it and test it."
+      },
+      "steps": [
+        {
+          "label": "4-to-issues",
+          "step": "spec-to-issues",
+          "flags": "--spec <spec>",
+          "answers": "Approve the breakdown and the ADR changes.",
+          "verify": [
+            {"kind": "commits", "since": "<head:4-to-issues>", "count": 1, "subjects": ["^SPEC: "]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:4-to-issues>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "sha": "<head:seed>", "before": "<run>/steps/4-to-issues.spec-before", "worktree": "clean"},
+            {"kind": "issue", "path": "<issue>", "status": "ready-for-agent", "recorded": {"codeCommit": "none"}}
+          ],
+          "checks": [
+            "the SPEC: commit holds the spec and every issue file it wrote (fill `paths`)",
+            "every issues/*.json parses with IssueFileSchema, status ready-for-agent"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-agile-5",
+      "eval_id": 21,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify --at 5 --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "Step 5 alone on the first unblocked issue: one CODE: commit carrying both trailers, then the issue advanced with its implementation record and a codeCommit naming that commit.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Slugify",
+        "description": "Add slugify(text) to src/text.js: lower-case, ASCII letters and digits kept, runs of anything else become one hyphen, no leading or trailing hyphen. Export it and test it."
+      },
+      "steps": [
+        {
+          "label": "5-implement",
+          "step": "implement",
+          "issue": ".mysdd/features/01-slugify/issues/01-slugify-words.json",
+          "verify": [
+            {"kind": "commits", "since": "<head:5-implement>", "count": 1, "subjects": ["^CODE: "], "trailers": [["Issue: <issue>", "Spec: <spec>"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:5-implement>"},
+            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"codeCommit": "recorded"}, "commentPatterns": ["^Deviations and tradeoffs:"]},
+            {"kind": "recorded-subject", "issuePath": "<issue>", "field": "codeCommit", "subject": "^CODE: "}
+          ],
+          "checks": [
+            "npm test passes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-agile-6",
+      "eval_id": 22,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify --at 6 --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "Phase 1 alone on the seeded code commit: one history commit holding only the issue, whatever the verdict, its record reviewing exactly codeCommit and the status unchanged.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Slugify",
+        "description": "Add slugify(text) to src/text.js: lower-case, ASCII letters and digits kept, runs of anything else become one hyphen, no leading or trailing hyphen. Export it and test it."
+      },
+      "steps": [
+        {
+          "label": "6-final-review",
+          "step": "final-review",
+          "issue": ".mysdd/features/01-slugify/issues/01-slugify-words.json",
+          "commitSha": "<head:seed>",
+          "verify": [
+            {"kind": "commits", "since": "<head:6-final-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record final review attempt 1$"], "paths": [["<issue>"]], "trailers": [["Issue: <issue>"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:6-final-review>"},
+            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"reviewHistoryCommit": "recorded", "reviewCodeCommit": "none"}, "commentPatterns": ["^Final review, phase 1, attempt 1$", "^Reviewed commits: <head:seed>$", "^Verdict: (PASS|NEEDS FIXES)$"]},
+            {"kind": "recorded-subject", "issuePath": "<issue>", "field": "reviewHistoryCommit", "subject": "^REVIEW HISTORY: Record final review attempt 1$"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mm-agile-7-triage",
+      "eval_id": 23,
+      "flavour": "modified-matt",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify --at 7 --findings some --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "Phase 2's strict triage, as mm-jobs-e-triage for step E: with one finding undecided it keeps asking and changes nothing, then fixes, rejects, records COMPLETE and closes once both are decided.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Slugify",
+        "description": "Add slugify(text) to src/text.js: lower-case, ASCII letters and digits kept, runs of anything else become one hyphen, no leading or trailing hyphen. Export it and test it."
+      },
+      "steps": [
+        {
+          "label": "7-review-fix",
+          "step": "review-fix",
+          "issue": ".mysdd/features/01-slugify/issues/01-slugify-words.json",
+          "answers": "Finding 1: FIX it as you propose; I approve that. Finding 2: I haven't decided yet; don't fix or record it until I do.",
+          "verify": [
+            {"kind": "commits", "since": "<head:7-review-fix>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:7-review-fix>"},
+            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"reviewCodeCommit": "none"}}
+          ],
+          "then": {
+            "answers": "Finding 2: REJECT it; capitalize doesn't guard against null either, and callers pass strings. Asked to agree to stop with the work unfinished (INCOMPLETE or BLOCKED): I don't agree; carry on.",
+            "verify": [
+              {"kind": "commits", "since": "<head:7-review-fix>", "count": 2, "subjects": ["^CODE REVIEW FIXES: ", "^Closed Issue: <issue>$"], "paths": [["src/text.js", "test/text.test.js"], ["<issue>"]], "trailers": [["Issue: <issue>", "Spec: <spec>"], []]},
+              {"kind": "sentinel"},
+              {"kind": "reflog", "since": "<head:7-review-fix>"},
+              {"kind": "issue", "path": "<issue>", "status": "done-final-review", "recorded": {"reviewCodeCommit": "recorded"}, "commentPatterns": ["^Final review, phase 2, attempt 1$", "^Outcome: COMPLETE$", "^1\\. FIXED", "^2\\. REJECTED"]},
+              {"kind": "recorded-subject", "issuePath": "<issue>", "field": "reviewCodeCommit", "subject": "^CODE REVIEW FIXES: "}
+            ],
+            "checks": [
+              "npm test passes",
+              "slugify('snake_case') has no underscore"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "mk-agile-7-triage",
+      "eval_id": 24,
+      "flavour": "makerkit-custom",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour makerkit-custom --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify --at 7 --findings some --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "mk's PHASE-2 is its own text: it checks in the root AGENTS.md's § Verification order and triages a check-time review skill's findings with the user, never recording them UNRESOLVED unasked. Its subjects and records come from the same tracker as mm's, so every expectation is mm-agile-7-triage's.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Slugify",
+        "description": "Add slugify(text) to src/text.js: lower-case, ASCII letters and digits kept, runs of anything else become one hyphen, no leading or trailing hyphen. Export it and test it."
+      },
+      "steps": [
+        {
+          "label": "7-review-fix",
+          "step": "review-fix",
+          "issue": ".mysdd/features/01-slugify/issues/01-slugify-words.json",
+          "answers": "Finding 1: FIX it as you propose; I approve that. Finding 2: I haven't decided yet; don't fix or record it until I do.",
+          "verify": [
+            {"kind": "commits", "since": "<head:7-review-fix>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:7-review-fix>"},
+            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"reviewCodeCommit": "none"}}
+          ],
+          "then": {
+            "answers": "Finding 2: REJECT it; capitalize doesn't guard against null either, and callers pass strings. Asked to agree to stop with the work unfinished (INCOMPLETE or BLOCKED): I don't agree; carry on.",
+            "verify": [
+              {"kind": "commits", "since": "<head:7-review-fix>", "count": 2, "subjects": ["^CODE REVIEW FIXES: ", "^Closed Issue: <issue>$"], "paths": [["src/text.js", "test/text.test.js"], ["<issue>"]], "trailers": [["Issue: <issue>", "Spec: <spec>"], []]},
+              {"kind": "sentinel"},
+              {"kind": "reflog", "since": "<head:7-review-fix>"},
+              {"kind": "issue", "path": "<issue>", "status": "done-final-review", "recorded": {"reviewCodeCommit": "recorded"}, "commentPatterns": ["^Final review, phase 2, attempt 1$", "^Outcome: COMPLETE$", "^1\\. FIXED", "^2\\. REJECTED"]},
+              {"kind": "recorded-subject", "issuePath": "<issue>", "field": "reviewCodeCommit", "subject": "^CODE REVIEW FIXES: "}
+            ],
+            "checks": [
+              "npm test passes",
+              "slugify('snake_case') has no underscore"
             ]
           }
         }

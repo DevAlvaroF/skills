@@ -26,8 +26,9 @@ export type Check =
    * each `recorded` key resolves in HEAD's history, and every SHA it holds is a full one.
    * `before` (resolved from the working directory) is the plan as the step found it — `step
    * --plan` writes it to `steps/<label>.plan-before` — and makes attempts only grow from it.
+   * `attempts` is the exact count: a seeded step that must not record yet keeps the seed's.
    */
-  | { kind: 'plan'; path: string; jobId: string; recorded: PlanRecordStepKey[]; patterns?: string[]; before?: string }
+  | { kind: 'plan'; path: string; jobId: string; recorded: PlanRecordStepKey[]; patterns?: string[]; before?: string; attempts?: number }
   | { kind: 'spec-marker'; path: string; briefId: string }
   /**
    * The spec's `<spec-record>` block: it parses with `SpecRecordSchema` (the app's `readSpecRecord`), keeps
@@ -203,6 +204,11 @@ async function check(repo: string, item: Check, history: GitHistoryService): Pro
         const bad = shas.filter(({ sha }) => !RECORDED_SHA_PATTERN.test(sha) || tryGit(repo, ['cat-file', '-e', `${sha}^{commit}`]) === null)
         out.push({ text: `every SHA Job ${job}'s record holds is 40 lowercase hex and names a commit`, passed: bad.length === 0,
           evidence: bad.map(({ at, sha }) => `${at} = ${JSON.stringify(sha)}`).join(' | ') || `${shas.length} SHAs, all full commits` })
+      }
+      if (item.attempts !== undefined) {
+        out.push({ text: `Job ${job}'s record holds exactly ${item.attempts} attempt(s)`,
+          passed: read.state === 'read' && read.record.attempts.length === item.attempts,
+          evidence: read.state === 'read' ? read.record.attempts.map((attempt) => `${attempt.step}${attempt.attempt}`).join(', ') || 'none' : unread(read) })
       }
       if (item.before !== undefined) out.push(attemptsGrow(resolve(item.before), item.jobId, read))
       for (const key of item.recorded) {

@@ -1,0 +1,2 @@
+1. BLOCKING — src/text.js:8. Impact: an underscore survives into the slug: slugify('snake_case') returns 'snake_case', though US-002 makes every character but an ASCII letter or digit a separator (`\W` counts `_` as a word character). The tests have no underscore, so they pass. Correction: replace /[^a-z0-9]+/g after lower-casing, and test an underscore.
+2. SUGGESTION — src/text.js:7. Impact: slugify(null) and slugify(undefined) throw a TypeError instead of returning ''. Correction: return '' when text is not a string, and test it.

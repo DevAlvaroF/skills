@@ -21,6 +21,7 @@ check means what the app means. There, `npm run skill-evals` runs `cli.ts`.
 2. For each of those scenarios, and each configuration it names:
    ```bash
    npm run skill-evals -- repo /tmp/pk-e2e/mm-jobs-new --flavour modified-matt --skills new
+   npm run skill-evals -- seed-plan /tmp/pk-e2e/mm-jobs-new .claude/plans/word-count.md --job $JOB --at C
    npm run skill-evals -- prompt code --templates new --subject subject.json > prompt.txt
    npm run skill-evals -- step /tmp/pk-e2e/mm-jobs-new $RUN C-code prompt.txt --plan .claude/plans/word-count.md
    npm run skill-evals -- answer /tmp/pk-e2e/mm-jobs-new $RUN C-code "I approve your triage."
@@ -28,7 +29,8 @@ check means what the app means. There, `npm run skill-evals` runs `cli.ts`.
    npm run skill-evals -- snapshot /tmp/pk-e2e/mm-jobs-new $RUN .claude/plans
    ```
    with `RUN=.skill-evals/iteration-N/eval-<id>/<new_skill|old_skill>/run-1`.
-   `DRIVER.md` is the brief for an agent driving one scenario.
+   A seeded scenario runs its seed after `repo` (see Seeded steps); a chain
+   has none. `DRIVER.md` is the brief for an agent driving one scenario.
 3. `npm run skill-evals -- aggregate .skill-evals/iteration-N` writes
    `benchmark.json`/`.md` through skill-creator's `aggregate_benchmark`. Its
    delta compares configurations, so with `new` alone it means nothing:
@@ -48,6 +50,71 @@ the `spec` check, which holds the Spec Record to `spec-record-check.ts`. Each
 step's `timing.json` sums the token usage Codex reports per turn; the run's
 `timing.json` sums the steps.
 
+## Seeded steps
+
+A seed writes, without a Codex session, the state the step before leaves, so
+one step can run alone. `seed.ts` builds it and checks it with the app's
+parsers before it prints `<full path> <HEAD>`: plans against `JobRecordSchema`
+and `job-record-check.ts`, specs against `spec-record-check.ts`, Issues against
+`IssueFileSchema`. A seed the app can't read wastes a whole Codex run, and
+`JSON.parse` alone once missed a schema break that hid a card.
+prompt-kanban's `tests/unit/evals/seed-states.test.ts` builds every state and
+checks that each recorded SHA is a commit holding what its subject says, that
+the fixture's `npm test` passes, and that the tree is clean except for what the
+step before leaves uncommitted.
+
+| Step | Seed | What it holds |
+|---|---|---|
+| 3 | `seed-spec … --record empty` | `fixtures/specs/slugify.md` as step 2 leaves it, untracked, with one question open (a length cap) |
+| 4 | `seed-feature … --at 4` | `specs/slugify.settled.md` with a finished first review (`seed-spec … recorded`) |
+| 5 | `seed-feature … --at 5` | + `fixtures/issues/slugify/` (02 blocked by 01), committed with the spec as `SPEC: …` |
+| 6 | `seed-feature … --at 6` | + `CODE: Add slugify` from `fixtures/code/slugify` with `Issue:` and `Spec:` trailers; issue 01 advanced as implement leaves it, uncommitted |
+| 7 | `seed-feature … --at 7 --findings none\|some` | + a phase 1 record on issue 01, committed as `REVIEW HISTORY: Record final review attempt 1` and recorded; `some` uses `reviews/slugify.findings.txt` |
+| B | `seed-plan … --job <uuid>` (`--at B`, the default) | `fixtures/plans/word-count.md` ending in the empty Job Record, untracked, with one question open |
+| C | `seed-plan … --at C` | `plans/word-count.settled.md`, its question answered under Open questions, with a B attempt committed and recorded |
+| D | `seed-plan … --at D` | + `CODE: Add wordCount` from `fixtures/code/word-count` and a COMPLETE C attempt |
+| E | `seed-plan … --at E --findings none\|some` | + a D attempt committed and recorded: PASS with no findings, or NEEDS FIXES with `reviews/word-count.findings.json` |
+
+`--findings some` holds one real defect planted in the code that its tests miss
+(tab- and newline-separated words count as one; an underscore survives into the
+slug) and one arguable suggestion, so a triage has one finding to fix and one
+the user may reject. Scenarios 19, 23 and 24 approve the triage for finding 1
+only, so the step has to keep asking; the `then` answer rejects finding 2, and
+the step records COMPLETE with one FIXED and one REJECTED. The `plan` check's
+optional `attempts` is the exact count, so a check can tell a step that
+recorded from one still asking.
+`seed-feature` needs `repo --setup committed|local`; in local mode the Feature
+files stay untracked and each review commits the empty marker instead, as the
+tracker says.
+
+Steps 0, 1 and A have no seed: they start from nothing but a repo, a Brief or a
+Job, and `repo --setup` already writes what comes before them. Step 2 writes the
+spec from the grill's conversation, which exists only in that session, so 1 and
+2 stay one session.
+
+Per step, new skills, measured inside chains:
+
+| Chain | Per step (tokens) | Chain total |
+|---|---|---|
+| mm-jobs, c6c | A 0.07M · B 0.79M · C 0.54M · D 0.29M · E 0.23M | 1.92M |
+| mm-agile, iteration 1 | setup 0.17M · 1+2 0.76M · 3 0.26M · 4 0.41M · 5 0.79M · 6 0.35M · 7 0.32M | 3.06M |
+
+A seeded step costs about what it costs inside a chain, so targeting one step is
+3–10× cheaper than its chain, while seeding every step and running them all
+costs about a chain.
+
+Chains stay the release tier: a seed is the app's idea of what the step before
+leaves behind, and only a chain tests what that step actually leaves, so a
+contract bump or a release still runs one chain per group.
+
+Run `old` on seeded steps only within one contract, because seeds are built
+from the current templates and schemas and old fails them by construction
+across a bump. Within one contract they are the right way to compare old with
+new, because both start from byte-identical input, whereas a chain's B reads
+the A output of its own configuration.
+
+<!-- seeded-variance: filled after phase 3 -->
+
 ## The Spec Record scenarios (contract 6)
 
 Scenarios 7–15 in `evals.json` measure step 3's Spec Record and commit. They
@@ -63,8 +130,10 @@ costs one or two Codex sessions:
   spec from before the record), `empty` (as step 2 leaves it), `saved`,
   `committed` or `recorded` (a passing review interrupted after saving its
   attempt, after committing it, or finished), `malformed` or `duplicate`.
-  `--secret` adds a secret-shaped line, uncommitted. The fixture leaves one
-  question open (a length cap) for the review to ask.
+  For an ignored spec, `committed` and `recorded` make the empty marker
+  instead, as local mode does. `--secret` adds a secret-shaped line,
+  uncommitted. The fixture leaves one question open (a length cap) for the
+  review to ask.
 
 Their checks are `verify` objects. `spec` reads the record with the app's
 `readSpecRecord` and checks its attempts, its live key, its growth against
@@ -84,14 +153,11 @@ npm run skill-evals -- verify /tmp/pk-e2e/mm-spec-local-new $RUN checks.json
 
 ## The open plan question (scenario 16)
 
-`mm-jobs-b-open` runs step B alone on the plan step A leaves.
-`seed-plan <repo> <plan path> --job <uuid>` writes `fixtures/plans/word-count.md`
-ending with `jobRecordTemplate(<uuid>)`, untracked as step A leaves it, and
-prints the plan's full path and `HEAD`. The fixture's Notes leave one question
-open (does `--` count as a word?). Its step has `then`, so one session is
-verified twice: once B stops with the answer withheld — no commit, no attempt,
-the question under `Open questions` above the record — and again after the
-answer settles it: one `REVIEW HISTORY: Record step B attempt 1` commit holding
+`mm-jobs-b-open` runs step B alone on `seed-plan`'s default, `--at B` (see
+Seeded steps). The fixture's Notes leave one question open (does `--` count as
+a word?). Its step has `then`, so one session is verified twice: once B stops
+with the answer withheld — no commit, no attempt, the question under `Open
+questions` above the record — and again after the answer settles it: one `REVIEW HISTORY: Record step B attempt 1` commit holding
 the plan alone, `plan-review` recorded, and no attempt carrying `openQuestions`.
 
 ## skill-check
@@ -129,9 +195,10 @@ for bundling one into the skill. It reads blocks with the app's own
 - Run what the change calls for, by `../AGENTS.md`'s tiers: new only and one
   run by default, because the checks grade formats and are stable; re-run a
   failure once before calling it a bug. Old against new only for a claimed
-  token saving, since tokens vary about 60% run to run: report a delta only
-  beyond ~50%, else "no measurable change". A new check runs `old` once to
-  prove it discriminates, then new only.
+  token saving, on seeded steps within one contract (see Seeded steps), since
+  tokens vary about 60% run to run: report a delta only beyond ~50%, else "no
+  measurable change". A new check runs `old` once to prove it discriminates,
+  then new only.
 - Grade what the skills promise — formats, done rules, hard limits — never
   wording. A check that passes for old and new alike measures nothing; prefer
   ones that caught a real failure (the trailer check in `verify.ts` did, and

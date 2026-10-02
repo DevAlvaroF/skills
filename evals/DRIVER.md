@@ -31,6 +31,8 @@ fails to import (another agent may be mid-edit in `src/`), wait a minute and ret
   the variant named in the step notes; `runs: 2` means two independent repetitions, each from a fresh repo. Their
   checks are already `verify` objects: substitute `<spec>`, `<plan>`, `<job>` (the scenario's `job.id`),
   `<head:LABEL>` and `<run>`, and write them to `checks-<label>.json`.
+- A seeded scenario's `seed` runs after `repo` and before step 1, and `<head:seed>` is the `HEAD` it prints. If a
+  step lists `hand` checks, check them by hand and append each to `grading.json` as under Verifying.
 - A step with `then` is one session verified twice: verify its `verify` as `checks-<label>.json` once the step stops,
   then send `then.answers` with `answer` in that same session and verify `then.verify` as
   `checks-<label>-answered.json`.
