@@ -20,11 +20,11 @@ or an assumed empty finding list. Keep the additional-plans inventory (below) fr
 3. **Weigh every finding, then stop.** Being reviewed pulls you both ways — accept because it was raised, reject because
    it criticises you — and neither is evidence. Check each claim against the code and requirements, then present every
    finding by number with a proposed **FIX** (where, how), **REJECT** or **DEFER** (why), weighing the recorded
-   deviations. Then wait: change no code until the user replies approving the triage in so many words. Being invoked,
-   copying a prompt or marking a step complete is not approval. A decision contradiction offers fixing the code or
-   superseding the ADR per `/makerkit-custom-domain-modeling`, which needs the user's own agreement. Never edit the
-   spec. Keep asking until the user has said FIX, REJECT or DEFER for every finding, and never record one undecided:
-   nobody would act on it.
+   deviations. Then wait: change no code until the user has said FIX, REJECT or DEFER for every finding in so many words
+   — a fix begun while others are undecided may be undone or reshaped by them, and one nobody agreed to changes code
+   unasked. Being invoked, copying a prompt or marking a step is not approval. A decision contradiction offers fixing
+   the code or superseding the ADR per `/makerkit-custom-domain-modeling`, which needs the user's own agreement. Never
+   edit the spec. Keep asking, and never record a finding undecided: nobody would act on it.
 4. **Implement the approved fixes**, nothing more, with `/makerkit-custom-tdd` where behaviour changes.
 5. **Check** with the root `AGENTS.md` § Verification in its order, plus what nested files add, whole-repo runs
    through a sub-agent reporting failures only. A review skill there sees only this attempt's fixes and the ADRs'

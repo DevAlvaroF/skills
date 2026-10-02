@@ -46,9 +46,11 @@ also copies the Job's plan, as the step finds it, to
 Record's attempts may only grow. The `plan` check also holds the record to
 `job-record-check.ts`, the checker `npm run skill-check` runs (below). `--spec
 <path>` does the same for a Feature's spec, as `steps/<label>.spec-before`, for
-the `spec` check, which holds the Spec Record to `spec-record-check.ts`. Each
-step's `timing.json` sums the token usage Codex reports per turn; the run's
-`timing.json` sums the steps.
+the `spec` check, which holds the Spec Record to `spec-record-check.ts`. The
+`unchanged` check takes `paths` and passes while `git status` shows nothing
+under them, staged, unstaged or untracked: a step still asking has changed no
+code. Each step's `timing.json` sums the token usage Codex reports per turn;
+the run's `timing.json` sums the steps.
 
 ## Seeded steps
 
@@ -79,8 +81,9 @@ step before leaves uncommitted.
 (tab- and newline-separated words count as one; an underscore survives into the
 slug) and one arguable suggestion, so a triage has one finding to fix and one
 the user may reject. Scenarios 19, 23 and 24 approve the triage for finding 1
-only, so the step has to keep asking; the `then` answer rejects finding 2, and
-the step records COMPLETE with one FIXED and one REJECTED. The `plan` check's
+only, so the step keeps asking and changes nothing, which `unchanged` checks on
+`src` and `test`; the `then` answer rejects finding 2, and the step records
+COMPLETE with one FIXED and one REJECTED. The `plan` check's
 optional `attempts` is the exact count, so a check can tell a step that
 recorded from one still asking.
 `seed-feature` needs `repo --setup committed|local`; in local mode the Feature
@@ -242,13 +245,15 @@ Spec Record, so their record checks fail by construction; 10–15 run new only.
 | mm-spec, 1–4 | 28/34 ×2, 1.67M / 1.80M, 592 / 627 s | 62/63 ×2, 1.49M / 2.38M, 665 / 891 s |
 | mk-spec, 1–4 | 31/36 ×2, 2.13M / 2.31M, 719 / 608 s | 62/63 ×2, 2.07M / 1.55M, 711 / 661 s |
 | mm-spec-local, 3 | 6/9 ×2, 0.38M / 0.32M, 292 / 264 s | 24/24 ×2, 1.02M / 1.15M, 450 / 462 s |
-| legacy, re-review, open, secret | — | 25/25, 26/26, 15/15, 15/16 |
+| legacy, re-review, open, secret | — | 25/25, 26/26, 15/15, 16/16 (iteration e1b) |
 | resume committed / saved | — | 16/16 / 25/25 ×2 (iteration c6b) |
 | broken malformed / duplicate | — | 7/7, 7/7 |
 
 The one new miss in mm-spec and mk-spec is a driver's own `paths` list: the `SPEC:` commit also
-carried the glossary entry the grill left in `CONTEXT.md`. Secret's miss is a hand check asking that
-the key be named to the user; the review deleted it before publishing and none reached history.
+carried the glossary entry the grill left in `CONTEXT.md`. Secret first scored 15/16: the review
+deleted the key unasked instead of naming it, and none reached history. Re-run in iteration e1 on the
+trimmed to-spec, it did the same twice, so REVIEW.md now leaves removing it to the user; e1b, one run,
+16/16, named the key and its line, stopped, and removed it only once the user answered.
 Saved resume first failed 24/25 — the resume rewrote the saved attempt's summary — which is why
 REVIEW.md says a resumed attempt keeps its text. Step 3's recording costs tokens the old skill never
 spends; in mm-spec-local it is about 3× old's.
@@ -257,6 +262,10 @@ After the strict-triage fixes (iteration c6c, one run, new only): mm-spec-local 
 25/25, mm-jobs A–E 82/82, all within the token noise band. b-open 29/29 new; old, once, 36/41,
 failing the first pass by committing with the question open. In that A–E run D found nothing, so E's
 triage went unexercised.
+
+Strict triage (iteration e1, one run each, new only): with one finding still undecided, scenarios 19,
+23 and 24 change nothing under `src` and `test`, as the new `unchanged` check confirms, then record
+COMPLETE. 19: 44/44, 1.41M, 395 s. 23: 34/34, 1.39M, 344 s. 24: 34/34, 1.25M, 237 s.
 
 ## Baseline (contract 5, 2026-09-29)
 

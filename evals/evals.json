@@ -701,7 +701,7 @@
       "runs": 1,
       "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old>",
       "seed": "npm run -s skill-evals -- seed-plan /tmp/pk-e2e/<id>-<new|old> .claude/plans/word-count.md --job 8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d --at E --findings some",
-      "why": "Closes the c6c gap: D found nothing there, so E's strict triage went unexercised. With one finding decided and one not, E must keep asking rather than change code or record an undecided finding, then fix, reject and record once both are decided.",
+      "why": "Closes the c6c gap: D found nothing there, so E's strict triage went unexercised. Finding 1 approved and finding 2 undecided, E keeps asking and changes nothing, src and test included: approving one finding starts no fix while another is open (D attempt 1 caught runs 2 and 3 editing code at this point). Once both are decided it fixes, rejects and records once.",
       "job": {
         "id": "8a2b4c6d-1e3f-4a5b-9c7d-0e1f2a3b4c5d",
         "title": "Word count",
@@ -718,7 +718,8 @@
             {"kind": "commits", "since": "<head:E-code-fix>", "count": 0},
             {"kind": "sentinel"},
             {"kind": "reflog", "since": "<head:E-code-fix>"},
-            {"kind": "plan", "path": "<plan>", "jobId": "<job>", "recorded": ["plan-review", "code", "code-review"], "before": "<run>/steps/E-code-fix.plan-before", "attempts": 3}
+            {"kind": "plan", "path": "<plan>", "jobId": "<job>", "recorded": ["plan-review", "code", "code-review"], "before": "<run>/steps/E-code-fix.plan-before", "attempts": 3},
+            {"kind": "unchanged", "paths": ["src", "test"]}
           ],
           "then": {
             "answers": "Finding 2: REJECT it; capitalize doesn't guard against null either, and callers pass strings. Asked to agree to stop with the work unfinished (INCOMPLETE or BLOCKED): I don't agree; carry on.",
@@ -841,7 +842,7 @@
       "runs": 1,
       "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour modified-matt --skills <new|old> --setup committed",
       "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify --at 7 --findings some --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
-      "why": "Phase 2's strict triage, as mm-jobs-e-triage for step E: with one finding undecided it keeps asking and changes nothing, then fixes, rejects, records COMPLETE and closes once both are decided.",
+      "why": "Phase 2's strict triage, as mm-jobs-e-triage for step E: finding 1 approved and finding 2 undecided, it keeps asking and changes nothing, src and test included, then fixes, rejects, records COMPLETE and closes once both are decided.",
       "brief": {
         "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
         "title": "Slugify",
@@ -857,7 +858,8 @@
             {"kind": "commits", "since": "<head:7-review-fix>", "count": 0},
             {"kind": "sentinel"},
             {"kind": "reflog", "since": "<head:7-review-fix>"},
-            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"reviewCodeCommit": "none"}}
+            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"reviewCodeCommit": "none"}},
+            {"kind": "unchanged", "paths": ["src", "test"]}
           ],
           "then": {
             "answers": "Finding 2: REJECT it; capitalize doesn't guard against null either, and callers pass strings. Asked to agree to stop with the work unfinished (INCOMPLETE or BLOCKED): I don't agree; carry on.",
@@ -884,7 +886,7 @@
       "runs": 1,
       "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour makerkit-custom --skills <new|old> --setup committed",
       "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify --at 7 --findings some --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
-      "why": "mk's PHASE-2 is its own text: it checks in the root AGENTS.md's § Verification order and triages a check-time review skill's findings with the user, never recording them UNRESOLVED unasked. Its subjects and records come from the same tracker as mm's, so every expectation is mm-agile-7-triage's.",
+      "why": "mk's PHASE-2 is its own text: it checks in the root AGENTS.md's § Verification order and triages a check-time review skill's findings with the user, never recording them UNRESOLVED unasked. Its subjects, records and wait come from the same rules as mm's, so every expectation is mm-agile-7-triage's, the unchanged src and test at the halfway point included.",
       "brief": {
         "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
         "title": "Slugify",
@@ -900,7 +902,8 @@
             {"kind": "commits", "since": "<head:7-review-fix>", "count": 0},
             {"kind": "sentinel"},
             {"kind": "reflog", "since": "<head:7-review-fix>"},
-            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"reviewCodeCommit": "none"}}
+            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"reviewCodeCommit": "none"}},
+            {"kind": "unchanged", "paths": ["src", "test"]}
           ],
           "then": {
             "answers": "Finding 2: REJECT it; capitalize doesn't guard against null either, and callers pass strings. Asked to agree to stop with the work unfinished (INCOMPLETE or BLOCKED): I don't agree; carry on.",

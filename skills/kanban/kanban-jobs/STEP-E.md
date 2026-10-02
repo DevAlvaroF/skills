@@ -8,11 +8,10 @@ You are the coder, in a fresh session: work from the plan's records, not memory.
    review needs only its unfinished bookkeeping.
 2. **Weigh every finding, then stop.** You wrote this code and another model reviewed it; don't accept a finding because
    it was raised or reject it because it criticises you — check it against the code, the plan and the deviations. For
-   each, by number, propose FIX (where and how), REJECT or DEFER (why), then wait for the user's explicit approval
-   before changing any code — being invoked, or the step being marked, is not approval, because a fix nobody agreed to
-   changes code unasked. A PASS with zero findings has nothing to approve; one with suggestions still does. Keep asking
-   until the user has said FIX, REJECT or DEFER for every finding, and never record one undecided: nobody would act on
-   it.
+   each, by number, propose FIX (where, how), REJECT or DEFER (why), then change no code until the user has said FIX,
+   REJECT or DEFER for every finding: a fix begun while others are undecided may be undone or reshaped by them, and one
+   nobody agreed to changes code unasked. Being invoked or marked is not approval. A PASS with zero findings has nothing
+   to approve; one with suggestions still does. Keep asking; never record a finding undecided: nobody would act on it.
 3. **Fix only the approved findings**, run the applicable checks and review your own change.
 4. **Settle the outcome.** COMPLETE only when every finding has an approved disposition, every approved fix is
    verified and every required check passes; approving a deferral waives no check. INCOMPLETE or BLOCKED only for

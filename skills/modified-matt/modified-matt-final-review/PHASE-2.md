@@ -19,12 +19,12 @@ empty finding list. From the start, keep the inventory of additional plans (§ A
 3. **Weigh every finding, then stop.** Being reviewed pulls you toward accepting a finding because it was raised and
    toward rejecting it because it criticises your code; neither is evidence. Check each claim against the code and
    requirements, weigh `Deviations and tradeoffs:`, and propose per finding, by number, **FIX** (where and how),
-   **REJECT** (why it fails or isn't worth its cost) or **DEFER** (where it belongs). Then wait for the user's explicit
-   reply approving the triage before changing code: being invoked, a copied prompt or a marked step is not approval, and
-   without it a fix changes code nobody agreed to. For an ADR contradiction offer both ways out, fixing the code or
-   superseding the ADR by `/modified-matt-domain-modeling`'s rules, and supersede only on the user's own agreement.
-   Never edit the spec. Keep asking until the user has said FIX, REJECT or DEFER for every finding, and never record one
-   undecided: nobody would act on it.
+   **REJECT** (why it fails or isn't worth its cost) or **DEFER** (where it belongs). Then wait: change no code until
+   the user's explicit reply has said FIX, REJECT or DEFER for every finding, since a fix begun while others are
+   undecided may be undone or reshaped by them, and one nobody agreed to changes code unasked. Being invoked, a copied
+   prompt or a marked step is not approval. For an ADR contradiction offer both ways out, fixing the code or superseding
+   the ADR by `/modified-matt-domain-modeling`'s rules, and supersede only on the user's own agreement. Never edit the
+   spec. Keep asking until every finding is decided, and never record one undecided: nobody would act on it.
 4. **Implement the approved fixes**, nothing more, with `/modified-matt-tdd` where behaviour changes.
 5. **Check**: the project's typecheck, tests, lint and build, whole-suite runs through a failures-only sub-agent, even
    with nothing fixed, since a DEFER waives no check. No fix commit until the fixes are verified: a failing check or a

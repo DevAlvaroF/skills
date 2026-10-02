@@ -24,12 +24,13 @@ depends on them:
    open; every review commits its record — 6 and D whatever the verdict, B
    once its questions are answered, the spec review (step 3) once the spec
    passes; in 7 and E every finding ends FIXED, REJECTED or DEFERRED by the
-   user's decision, and the agent keeps asking rather than record one
-   undecided; INCOMPLETE or BLOCKED is only for approved work that can't be
-   finished, once the user agrees — except a commit holding a path that isn't
-   the agent's, which stops at once and ends BLOCKED, as a hard limit, not a
-   choice; a recorded SHA is the commit this session made. The board's columns
-   are derived from these, so a vague done rule is a card in the wrong column.
+   user's decision, and the agent changes no code and records nothing until
+   every finding is decided; INCOMPLETE or BLOCKED is only for approved work
+   that can't be finished, once the user agrees — except a commit holding a
+   path that isn't the agent's, which stops at once and ends BLOCKED, as a hard
+   limit, not a choice; a recorded SHA is the commit this session made. The
+   board's columns are derived from these, so a vague done rule is a card in
+   the wrong column.
 3. **Hard limits.** Current branch only; only your own paths, the user's staged
    work stays staged and out; never amend, rebase, reset, push, force-add or
    untrack; no empty commit except the local-mode review marker; no attribution

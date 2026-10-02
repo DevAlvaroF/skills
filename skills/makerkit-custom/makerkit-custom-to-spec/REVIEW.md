@@ -32,7 +32,8 @@ changed:
 2. **Check what you publish.** Before every review commit that holds the spec (the empty marker holds nothing), read the
    whole spec and stop on anything secret-shaped (keys, tokens, `sk-`/`ghp_`/`AKIA` prefixes, private keys, credentialed
    URLs, `.env`-style secrets, PII, customer data), telling the user what and where: the commit puts the spec in
-   history, which outlives any later redaction.
+   history, which outlives any later redaction. Found at any point, name the line and where it is and leave removing it
+   to the user: a review that deleted one unasked hid what they may need to rotate.
 3. **Commit it** per the tracker's § Commits: `REVIEW HISTORY: Record spec review attempt <N>`, trailer
    `Spec: <spec path>`, holding the spec alone; in local mode, the empty marker per § Commits. A commit holding a path
    that isn't yours: record nothing more and report it, per § Commits.

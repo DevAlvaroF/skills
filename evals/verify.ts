@@ -21,6 +21,8 @@ export type Check =
   | { kind: 'sentinel' }
   /** No history rewrite since `since`. */
   | { kind: 'reflog'; since: string }
+  /** Nothing under `paths` differs from HEAD, staged, unstaged or untracked: a step still asking changed no code. */
+  | { kind: 'unchanged'; paths: string[] }
   /**
    * The Job's `<job-record>` block: it parses with `JobRecordSchema`, the Job owns the plan,
    * each `recorded` key resolves in HEAD's history, and every SHA it holds is a full one.
@@ -177,6 +179,10 @@ async function check(repo: string, item: Check, history: GitHistoryService): Pro
       const recent = cut === -1 ? lines : lines.slice(0, cut)
       const bad = recent.filter((line) => /amend|rebase|reset|checkout|merge/.test(line))
       return [{ text: 'no amend, rebase, reset or branch switch', passed: bad.length === 0, evidence: bad.join(' | ') || `${recent.length} entries, all commits` }]
+    }
+    case 'unchanged': {
+      const changed = git(repo, ['status', '--porcelain', '--untracked-files=all', '--', ...item.paths]).split('\n').filter(Boolean)
+      return [{ text: `${item.paths.join(', ')} unchanged`, passed: changed.length === 0, evidence: changed.join(' | ') || 'clean' }]
     }
     case 'plan': {
       const full = join(repo, item.path)
