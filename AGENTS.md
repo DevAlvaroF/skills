@@ -97,7 +97,8 @@ move a graded result; `evals/README.md` holds the loop and the baseline.
   vary about 60% from run to run. Run it on seeded single steps, because both
   sides then start from byte-identical input, and only within one contract:
   skip it when the seeded format changed, since old fails a seed of the new
-  format by construction. Report a token delta only beyond ~50%; otherwise say
+  format by construction. Report a token delta only beyond ~25% on a seeded
+  step (measured 20% across three runs) or ~50% on a chain; otherwise say
   "no measurable change".
 
 After touching `kanban-jobs` or `to-spec`, or to check a plan or a spec an

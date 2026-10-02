@@ -99,9 +99,12 @@ Per step, new skills, measured inside chains:
 | mm-jobs, c6c | A 0.07M · B 0.79M · C 0.54M · D 0.29M · E 0.23M | 1.92M |
 | mm-agile, iteration 1 | setup 0.17M · 1+2 0.76M · 3 0.26M · 4 0.41M · 5 0.79M · 6 0.35M · 7 0.32M | 3.06M |
 
-A seeded step costs about what it costs inside a chain, so targeting one step is
-3–10× cheaper than its chain, while seeding every step and running them all
-costs about a chain.
+A seeded step costs about what it costs inside a chain when the seed asks for
+the same work (C, D, 4, 5 and 6 below), so targeting one step is 3–10× cheaper
+than its chain, while seeding every step and running them all costs about a
+chain. A triage seed asks for more: two findings, one of them fixed, over three
+resumed turns, so E and 7 cost 4–7× their chain step, which had little or
+nothing to triage, though still less than their chain.
 
 Chains stay the release tier: a seed is the app's idea of what the step before
 leaves behind, and only a chain tests what that step actually leaves, so a
@@ -113,7 +116,30 @@ across a bump. Within one contract they are the right way to compare old with
 new, because both start from byte-identical input, whereas a chain's B reads
 the A output of its own configuration.
 
-<!-- seeded-variance: filled after phase 3 -->
+First runs (iteration `seeds`, 2026-10-02, new only, Codex CLI 0.159), every
+one passing; tokens are input + output:
+
+| Scenario | Passed | Tokens | Seconds |
+|---|---|---|---|
+| 17 mm-jobs-c | 19/19 | 0.65M | 234 |
+| 18 mm-jobs-d | 20/20 | 0.30M | 217 |
+| 19 mm-jobs-e-triage, ×3 | 43/43 ×3 | 1.23M / 1.48M / 1.32M | 285 / 260 / 261 |
+| 20 mm-agile-4 | 22/22 | 0.33M | 128 |
+| 21 mm-agile-5 | 16/16 | 0.62M | 221 |
+| 22 mm-agile-6 | 19/19 | 0.38M | 161 |
+| 23 mm-agile-7-triage | 33/33 | 1.58M | 197 |
+| 24 mk-agile-7-triage | 33/33 | 1.42M | 224 |
+
+Every triage run fixed finding 1 and then asked again about finding 2 rather
+than record it, the branch the c6c chain left untested. D and 6 found their
+planted defect unprompted; 6 also found one the seed did not plant
+(lower-casing first turns `İ` and the Kelvin sign into ASCII letters).
+
+Three runs of one seeded step spread 20% in tokens (1.23M to 1.48M), against
+about 60% for a chain, where each step also inherits the previous steps'
+variation. So on a seeded step a token delta beyond ~25% is worth reporting;
+three runs are a small sample, so widen that again if a seeded step spreads
+more.
 
 ## The Spec Record scenarios (contract 6)
 
@@ -196,8 +222,8 @@ for bundling one into the skill. It reads blocks with the app's own
   run by default, because the checks grade formats and are stable; re-run a
   failure once before calling it a bug. Old against new only for a claimed
   token saving, on seeded steps within one contract (see Seeded steps), since
-  tokens vary about 60% run to run: report a delta only beyond ~50%, else "no
-  measurable change". A new check runs `old` once to prove it discriminates,
+  tokens vary about 60% run to run: report a delta only beyond ~50%, or ~25%
+  on a seeded step (see Seeded steps), else "no measurable change". A new check runs `old` once to prove it discriminates,
   then new only.
 - Grade what the skills promise — formats, done rules, hard limits — never
   wording. A check that passes for old and new alike measures nothing; prefer
