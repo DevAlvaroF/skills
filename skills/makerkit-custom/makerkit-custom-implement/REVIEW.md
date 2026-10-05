@@ -7,11 +7,11 @@ Review along two axes, as **parallel sub-agents**, so one axis can't colour the 
 - **Spec** always runs here: does the code do what the issue and its spec ask, within the spec's Decision log and the
   binding ADRs for the touched paths?
 - **Standards** belongs to the repo's review skills in step 2: `/reviewer`, `/rls-review` when the change touches
-  migrations or RLS policies, and `/makerkit-custom-kit-conformance` when installed. Hand them the binding ADRs' paths
-  too. Run the **Standards fallback** here only when § Verification names no general review skill or the one it names
-  isn't installed — a specialist such as `/rls-review` doesn't count — unless the project names its own fallback. If no
-  standards review can run at all, report that in the final report and the implementation record; never report the
-  axis as passed.
+  migrations or RLS policies, and `/makerkit-custom-kit-conformance`, always: it ships with these skills. Hand them the
+  binding ADRs' paths too. Run the **Standards fallback** here only when § Verification names no general review skill or
+  the one it names isn't installed — a specialist such as `/rls-review` doesn't count — unless the project names its own
+  fallback. If no standards review can run at all, report that in the final report and the implementation record; never
+  report the axis as passed.
 
 ## Hand them the commands, not the diff
 

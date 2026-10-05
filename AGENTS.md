@@ -66,8 +66,11 @@ examples — because an example is the cheapest exact definition.
 ## Self-contained skills
 
 A skill gives the same result without prompt-kanban and with only its own
-directory installed. No links into another skill's files; name another skill by
-its invocation (`/modified-matt-implement`) instead.
+directory installed. The exception is `makerkit-custom`: the pack is always
+installed whole, so its skills may require one another (implement and
+final-review always run `/makerkit-custom-kit-conformance`). No links into
+another skill's files; name another skill by its invocation
+(`/modified-matt-implement`) instead.
 
 ## Size budget
 

@@ -80,10 +80,11 @@ root is already loaded; read the rest directly, because not every agent loads ne
 `AGENTS.md` names when writing code there, and run any verification it adds.
 ```
 
-Add this line once to the same file's `## Verification`, creating the section if missing:
+Add this line once to the same file's `## Verification`, creating the section if missing and replacing an older one
+ending `, when installed.`:
 
 ```markdown
-- Run `/makerkit-custom-kit-conformance` on the change, when installed.
+- Run `/makerkit-custom-kit-conformance` on the change.
 ```
 
 Write each generated file from its seed. An existing `domain.md` takes the seed's changes and keeps the user's own
