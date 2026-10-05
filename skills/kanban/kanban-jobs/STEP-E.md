@@ -39,6 +39,7 @@ You are the coder, in a fresh session: work from the plan's records, not memory.
 
    `reviewAttempt` is that D attempt's number. A verdict is FIXED with location and verification, or REJECTED or
    DEFERRED with the approved reason; an unfinished approved fix is UNRESOLVED, with its blocker.
+
 7. **Commit the plan for every outcome** under `JOB HISTORY: Record step E attempt <N>`. Its SHA never goes in the
    plan: `code-fix` names code commits only.
 

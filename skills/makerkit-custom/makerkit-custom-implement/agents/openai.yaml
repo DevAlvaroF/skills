@@ -1,5 +1,5 @@
 interface:
-  display_name: "Makerkit Custom Implement"
-  short_description: "Implement issues from the tracker"
+  display_name: 'Makerkit Custom Implement'
+  short_description: 'Implement issues from the tracker'
 policy:
   allow_implicit_invocation: false

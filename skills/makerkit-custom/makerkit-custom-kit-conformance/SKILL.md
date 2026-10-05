@@ -19,6 +19,7 @@ may be mid-work.
 
 ## Detect the flavour
 
+<!-- oxfmt-ignore -->
 | Flavour | Signals |
 |---|---|
 | Supabase | `apps/web/supabase/`, `@kit/supabase` |

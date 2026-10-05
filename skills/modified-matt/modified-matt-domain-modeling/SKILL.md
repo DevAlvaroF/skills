@@ -5,7 +5,7 @@ description: Builds and sharpens a project's domain model — the glossary, the 
 
 # Domain Modeling
 
-Actively build and sharpen the project's domain model as you design. This is the *active* discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely *reading* the glossary and ADRs is not this skill: `.mysdd/docs/agents/domain.md` covers that.)
+Actively build and sharpen the project's domain model as you design. This is the _active_ discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely _reading_ the glossary and ADRs is not this skill: `.mysdd/docs/agents/domain.md` covers that.)
 
 ## Where the model lives
 

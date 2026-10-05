@@ -1,5 +1,5 @@
 interface:
-  display_name: "To Issues"
-  short_description: "Split a plan into tracer-bullet issues"
+  display_name: 'To Issues'
+  short_description: 'Split a plan into tracer-bullet issues'
 policy:
   allow_implicit_invocation: false

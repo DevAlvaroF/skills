@@ -46,6 +46,7 @@ parse it. Only append to `comments`. Never write `codeCommit`; phase 1 writes on
 
 Once the phase is settled, read its file in full before writing anything:
 
+<!-- oxfmt-ignore -->
 | Phase | File | For |
 |---|---|---|
 | 1 | [PHASE-1.md](./PHASE-1.md) | the independent review, recorded and committed |

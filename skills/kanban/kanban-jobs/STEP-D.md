@@ -31,5 +31,6 @@ You are the reviewer, in a fresh session. Your key is `code-review`.
 
    Every finding, suggestions and blocked checks included, goes in `findings` (`[]` when none). Step E triages from
    this attempt alone, so a finding left out is lost.
+
 5. **Commit the plan, whatever the verdict**, under `REVIEW HISTORY: Record step D attempt <N>` (or the marker), then
    write that commit's SHA into `commit` and `commits["code-review"]`.

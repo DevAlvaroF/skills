@@ -15,6 +15,7 @@ A **Job** is five steps, each in a fresh session working from the plan's record:
 **C** code, **D** review the code, **E** fix the findings. The record is the Job's `<job-record>` block in a markdown
 plan in the repository. Read this file and the step's file in full before writing anything:
 
+<!-- oxfmt-ignore -->
 | Step | File | For |
 |---|---|---|
 | A | [STEP-A.md](./STEP-A.md) | writing the plan by hand |
@@ -77,6 +78,7 @@ unusable.
 
 ## Commits
 
+<!-- oxfmt-ignore -->
 | Step | Subject | Holds |
 |---|---|---|
 | B | `REVIEW HISTORY: Record step B attempt <N>` | the plan file alone |

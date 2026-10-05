@@ -53,6 +53,7 @@ and only appends to `comments`: an earlier record is evidence the next phase rea
 
 Once the phase is settled, read its file in full, and only that one, before writing anything:
 
+<!-- oxfmt-ignore -->
 | Phase | File | For |
 |---|---|---|
 | 1 | [PHASE-1.md](./PHASE-1.md) | the independent review, recorded and committed |

@@ -1,5 +1,5 @@
 interface:
-  display_name: "Makerkit Custom Final Review"
-  short_description: "Review and commit the findings; the coder triages and closes"
+  display_name: 'Makerkit Custom Final Review'
+  short_description: 'Review and commit the findings; the coder triages and closes'
 policy:
   allow_implicit_invocation: false

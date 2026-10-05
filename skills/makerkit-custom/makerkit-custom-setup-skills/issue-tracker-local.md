@@ -77,6 +77,7 @@ its field.
 
 Each field has one writer; every other skill carries it over verbatim, because it may be the only copy:
 
+<!-- oxfmt-ignore -->
 | Field | Writer |
 |---|---|
 | everything, with `status: ready-for-agent` | to-issues (a re-sync keeps each `done`) |
@@ -156,6 +157,7 @@ ADRs superseded: None.
 Subjects you write are ≤72 characters. The fixed subjects that embed `<issue path>` (repo-root-relative, starting
 `.mysdd/features/`) keep the whole path however long: other skills match them exactly.
 
+<!-- oxfmt-ignore -->
 | Operation | Subject | Body, trailers | Holds exactly | Local mode |
 |---|---|---|---|---|
 | spec review | `REVIEW HISTORY: Record spec review attempt <N>` | `Spec: <spec path>` | the spec | the empty marker |

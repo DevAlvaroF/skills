@@ -17,6 +17,7 @@ If the latest phase 1 record already reviewed the change as it stands but its `R
 
    A loaded review skill (such as `/modified-matt-implement`'s review) may run the passes instead, on exactly these
    commits: override a default of `git diff HEAD` or `git show HEAD`, since another diff is another review.
+
 2. **Verify, don't assume.** Every acceptance criterion needs evidence: take it from the Spec pass and verify here only
    what it left open. One nobody could verify (no way to drive the UI, a missing service) is a failure, not a pass: say
    what was blocked and why.

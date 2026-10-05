@@ -7,7 +7,7 @@ description: Builds and sharpens a project's domain model — the glossary, the 
 
 Actively build and sharpen the project's domain model as you design: challenge terms, invent edge-case scenarios, and
 write the vocabulary and decisions down the moment they crystallise. (Merely
-*reading* the glossary and ADRs is not this skill: `.mysdd/docs/agents/domain.md` covers that.)
+_reading_ the glossary and ADRs is not this skill: `.mysdd/docs/agents/domain.md` covers that.)
 
 ## Where the model lives
 

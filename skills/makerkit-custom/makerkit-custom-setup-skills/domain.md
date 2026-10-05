@@ -33,7 +33,7 @@ Grill, to-spec, to-issues and implement send you here before they start. Read th
 `docs/` is upstream Makerkit's product documentation when it holds `.mdoc` files, often 150+; if it is missing or
 holds none, skip this. Never walk it in your own context: it would crowd out the work. Dispatch one sub-agent, name the
 one or two topic directories the work touches (e.g., `docs/billing`, `docs/security`), and ask how the feature is
-*meant* to work there, answered briefly with the doc paths it relied on. Where its answer and the repo differ, follow
+_meant_ to work there, answered briefly with the doc paths it relied on. Where its answer and the repo differ, follow
 the repo.
 
 Don't block on it: carry on with whatever doesn't depend on its answer — the frontier questions in a grilling, the

@@ -17,7 +17,7 @@ scope:
 {1-3 sentences: what's the context, what did we decide, and why.}
 ```
 
-That's it. An ADR can be a single paragraph: the value is in recording *that* a decision was made and *why*. Add **Considered Options** or **Consequences** only when the rejected alternatives or the downstream effects are worth remembering.
+That's it. An ADR can be a single paragraph: the value is in recording _that_ a decision was made and _why_. Add **Considered Options** or **Consequences** only when the rejected alternatives or the downstream effects are worth remembering.
 
 ## Frontmatter
 
