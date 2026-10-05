@@ -51,8 +51,8 @@ reading only it never sees the root `AGENTS.md`: ask whether to add the import o
 
 ## 3. Confirm
 
-Draft the `## Agent skills` block, both generated files and every agreed rule change or migration. For a file that
-exists, show the delta, not the whole file. Let the user edit before writing.
+Draft the `## Agent skills` block, the § Verification line, both generated files and every agreed rule change or
+migration. For a file that exists, show the delta, not the whole file. Let the user edit before writing.
 
 ## 4. Write
 
@@ -80,10 +80,17 @@ root is already loaded; read the rest directly, because not every agent loads ne
 `AGENTS.md` names when writing code there, and run any verification it adds.
 ```
 
+Add this line once to the same file's `## Verification`, creating the section if missing:
+
+```markdown
+- Run `/makerkit-custom-kit-conformance` on the change, when installed.
+```
+
 Write each generated file from its seed. An existing `domain.md` takes the seed's changes and keeps the user's own
 sections, named in the report; an existing tracker follows [UPGRADE.md](./UPGRADE.md). The tracker must end with
 exactly one `Tracker contract: 6` line, directly under the title: every reader stops on anything else. Beyond the
-block, a root file seeded on request and the UPGRADE.md moves, leave every `AGENTS.md` alone.
+block, its § Verification line, a root file seeded on request and the UPGRADE.md moves, leave every `AGENTS.md`
+alone.
 
 ## 5. Done
 

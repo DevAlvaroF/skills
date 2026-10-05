@@ -3,8 +3,8 @@
 Custom skills for Claude Code and Codex, installed per project with
 [`npx skills`](https://github.com/vercel-labs/skills).
 
-The repo ships two flavours of the same eight skills. **Install one per
-project, never both.**
+The repo ships two flavours of the same eight skills; Makerkit Custom adds a
+ninth, `kit-conformance`. **Install one per project, never both.**
 
 | Flavour | Use it for |
 |---|---|
@@ -189,7 +189,7 @@ share:
 | **3 Review PRD Spec** | reviewer, fresh session | `reviewer` (warns if missing), `to-spec` (required) | `spec.md`, following `to-spec`'s `REVIEW.md` | edits `spec.md` in place, asking you about every gap rather than assuming, open questions kept in the spec; never cuts User Stories or renumbers an ID; only appends to the Decision log. Once the spec passes: one attempt in its Spec Record, then its `commit` and `commits.spec-review`, left uncommitted | only once the spec passes: `REVIEW HISTORY: Record spec review attempt <N>` + `Spec:` — the spec alone (local: empty marker) |
 | **4 Spec to Issues** | coder, fresh session | `to-issues` | spec, existing issues (reconciled by `slug`, never regenerated) | one issue JSON per vertical slice: `ready-for-agent`, `blockedBy`, `testBoundaries`, `covers`, commit fields `null`; after your approval, ADRs added for the spec's standing decisions and retired for dropped ones | `SPEC: <subject>`, no trailers — spec (with step 3's SHA edit), issues, glossary, ADRs (local: glossary and ADRs only) |
 | **5 Implement** | coder, auto mode | `implement`, `tdd` | issue, its spec when `spec` isn't `null`, ADRs | code, its own two-axis review (`REVIEW.md`); then the issue: criteria ticked, `done-coding-awaiting-final-review`, `codeCommit`, an implementation record with `Deviations and tradeoffs:` | `CODE: <subject>` + `Issue:`/`Spec:` trailers — code, agreed ADRs and `AGENTS.md` convention lines; the issue file stays uncommitted |
-| **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, `Findings` numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing, never changes `status` | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file (local: empty marker) |
+| **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required), `kit-conformance` (Makerkit, via final-review) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, `Findings` numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing, never changes `status` | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file (local: empty marker) |
 | **7 Fix Findings** (phase 2) | coder, fresh session, plan mode | `final-review` (required), `tdd` | latest phase 1 record, implementation record, earlier phase 2 records answering it | FIX / REJECT / DEFER per finding → your approval → fixes, checks; phase 2 record (attempt, `Answers`, `Outcome`, `Verdicts`, `Checks`, `Fix commit`, `Attempt plans`, `ADRs superseded`); `reviewCodeCommit`; `done-final-review` only on COMPLETE | `CODE REVIEW FIXES: <subject>` + trailers if code changed; `ATTEMPT PLANS: final review <issue path> attempt <K>` for plans it created, every outcome; on COMPLETE, `Closed Issue: <issue path>` (issue + board file if changed; none in local mode) |
 
 Step 7 always runs, even after a PASS with zero findings: the checks still
@@ -244,8 +244,9 @@ Same steps, gates and commits under `makerkit-custom-*`, except:
   touches migrations or RLS policies, else the smell baseline run in place,
   and `/makerkit-custom-kit-conformance` when installed: it reports only
   whether the change embraces the kit or fights it (bypassed wrappers,
-  edited upstream code, broken tenancy or schema workflow). Add it to a
-  project's `AGENTS.md` § Verification so implement's step 2 runs it too.
+  edited upstream code, broken tenancy or schema workflow). Setup-skills seeds
+  it into the root `AGENTS.md` § Verification, so implement's step 2 runs it
+  too.
 - **Slicing.** A slice crossing migration, policy, types, action, page and
   tests is still one slice; a shared migration or RLS policy is done before
   work is split across sub-agents.
@@ -264,7 +265,7 @@ never `HEAD` or a range.
 | **A Generate Plan** | coder, fresh session, plan mode | none | the Job's title and description | a plan under `.claude/plans` ending with the empty `<job-record id="<jobId>">` block; you bind it in the app | nothing |
 | **B Review Plan** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the plan, the code as it stands | edits the plan in place, questions and the user's answers under `Open questions` above the record; once none is open, attempt `B` (`changes`), then its `commit` and `commits.plan-review` | `REVIEW HISTORY: Record step B attempt <N>` — the plan alone (ignored plan: empty marker) |
 | **C Code** | coder, fresh session | `tdd`, `kanban-jobs` (required) | the plan and its answered questions | code, checks, self-review; attempt `C` (`outcome`, `deviations`), with its `commit` and `commits.code` when it committed | `CODE: <subject>` — code only, and only when COMPLETE; never the plan |
-| **D Review Code** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the Job's recorded code commits, the plan | no source change; attempt `D` (`reviewedCommits`, `verdict`, `findings`), then its `commit` and `commits.code-review` | `REVIEW HISTORY: Record step D attempt <N>` — the plan, whatever the verdict (ignored: marker) |
+| **D Review Code** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required), `kit-conformance` (Makerkit) | the Job's recorded code commits, the plan | no source change; attempt `D` (`reviewedCommits`, `verdict`, `findings`), then its `commit` and `commits.code-review` | `REVIEW HISTORY: Record step D attempt <N>` — the plan, whatever the verdict (ignored: marker) |
 | **E Fix Findings** | coder, fresh session, plan mode | `tdd`, `kanban-jobs` (required) | latest D attempt's findings, latest C attempt's deviations | FIX / REJECT / DEFER → your approval → fixes, checks; attempt `E` (`outcome`, `attemptPlans`, `verdicts`), with its `commit` and `commits.code-fix` when it committed | `CODE REVIEW FIXES: <subject>` if COMPLETE with code; `ATTEMPT PLANS: step E <jobId> attempt <N>` for plans it created; `JOB HISTORY: Record step E attempt <N>` — the plan, every outcome (ignored: none, no marker) |
 
 **The Job Record.** Each Job owns one block of its plan: a column-zero
@@ -301,9 +302,9 @@ step on a plan you name: it proposes the next step from the record, asks for
 what a prompt would have handed it, and follows `STEP-A.md` for a plan written
 by hand.
 
-In a Makerkit project, tick `makerkit-custom-kit-conformance` on step D too
-(or name it when running D by hand): it reviews exactly the commits D hands
-it.
+In a Makerkit project with `makerkit-custom-kit-conformance` installed, the
+app ticks it on step D (name it when running D by hand): it reviews exactly
+the commits D hands it.
 
 ---
 
