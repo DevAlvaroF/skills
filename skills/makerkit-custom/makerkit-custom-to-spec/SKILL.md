@@ -123,4 +123,6 @@ Any "no" is a fix, not a caveat:
 - Out of Scope is non-empty: a spec that excludes nothing hasn't been scoped.
 - The Decision log is redacted, and no path or snippet appears beyond the exceptions above.
 - No decision contradicts a live binding ADR; one the user agreed to supersede already reads `superseded`.
+- No decision rebuilds what the kit ships, edits code upstream owns or bypasses a kit primitive; it names the kit's
+  extension point instead, because code built on it fights every upstream pull.
 - The spec ends with its Spec Record, which parses.
