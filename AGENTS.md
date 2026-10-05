@@ -1,6 +1,6 @@
 # Writing rules for these skills
 
-These skills aim for Matt Pocock–level simplicity (`matt_submodule/skills` is the
+These skills aim for Matt Pocock–level simplicity (`matt/skills` is the
 style reference). They grew to three times that size once, mostly as procedure
 and guards around one choice, and every later reader paid for it in tokens and
 in agents following a recipe instead of the outcome. These rules keep them small.
