@@ -241,7 +241,11 @@ Same steps, gates and commits under `makerkit-custom-*`, except:
   (the smell baseline) runs only when no general review skill is named or
   installed, or only a specialist one like `/rls-review`. Step 6's standards
   pass is `/reviewer` on the same terms, plus `/rls-review` when the change
-  touches migrations or RLS policies, else the smell baseline run in place.
+  touches migrations or RLS policies, else the smell baseline run in place,
+  and `/makerkit-custom-kit-conformance` when installed: it reports only
+  whether the change embraces the kit or fights it (bypassed wrappers,
+  edited upstream code, broken tenancy or schema workflow). Add it to a
+  project's `AGENTS.md` § Verification so implement's step 2 runs it too.
 - **Slicing.** A slice crossing migration, policy, types, action, page and
   tests is still one slice; a shared migration or RLS policy is done before
   work is split across sub-agents.
@@ -296,6 +300,10 @@ select each step's commit; marking E moves the Job to Done. Older plans'
 step on a plan you name: it proposes the next step from the record, asks for
 what a prompt would have handed it, and follows `STEP-A.md` for a plan written
 by hand.
+
+In a Makerkit project, tick `makerkit-custom-kit-conformance` on step D too
+(or name it when running D by hand): it reviews exactly the commits D hands
+it.
 
 ---
 
@@ -367,7 +375,7 @@ Each agent needs its own switch — keep them in sync:
 
 Currently user-invoked: `grill-with-docs`, `implement`, `final-review`,
 `setup-skills`, `to-spec`, `to-issues`, and `kanban-jobs`. Model-invoked:
-`domain-modeling`, `tdd`.
+`domain-modeling`, `tdd`, `kit-conformance`.
 
 ---
 
