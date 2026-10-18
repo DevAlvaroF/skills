@@ -67,5 +67,6 @@ Standards findings — the fallback's here, the review skills' in step 2 — are
 binding ADR sanctions, naming it. **Fix now** what is small, local and safe (a rename, one extraction, deleting a
 speculative abstraction), writing the covering test first where the code is untested — at a boundary the issue doesn't
 list, only once the user agrees and it's added to `testBoundaries`. **Flag only** what is large, cross-cutting,
-ambiguous or might change behaviour. Spec findings are never auto-applied: they're about intent, not mechanics. Re-run
-the step 2 checks after any fix, and report under `## Refactors` what was fixed and what was flagged.
+ambiguous or might change behaviour; a flag the user wants kept is a deferral (§ Deferrals), never only a report line.
+Spec findings are never auto-applied: they're about intent, not mechanics. Re-run the step 2 checks after any fix, and
+report under `## Refactors` what was fixed and what was flagged.

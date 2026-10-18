@@ -62,7 +62,8 @@ fix. Drop any a binding ADR sanctions, naming it. Then, by judgement:
 - **Fix now** when small, local and safe (a rename, one extraction, deleting a speculative abstraction). Untested code
   gets its covering test first; a boundary the issue doesn't list is agreed with the user and added to
   `testBoundaries`, or the finding becomes flag-only.
-- **Flag only** when it's large, cross-cutting, ambiguous or risks a behaviour change.
+- **Flag only** when it's large, cross-cutting, ambiguous or risks a behaviour change. A flag the user wants kept is a
+  deferral (the tracker's § Deferrals), never only a line in the report.
 
 After any fix, re-run the repo's verification through a failures-only sub-agent. Report under `## Refactors`: what was
 fixed and what was flagged.

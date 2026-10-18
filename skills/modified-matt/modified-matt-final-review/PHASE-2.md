@@ -14,17 +14,18 @@ empty finding list. From the start, keep the inventory of additional plans (§ A
      only a missing `Closed Issue:` or `ATTEMPT PLANS:` commit, or say nothing is left. With no answer on a zero-finding
      PASS, an older contract closed it: say so and stop.
    - Any other `done-final-review`, or NEEDS FIXES with no findings: ask; never overwrite the status.
-   - An earlier answer: keep its FIXED, REJECTED and DEFERRED verdicts and work only on UNRESOLVED, so nothing is fixed
-     or committed twice.
+   - An earlier answer: keep its FIXED, REJECTED and DEFERRED verdicts and its Sub-issue, and work only on UNRESOLVED,
+     so nothing is fixed or committed twice.
 3. **Weigh every finding, then stop.** Being reviewed pulls you toward accepting a finding because it was raised and
    toward rejecting it because it criticises your code; neither is evidence. Check each claim against the code and
    requirements, weigh `Deviations and tradeoffs:`, and propose per finding, by number, **FIX** (where and how),
-   **REJECT** (why it fails or isn't worth its cost) or **DEFER** (where it belongs). Then wait: change no code until
-   the user's explicit reply has said FIX, REJECT or DEFER for every finding, since a fix begun while others are
-   undecided may be undone or reshaped by them, and one nobody agreed to changes code unasked. Being invoked, a copied
-   prompt or a marked step is not approval. For an ADR contradiction offer both ways out, fixing the code or superseding
-   the ADR by `/modified-matt-domain-modeling`'s rules, and supersede only on the user's own agreement. Never edit the
-   spec. Keep asking until every finding is decided, and never record one undecided: nobody would act on it.
+   **REJECT** (why it fails or isn't worth its cost) or **DEFER** (its address per the tracker's § Deferrals: this
+   attempt's one Sub-issue, or the live issue already covering it). Then wait: change no code until the user's explicit
+   reply has said FIX, REJECT or DEFER for every finding, since a fix begun while others are undecided may be undone or
+   reshaped by them, and one nobody agreed to changes code unasked. Being invoked, a copied prompt or a marked step is
+   not approval. For an ADR contradiction offer both ways out, fixing the code or superseding the ADR by
+   `/modified-matt-domain-modeling`'s rules, and supersede only on the user's own agreement. Never edit the spec. Keep
+   asking until every finding is decided, and never record one undecided: nobody would act on it.
 4. **Implement the approved fixes**, nothing more, with `/modified-matt-tdd` where behaviour changes.
 5. **Check**: the project's typecheck, tests, lint and build, whole-suite runs through a failures-only sub-agent, even
    with nothing fixed, since a DEFER waives no check. No fix commit until the fixes are verified: a failing check or a
@@ -39,16 +40,17 @@ empty finding list. From the start, keep the inventory of additional plans (§ A
    told what is left, agrees to stop there: a short fix is work to finish, not an outcome. The one exception: a commit
    holding foreign paths stops the attempt at once and ends BLOCKED, so nothing more is built on it before the user
    sees it.
-8. **Write the issue once.** The fix commit's SHA goes in `reviewCodeCommit`, never a later `HEAD` or the planning
-   commit's; with none, leave it. Append the phase 2 record per § Comment records, labels in order:
-   `Final review, phase 2, attempt <K>`, `Answers:`, `Outcome:`, `Verdicts:` (or `Verdicts: None.`), `Checks:`,
-   `Fix commit:` (or `Fix commit: None.`), `Attempt plans:`, `ADRs superseded:`. An approved FIX not finished is
-   `UNRESOLVED — approved FIX: <what>; blocker: <failure>`, never FIXED or an unapproved DEFER. Set `done-final-review`
-   only on COMPLETE, since that status moves the card to Done. A failed write after a commit: report the SHAs and the
-   error, commit nothing more.
+8. **Write the issue once**, after any Sub-issue a DEFER needs, so `DEFERRED — to <id>` names a file that exists. The
+   fix commit's SHA goes in `reviewCodeCommit`, never a later `HEAD` or the planning commit's; with none, leave it.
+   Append the phase 2 record per § Comment records, labels in order: `Final review, phase 2, attempt <K>`, `Answers:`,
+   `Outcome:`, `Verdicts:` (or `Verdicts: None.`), `Checks:`, `Fix commit:` (or `Fix commit: None.`), `Attempt plans:`,
+   `ADRs superseded:`. An approved FIX not finished is `UNRESOLVED — approved FIX: <what>; blocker: <failure>`, never
+   FIXED or an unapproved DEFER. Set `done-final-review` only on COMPLETE, since that status moves the card to Done. A
+   failed write after a commit: report the SHAs and the error, commit nothing more.
 9. **Close on COMPLETE**: in committed mode the `Closed Issue: <issue path>` commit, which also carries the uncommitted
-   `reviewHistoryCommit`; in local mode no commit, and say so. A failed close leaves record and status standing; a
-   retry makes only that commit. Not COMPLETE: say what is unresolved; a later attempt continues from this record.
+   `reviewHistoryCommit` and Sub-issue; in local mode no commit, and say so. A failed close leaves record and status
+   standing; a retry makes only that commit. Not COMPLETE: say what is unresolved; a later attempt continues from this
+   record.
 
 Report the fix commit's SHA and subject, each disposition, the checks, the final status, the close commit's SHA (or
 none), and apart, the `ATTEMPT PLANS:` SHA and paths and each plan left out with its reason.

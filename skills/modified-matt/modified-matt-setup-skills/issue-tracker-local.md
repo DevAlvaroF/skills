@@ -1,6 +1,6 @@
 # Issue tracker: Local Files
 
-Tracker contract: 6
+Tracker contract: 7
 
 Read this file whole before any spec, issue or review work: the skills take their formats and commit rules from here.
 `/modified-matt-setup-skills` writes the contract line above; a skill expecting another number stops. Never edit it.
@@ -14,6 +14,10 @@ Read this file whole before any spec, issue or review work: the skills take thei
   file, `<feature>/issues/<NN>-<slug>.json`, numbered on from the highest in `issues/` and `issues/archive/`. Ids and
   filenames never change and are never reused: `blockedBy` addresses issues by them. An id found only under
   `issues/archive/` is a Retired Issue and counts as resolved.
+- A **Sub-issue** holds work deferred from an issue, its source (§ Deferrals): id `<NN>.<n>`, file
+  `<NN>.<n>-<slug>.json`, `<NN>` the source's top-level number and `n` one past the highest `<NN>.*` in `issues/` and
+  `issues/archive/`, so it sorts right after `<NN>`; a deferral from `04.1` is `04.2`, never `04.1.1`. Top-level
+  numbering ignores Sub-issues.
 - "Publish to the issue tracker" means create that file; "fetch the relevant issue" means read and parse it.
 - Change an issue by parsing it and writing the whole object back, every field present: other programs parse it.
 - Feature directories get deleted; the glossary and `.mysdd/docs/` stay, so they never name an issue, a `US-NNN`, a
@@ -73,7 +77,8 @@ Anything else is unresolved, never local: stop before writing, list the paths, a
 
 `spec` is `null` for an issue drafted without one, and then `covers` is `[]`. `blockedBy`, `testBoundaries`, `covers`
 and `comments` may be `[]`. The three commit fields hold a full 40-character SHA or `null`; a later round overwrites
-its field.
+its field. A Sub-issue is seeded as to-issues seeds an issue, with `blockedBy: ["<source id>"]`, the source's `spec`,
+and `covers` the source stories its work belongs to, or `[]`.
 
 Each field has one writer; every other skill carries it over verbatim, because it may be the only copy:
 
@@ -83,6 +88,7 @@ Each field has one writer; every other skill carries it over verbatim, because i
 | everything, with `status: ready-for-agent` | to-issues (a re-sync keeps each `done`) |
 | `acceptanceCriteria[].done`, `codeCommit`, `status: done-coding-awaiting-final-review` | implement, after its `CODE:` commit |
 | `testBoundaries` additions the user agreed | implement |
+| a new Sub-issue, whole | implement (one per issue) or final review phase 2 (one per attempt), per § Deferrals |
 | `reviewHistoryCommit` | final review phase 1, after its record commit |
 | `reviewCodeCommit` | final review phase 2, after its fix commit |
 | `status: done-final-review` | final review phase 2, only on `Outcome: COMPLETE` |
@@ -99,14 +105,23 @@ whatever its verdict: untriaged findings can't close an issue. Phase 2 triages e
 COMPLETE triage sets `done-final-review`, and it runs even with zero findings, because the checks must still pass. A
 fix round never changes `status`, and a reviewed issue never returns to `ready-for-agent`.
 
+## Deferrals
+
+Deferred work lives in an issue file or it is lost. A deferral the user approves names a live issue whose scope already
+covers it, unchanged, or goes into the run's one Sub-issue; with neither it is a REJECT. One Sub-issue per implemented
+issue or triage attempt, each deferral a criterion, so the board gains one card, not five. It holds new work only — a
+finding, a flagged refactor, a gap found on the way — never its source's own criteria, which keep the source open:
+otherwise closing it would mean nothing. Work that changes the spec (a new story, a reversed decision) is no deferral:
+send it to to-spec. The Sub-issue stays uncommitted until its source's next issue-file commit (§ Commits).
+
 ## Comment records
 
 A record is recognised by the label its body opens with, never by author or position; free text may follow. Never
 edit or remove one: a correction is a new entry.
 
-**Implementation record** (implement): verification and its output, the review outcome, anything left open, each ADR
-superseded, and a part opening `Deviations and tradeoffs:` naming each deviation and deliberate tradeoff with its
-reason, or `Deviations and tradeoffs: None.`
+**Implementation record** (implement): verification and its output, the review outcome, anything left open, each
+deferral and the issue it went to, each ADR superseded, and a part opening `Deviations and tradeoffs:` naming each
+deviation and deliberate tradeoff with its reason, or `Deviations and tradeoffs: None.`
 
 **Phase 1 review record**, these lines in order:
 
@@ -122,8 +137,9 @@ reason, or `Deviations and tradeoffs: None.`
 - `Answers: phase 1 attempt <N>, reviewed commits <SHAs>`
 - `Outcome: COMPLETE` (every finding has a user-approved disposition, every fix verified, every check passes),
   `Outcome: INCOMPLETE` or `Outcome: BLOCKED`.
-- `Verdicts:` then one line per finding, numbered as in phase 1: `FIXED` with how it was verified; `REJECTED` or
-  `DEFERRED` with the reason the user approved; or `UNRESOLVED — approved FIX: <what>; blocker: <failure>`.
+- `Verdicts:` then one line per finding, numbered as in phase 1: `FIXED` with how it was verified; `REJECTED` with
+  the reason the user approved; `DEFERRED — to <id>: <reason the user approved>`; or
+  `UNRESOLVED — approved FIX: <what>; blocker: <failure>`.
   `Verdicts: None.` when phase 1 found nothing.
 - `Checks:` the checks run and their results.
 - `Fix commit:` the `CODE REVIEW FIXES:` SHA, or `Fix commit: None.`
@@ -164,9 +180,9 @@ Subjects you write are ≤72 characters. The fixed subjects that embed `<issue p
 | to-issues | `SPEC: <subject>` | optional why | spec, the issues it wrote, changed `CONTEXT.md`/`CONTEXT-MAP.md` and ADRs | glossary and ADRs only, else none |
 | implement | `CODE: <subject>` | optional why; `Issue: <issue path>` per issue; `Spec: <spec path>` unless `null` | the implementation, plus agreed ADRs and `AGENTS.md` convention lines | same |
 | phase 2 fixes | `CODE REVIEW FIXES: <subject>` | as `CODE:` | the approved fixes, agreed ADRs, check rewrites in the change's files | same |
-| phase 1 | `REVIEW HISTORY: Record final review attempt <N>` | `Issue: <issue path>` | the issue file | the empty marker |
+| phase 1 | `REVIEW HISTORY: Record final review attempt <N>` | `Issue: <issue path>` | the issue file and its uncommitted Sub-issue | the empty marker |
 | phase 2 plans | `ATTEMPT PLANS: final review <issue path> attempt <K>` | none | plans this attempt provably created, not ignored or bound elsewhere | same |
-| phase 2 close | `Closed Issue: <issue path>` | none | the issue file, plus `.mysdd/kanban-boards.json` if changed | none: the status change is the close |
+| phase 2 close | `Closed Issue: <issue path>` | none | the issue file and its uncommitted Sub-issue, plus `.mysdd/kanban-boards.json` if changed | none: the status change is the close |
 
 The code prefix follows `codeCommit`: `null` → `CODE: `, a SHA → `CODE REVIEW FIXES: `. One commit per issue where
 the work separates. Final review finds the change by its `Issue:` trailers, so write them in both modes, as the

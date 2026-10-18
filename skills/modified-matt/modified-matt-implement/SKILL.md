@@ -8,7 +8,7 @@ Implement the issues the user names, working from each issue and the spec it cam
 
 ## Before you start
 
-- Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 6` line: with none (or no file) or
+- Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 7` line: with none (or no file) or
   a lower number, stop and tell the user to re-run `/modified-matt-setup-skills`; with a higher one, stop and tell them
   to run `npx skills update -p`. Its § Issue shape, § Comment records and § Commits are the formats and rules this
   skill writes by, and § Committed or local must resolve before you write: unresolved, stop and list the paths.
@@ -64,11 +64,13 @@ After the commits, write each committed issue once, as the whole object with eve
   supersession only from this record), and a part opening `Deviations and tradeoffs:` naming each deviation from the
   issue or spec and each deliberate tradeoff with its reason, or `Deviations and tradeoffs: None.` Phase 2's coder
   weighs findings against it in a fresh session, so record only what this run decided.
+- put each deferral the user approved where the tracker's § Deferrals says — this issue's one Sub-issue, or the live
+  issue already covering it — and name it in the record: a deferral nobody wrote down is lost.
 
 `testBoundaries` may only grow, by boundaries the user agreed. Never write `reviewHistoryCommit` or `reviewCodeCommit`, and
 never set `done-final-review`: they belong to the final review. If writing an issue fails after its commit landed, report the SHA
 and the error; don't commit again.
 
-Report per issue: the SHA and subject, any mixed paths, which issues advanced and which stayed open, with a one-line
-reason. In committed mode the issue file is now dirty and outside the commit, because a commit can't hold its own SHA;
-say so and leave it for the issue's next commit.
+Report per issue: the SHA and subject, any mixed paths, any Sub-issue written, which issues advanced and which stayed
+open, with a one-line reason. In committed mode the issue file is now dirty and outside the commit, because a commit
+can't hold its own SHA; say so and leave it for the issue's next commit.

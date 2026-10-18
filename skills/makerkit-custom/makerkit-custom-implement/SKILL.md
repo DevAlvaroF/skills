@@ -7,7 +7,7 @@ disable-model-invocation: true
 Implement the issues the user names, working from each issue and the spec it came from.
 
 Read `.mysdd/issue-tracker.md` whole before writing anything: its issue shape, comment records and commit rules are
-the ones this skill writes to. It must hold exactly one `Tracker contract: 6` line; missing, lower or none → stop and
+the ones this skill writes to. It must hold exactly one `Tracker contract: 7` line; missing, lower or none → stop and
 tell the user to re-run `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
 Read each issue and work from its `whatToBuild`, `acceptanceCriteria`, `testBoundaries` and `spec`. An issue whose
@@ -74,9 +74,11 @@ Rewrite each committed issue once, per § Issue shape: every criterion you verif
 § Comment records, including its `Deviations and tradeoffs:` part — the coder who triages the review weighs each
 finding against it. Record only what this run decided, and each ADR the user agreed to supersede, with its replacement:
 the final review accepts that change only from this record. Every other field is carried over verbatim; add to
-`testBoundaries` only what the user agreed. Never write `reviewHistoryCommit` or `reviewCodeCommit`, and never set
+`testBoundaries` only what the user agreed. Each deferral the user approved goes where § Deferrals says — this issue's
+one Sub-issue, or the live issue already covering it — and the record names it: a deferral nobody wrote down is lost.
+Never write `reviewHistoryCommit` or `reviewCodeCommit`, and never set
 `done-final-review`: those belong to the final review. If the write fails after the commit landed, report the SHA and
 the error instead of committing again.
 
-Report per issue: the SHA and subject, its mixed paths, and which issues you advanced or left open, each with a
-one-line reason. In committed mode the issue file is left dirty on purpose, per § Commits' done rules.
+Report per issue: the SHA and subject, its mixed paths, any Sub-issue written, and which issues you advanced or left
+open, each with a one-line reason. In committed mode the issue file is left dirty on purpose, per § Commits' done rules.

@@ -16,15 +16,17 @@ or an assumed empty finding list. Keep the additional-plans inventory (below) fr
    - **Saved but unfinished close** (`done-final-review`, a COMPLETE phase 2 answering): make only a missing close or
      plans commit — the status was written before them, so it doesn't prove they landed.
    - A NEEDS FIXES review with no findings, or a closed issue with undisposed findings: ask.
-   - An earlier attempt's FIXED, REJECTED and DEFERRED verdicts stand; continue only its UNRESOLVED work.
+   - An earlier attempt's FIXED, REJECTED and DEFERRED verdicts and its Sub-issue stand; continue only its UNRESOLVED
+     work.
 3. **Weigh every finding, then stop.** Being reviewed pulls you both ways — accept because it was raised, reject because
    it criticises you — and neither is evidence. Check each claim against the code and requirements, then present every
-   finding by number with a proposed **FIX** (where, how), **REJECT** or **DEFER** (why), weighing the recorded
-   deviations. Then wait: change no code until the user has said FIX, REJECT or DEFER for every finding in so many words
-   — a fix begun while others are undecided may be undone or reshaped by them, and one nobody agreed to changes code
-   unasked. Being invoked, copying a prompt or marking a step is not approval. A decision contradiction offers fixing
-   the code or superseding the ADR per `/makerkit-custom-domain-modeling`, which needs the user's own agreement. Never
-   edit the spec. Keep asking, and never record a finding undecided: nobody would act on it.
+   finding by number with a proposed **FIX** (where, how), **REJECT** (why) or **DEFER** (why, and its address per
+   § Deferrals: this attempt's one Sub-issue, or the live issue already covering it), weighing the recorded deviations.
+   Then wait: change no code until the user has said FIX, REJECT or DEFER for every finding in so many words — a fix
+   begun while others are undecided may be undone or reshaped by them, and one nobody agreed to changes code unasked.
+   Being invoked, copying a prompt or marking a step is not approval. A decision contradiction offers fixing the code or
+   superseding the ADR per `/makerkit-custom-domain-modeling`, which needs the user's own agreement. Never edit the
+   spec. Keep asking, and never record a finding undecided: nobody would act on it.
 4. **Implement the approved fixes**, nothing more, with `/makerkit-custom-tdd` where behaviour changes.
 5. **Check** with the root `AGENTS.md` § Verification in its order, plus what nested files add, whole-repo runs
    through a sub-agent reporting failures only. A review skill there sees only this attempt's fixes and the ADRs'
@@ -41,10 +43,11 @@ or an assumed empty finding list. Keep the additional-plans inventory (below) fr
    (a check that can't run) only once the user, told what is left, agrees to stop there: a short fix is work to
    finish, not an outcome. The one exception: a commit holding foreign paths stops the attempt at once and ends
    BLOCKED, so nothing more is built on it before the user sees it.
-8. **Write the issue once**: `reviewCodeCommit` gets the fix SHA if there is one; append one phase 2 record per
-   § Comment records. An approved FIX left unfinished is UNRESOLVED with its blocker, never FIXED or an unapproved
-   DEFER. Set `done-final-review` only on COMPLETE: the board reads it as Done. A write failing after a commit is
-   reported with the SHAs, never answered with another commit.
+8. **Write the issue once**, after any Sub-issue a DEFER needs, so `DEFERRED — to <id>` names a file that exists:
+   `reviewCodeCommit` gets the fix SHA if there is one; append one phase 2 record per § Comment records. An approved FIX
+   left unfinished is UNRESOLVED with its blocker, never FIXED or an unapproved DEFER. Set `done-final-review` only on
+   COMPLETE: the board reads it as Done. A write failing after a commit is reported with the SHAs, never answered with
+   another commit.
 9. **Close** on COMPLETE with the `Closed Issue: <issue path>` commit per § Commits; local mode has none — say so. A
    failed close leaves record and status standing, and a retry makes only that commit. Not COMPLETE: say what is
    unresolved and stop; the next attempt continues from this record.

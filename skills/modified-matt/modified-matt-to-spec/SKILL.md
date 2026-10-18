@@ -11,7 +11,7 @@ too, before writing anything.
 
 ## Process
 
-1. Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 6` line: with none (or no file)
+1. Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 7` line: with none (or no file)
    or a lower number, stop and tell the user to re-run `/modified-matt-setup-skills`; with a higher one, stop and tell
    them to run `npx skills update -p`. Its § Layout and § Committed or local decide where the spec goes and whether it
    may be written at all.

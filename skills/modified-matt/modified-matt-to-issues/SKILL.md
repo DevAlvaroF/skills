@@ -14,7 +14,7 @@ Break a plan, spec, or conversation into **issues**: tracer-bullet vertical slic
 ### 1. Gather context
 
 Work from the conversation; if the user passes a spec or issue path, read the whole file. Read
-`.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 6` line: with none (or no file) or a lower
+`.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 7` line: with none (or no file) or a lower
 number, stop and tell the user to re-run `/modified-matt-setup-skills`; with a higher one, stop and tell them to run
 `npx skills update -p`. Its § Layout, § Committed or local, § Issue shape and § Commits are the formats and rules this
 skill writes by.
@@ -62,8 +62,8 @@ List `issues/*.json` and `issues/archive/*.json` in the Feature first, and resol
 if it's unresolved, write nothing and list the paths.
 
 - **No live issue**: create one file per issue, `issues/<NN>-<slug>.json`, in dependency order, numbering from `01`, or
-  past the highest id under `issues/archive/` — a Retired Issue's number is never reused, because `blockedBy` may still
-  name it.
+  past the highest top-level id under `issues/archive/` — a Retired Issue's number is never reused, because `blockedBy`
+  may still name it.
 - **Live issues exist**: reconcile (below), and write nothing until the whole reconciliation is shown to the user.
 
 Each issue follows § Issue shape exactly, as strict JSON with every field present, seeded `ready-for-agent`, criteria
@@ -82,16 +82,17 @@ criteria, commit pointers — so reconcile, never regenerate:
 2. **On a match, preserve.** Carry `status`, `comments` and the three commit fields over verbatim, and keep each
    criterion's `done` by matching `text`, never flipping `true` back. Update only `title`, `whatToBuild`, `blockedBy`,
    `testBoundaries`, `covers`, `spec` and added or removed criteria. A delivered issue (`codeCommit` set, or past
-   `ready-for-agent`) keeps its `whatToBuild`, criteria and boundaries: new scope goes in a follow-up issue,
-   `<slug>-followup-<n>`, blocked by it; name any dropped or reworded criterion to the user and leave it.
-3. **No match is a new issue**, numbered past the highest id in `issues/` and `issues/archive/`.
+   `ready-for-agent`) keeps its `whatToBuild`, criteria and boundaries: new scope goes in a Sub-issue of it
+   (§ Layout); name any dropped or reworded criterion to the user and leave it.
+3. **No match is a new issue**, numbered past the highest top-level id in `issues/` and `issues/archive/`.
 4. **Ids and filenames never change**, so every `blockedBy` stays valid; order lives in `blockedBy`, not numbering.
-5. **Never delete.** Ask, for each issue with no counterpart, whether to keep it or move it to `issues/archive/`.
+5. **Never delete.** A Sub-issue is carried over verbatim, never offered for archiving: it holds approved work no
+   slice names. Ask, for each other issue with no counterpart, whether to keep it or move it to `issues/archive/`.
    Archiving makes it a Retired Issue that counts as resolved, so also ask, for each live issue blocked by it, whether
    to remap or drop that edge.
 6. **A `covers` entry naming a missing or `(retired)` story** is a dangling reference: list it and ask whether the
    issue is out of scope or points at another story, never silently drop it.
-7. **Report** a table of every issue: created, follow-up created, updated, status preserved or archived.
+7. **Report** a table of every issue: created, Sub-issue created, updated, status preserved or archived.
 
 ### 6. Record the spec's standing decisions
 

@@ -11,7 +11,7 @@ resolved. A spec that already exists is reviewed with the user instead: read [RE
 writing anything.
 
 Read `.mysdd/issue-tracker.md` whole before writing anything: it defines the layout and modes used here. It must
-hold exactly one `Tracker contract: 6` line; missing, lower or none → stop and tell the user to re-run
+hold exactly one `Tracker contract: 7` line; missing, lower or none → stop and tell the user to re-run
 `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
 ## Ground yourself first

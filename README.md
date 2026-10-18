@@ -66,7 +66,7 @@ npx skills@latest update -p
 ```
 
 Commit the changes and restart your agents. When an update raises the
-tracker contract (now `Tracker contract: 6`), re-run the setup skill too:
+tracker contract (now `Tracker contract: 7`), re-run the setup skill too:
 until you do, the skills that read the tracker stop and say so.
 
 ### Remove or switch flavour
@@ -162,7 +162,7 @@ share:
 
 - **Tracker contract.** `to-spec`, `to-issues`, `implement` and `final-review`
   read the tracker whole and stop before writing unless it holds exactly one
-  `Tracker contract: 6` line; prompts 3, 6 and 7 check the same line. Missing or
+  `Tracker contract: 7` line; prompts 3, 6 and 7 check the same line. Missing or
   lower: re-run setup. Higher: `npx skills update -p`. The tracker holds every
   format, subject, hard limit and done rule the steps share.
 - **Status.** `ready-for-agent` → `done-coding-awaiting-final-review` →
@@ -181,6 +181,11 @@ share:
 - **Approval.** Step 7 changes no code until you reply approving its triage.
   Copying the prompt or marking the step is not approval; a review with zero
   findings has nothing to approve.
+- **Deferrals.** Work you agree to defer in step 5 or 7 goes into a
+  Sub-issue, `<NN>.<n>` (`04.1`), blocked by the issue it came from, so it
+  sorts right after it and is ready once that issue closes — or into a live
+  issue that already covers it. A deferral with neither is a REJECT. No
+  re-run of to-spec or to-issues: the step writes the Sub-issue itself.
 
 | Step | Run by | Skills (app) | Reads | Writes | Commits |
 |---|---|---|---|---|---|
@@ -188,9 +193,9 @@ share:
 | **2 PRD Spec** | coder, **same session** as 1 | `to-spec` (warns if missing) | the grill conversation, tracker, ADRs | `.mysdd/features/<NN>-<slug>/spec.md`: `US-NNN` stories, test boundaries you confirmed, a redacted Decision log, ending with the empty `<spec-record>` block; its `kanban-brief:` line binds it to the Brief | nothing |
 | **3 Review PRD Spec** | reviewer, fresh session | `reviewer` (warns if missing), `to-spec` (required) | `spec.md`, following `to-spec`'s `REVIEW.md` | edits `spec.md` in place, asking you about every gap rather than assuming, open questions kept in the spec; never cuts User Stories or renumbers an ID; only appends to the Decision log. Once the spec passes: one attempt in its Spec Record, then its `commit` and `commits.spec-review`, left uncommitted | only once the spec passes: `REVIEW HISTORY: Record spec review attempt <N>` + `Spec:` — the spec alone (local: empty marker) |
 | **4 Spec to Issues** | coder, fresh session | `to-issues` | spec, existing issues (reconciled by `slug`, never regenerated) | one issue JSON per vertical slice: `ready-for-agent`, `blockedBy`, `testBoundaries`, `covers`, commit fields `null`; after your approval, ADRs added for the spec's standing decisions and retired for dropped ones | `SPEC: <subject>`, no trailers — spec (with step 3's SHA edit), issues, glossary, ADRs (local: glossary and ADRs only) |
-| **5 Implement** | coder, auto mode | `implement`, `tdd` | issue, its spec when `spec` isn't `null`, ADRs | code, its own two-axis review (`REVIEW.md`); then the issue: criteria ticked, `done-coding-awaiting-final-review`, `codeCommit`, an implementation record with `Deviations and tradeoffs:` | `CODE: <subject>` + `Issue:`/`Spec:` trailers — code, agreed ADRs and `AGENTS.md` convention lines; the issue file stays uncommitted |
-| **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required), `kit-conformance` (Makerkit, via final-review) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, `Findings` numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing, never changes `status` | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file (local: empty marker) |
-| **7 Fix Findings** (phase 2) | coder, fresh session, plan mode | `final-review` (required), `tdd` | latest phase 1 record, implementation record, earlier phase 2 records answering it | FIX / REJECT / DEFER per finding → your approval → fixes, checks; phase 2 record (attempt, `Answers`, `Outcome`, `Verdicts`, `Checks`, `Fix commit`, `Attempt plans`, `ADRs superseded`); `reviewCodeCommit`; `done-final-review` only on COMPLETE | `CODE REVIEW FIXES: <subject>` + trailers if code changed; `ATTEMPT PLANS: final review <issue path> attempt <K>` for plans it created, every outcome; on COMPLETE, `Closed Issue: <issue path>` (issue + board file if changed; none in local mode) |
+| **5 Implement** | coder, auto mode | `implement`, `tdd` | issue, its spec when `spec` isn't `null`, ADRs | code, its own two-axis review (`REVIEW.md`); then the issue: criteria ticked, `done-coding-awaiting-final-review`, `codeCommit`, an implementation record with `Deviations and tradeoffs:`; at most one Sub-issue for approved deferrals | `CODE: <subject>` + `Issue:`/`Spec:` trailers — code, agreed ADRs and `AGENTS.md` convention lines; the issue file stays uncommitted |
+| **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required), `kit-conformance` (Makerkit, via final-review) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, `Findings` numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing, never changes `status` | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file and its Sub-issue (local: empty marker) |
+| **7 Fix Findings** (phase 2) | coder, fresh session, plan mode | `final-review` (required), `tdd` | latest phase 1 record, implementation record, earlier phase 2 records answering it | FIX / REJECT / DEFER per finding → your approval → fixes, checks; at most one Sub-issue for approved DEFERs; phase 2 record (attempt, `Answers`, `Outcome`, `Verdicts`, `Checks`, `Fix commit`, `Attempt plans`, `ADRs superseded`); `reviewCodeCommit`; `done-final-review` only on COMPLETE | `CODE REVIEW FIXES: <subject>` + trailers if code changed; `ATTEMPT PLANS: final review <issue path> attempt <K>` for plans it created, every outcome; on COMPLETE, `Closed Issue: <issue path>` (issue, its Sub-issue, board file if changed; none in local mode) |
 
 Step 7 always runs, even after a PASS with zero findings: the checks still
 have to pass, and only phase 2 closes an Issue. On the Agile board the card
