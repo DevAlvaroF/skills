@@ -90,6 +90,9 @@ unusable.
 
 Subjects are at most 72 characters. A code commit may add one to three lines of why; the rest have no body.
 
+A plan doesn't change these subjects, contents or trailers; B corrects one that does (a plan once asked for tracker
+`Issue:` trailers and issue-only commits, and C had to stop and ask).
+
 **An ignored plan** (matched by an ignore rule and untracked) can't be committed, so B and D record the review with
 an **empty marker** under the same subject: parent the `HEAD` you noted, tree that parent's, published only while
 `HEAD` still names that parent, index untouched, signed if the repository signs. (A marker built from a stale tree
