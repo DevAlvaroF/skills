@@ -49,8 +49,18 @@ Record's attempts may only grow. The `plan` check also holds the record to
 the `spec` check, which holds the Spec Record to `spec-record-check.ts`. The
 `unchanged` check takes `paths` and passes while `git status` shows nothing
 under them, staged, unstaged or untracked: a step still asking has changed no
-code. Each step's `timing.json` sums the token usage Codex reports per turn;
-the run's `timing.json` sums the steps.
+code. Each step's `timing.json` sums what each of its turns spent; the run's
+`timing.json` sums the steps.
+
+Codex reports `turn.completed.usage` as the thread's running total, not the
+turn's: an `answer` (`codex exec resume`) reports everything the thread spent
+since its first prompt (Codex CLI 0.162.1 and 0.164.0; a 7-second resumed turn
+with no commands reported 955K). So `step` and `answer` count a turn as that
+total minus the one the thread had reached, kept in the step's
+`usage-cumulative.json`. Before 2026-10-24 the harness summed the totals, so
+a step of n turns counted its first turn n times and its last once: the mobile
+pilot's 15.4M was 8.0M, and three step-B runs of 3–4 turns read 1.9–2.4× their
+real cost. A one-turn step was exact.
 
 ## Seeded steps
 
@@ -76,6 +86,19 @@ step before leaves uncommitted.
 | C | `seed-plan … --at C` | `plans/word-count.settled.md`, its question answered under Open questions, with a B attempt committed and recorded |
 | D | `seed-plan … --at D` | + `CODE: Add wordCount` from `fixtures/code/word-count` and a COMPLETE C attempt |
 | E | `seed-plan … --at E --findings none\|some` | + a D attempt committed and recorded: PASS with no findings, or NEEDS FIXES with `reviews/word-count.findings.json` |
+| 4, mobile | `seed-feature … --at 4 --feature member-count` | `specs/member-count.settled.md` (one field added to the v1 workspace response, shown by the web app and the mobile app) with a finished first review |
+| 5, mobile | `seed-feature … --at 5 --feature member-count` | + `fixtures/issues/member-count/` (01 server; 02 web and 03 mobile, each blocked by 01) committed as `SPEC: …`, and 01 carried to `done-final-review` on `fixtures/code/member-count` (`CODE:`, a PASS phase 1, `Closed Issue:`); the tree is clean |
+
+The mobile seeds need `repo … --fixture makerkit-app --setup committed`: a
+Makerkit-shaped monorepo in miniature, with web-centric root rules (its
+§ Verification names `/verify-app`), an `/api/v1` handler and its additive-only
+`AGENTS.md`, an Expo screen in plain TSX, `packages/mobile-ui/AGENTS.md`, the
+`docs/native/` stubs and no dependencies, so nothing but its `npm test` runs. A
+chain on a real Makerkit repo cost ~30M tokens before reaching the mobile
+slice, most of it the web app's own verification; these seeds measure
+`makerkit-custom-mobile-app`'s § Issues (scenario 25) and § Tests and § Verify
+(26) alone. Their `issues` check reads every issue in a directory, its exact
+fields included, since the step names the files.
 
 `--findings some` holds one real defect planted in the code that its tests miss
 (tab- and newline-separated words count as one; an underscore survives into the
@@ -120,7 +143,9 @@ new, because both start from byte-identical input, whereas a chain's B reads
 the A output of its own configuration.
 
 First runs (iteration `seeds`, 2026-10-02, new only, Codex CLI 0.159), every
-one passing; tokens are input + output:
+one passing; tokens are input + output as the harness then summed them, which
+overcounts every step of more than one turn (see the Loop). Their events are
+gone, so the real figures are unknown:
 
 | Scenario | Passed | Tokens | Seconds |
 |---|---|---|---|
@@ -142,7 +167,25 @@ Three runs of one seeded step spread 20% in tokens (1.23M to 1.48M), against
 about 60% for a chain, where each step also inherits the previous steps'
 variation. So on a seeded step a token delta beyond ~25% is worth reporting;
 three runs are a small sample, so widen that again if a seeded step spreads
-more.
+more. All three runs, and the 4–7× above, came from the summed totals, and the
+triage step takes three turns, so each is overstated; re-measure before relying
+on either.
+
+The mobile seeds (iteration `mobile-seeds`, 2026-10-24, new only, Codex CLI
+0.164, counted per turn as above):
+
+| Scenario | Passed | Tokens | Seconds |
+|---|---|---|---|
+| 25 mk-mobile-4 | 33/33 | 0.47M | 157 |
+| 26 mk-mobile-5 | 36/36 | 0.99M | 152 |
+
+25 cut one server issue and a `Web app:` and a `Mobile app:` issue, each
+blocked by it, the mobile one tested at the v1 handler. 26 stopped
+uncommitted to ask for the simulator check, then committed `apps/native` alone
+and recorded "Verified by the user on the iOS simulator". It also wrote an
+implementation record before that stop and a second one after, the first now
+stale ("codeCommit remains null"): the issue is right, but the record is
+written twice.
 
 ## The Spec Record scenarios (contract 6)
 
@@ -236,6 +279,12 @@ for bundling one into the skill. It reads blocks with the app's own
   `<job-record>` block that parses cannot hold a misplaced attempt.
 
 ## Baseline (contract 6, 2026-10-01)
+
+Every token figure from here down, and in the per-step chain table above, was
+summed before the per-turn fix (see the Loop). Their Codex events are no
+longer in `.skill-evals/` or `~/.codex/sessions`, so they can't be recounted:
+multi-turn steps are overstated by an unknown amount, one-turn steps are
+exact, and old-against-new deltas mix both. Pass rates are unaffected.
 
 Two runs per configuration, Codex CLI 0.159. Old is contract 5's skills and prompts, which make no
 Spec Record, so their record checks fail by construction; 10–15 run new only.

@@ -11,17 +11,17 @@ import {
   type WorkflowStepKey,
   type WorkflowStepNode,
 } from '@shared/domain'
-import { FEATURE_STAGES, FINDINGS, PLAN_STAGES, SPEC_STATES, seedFeature, seedPlan, seedSpec, writeSetup, type Seeded } from './seed'
+import { FEATURES, FEATURE_STAGES, FINDINGS, PLAN_STAGES, SPEC_STATES, seedFeature, seedPlan, seedSpec, writeSetup, type Seeded } from './seed'
 import { runChecks, type Check } from './verify'
 
 /**
  * The skill-eval harness: disposable repos, the app's own Step prompts, one
  * Codex session per Step, and a verifier built on the app's parsers.
  *
- *   npm run skill-evals -- repo <dir> --flavour modified-matt|makerkit-custom --skills new|old [--clone <src>] [--setup committed|local]
+ *   npm run skill-evals -- repo <dir> --flavour modified-matt|makerkit-custom --skills new|old [--clone <src> | --fixture node-app|makerkit-app] [--setup committed|local]
  *   npm run skill-evals -- seed-spec <repo> <spec path> --record none|empty|saved|committed|recorded|malformed|duplicate [--brief <id>] [--secret]
  *   npm run skill-evals -- seed-plan <repo> <plan path> --job <uuid> [--at B|C|D|E] [--findings none|some]
- *   npm run skill-evals -- seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>]
+ *   npm run skill-evals -- seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>] [--feature slugify|member-count]
  *   npm run skill-evals -- prompt <step-key> --templates new|old --subject <subject.json>
  *   npm run skill-evals -- step <repo> <run-dir> <label> <prompt-file> [--no-sentinel] [--plan <path>] [--spec <path>]
  *   npm run skill-evals -- answer <repo> <run-dir> <label> <text-or-@file>
@@ -70,6 +70,9 @@ function makeRepo(args: string[]): void {
   const which = flag(args, 'skills') ?? die('--skills new|old')
   const source = which === 'old' ? OLD_SKILLS : NEW_SKILLS
   const clone = flag(args, 'clone')
+  const fixture = flag(args, 'fixture') ?? 'node-app'
+  if (clone && flag(args, 'fixture')) die('--clone or --fixture, not both')
+  if (!['node-app', 'makerkit-app'].includes(fixture)) die('--fixture node-app|makerkit-app')
 
   rmSync(dir, { recursive: true, force: true })
   mkdirSync(dirname(dir), { recursive: true })
@@ -77,7 +80,7 @@ function makeRepo(args: string[]): void {
     execFileSync('git', ['clone', '-q', '--no-hardlinks', clone, dir])
     git(dir, ['remote', 'remove', 'origin'])
   } else {
-    cpSync(join(ROOT, 'vendor/skills/evals/fixtures/node-app'), dir, { recursive: true })
+    cpSync(join(ROOT, 'vendor/skills/evals/fixtures', fixture), dir, { recursive: true })
     git(dir, ['init', '-q', '-b', 'main'])
   }
   git(dir, ['config', 'user.name', 'Eval User'])
@@ -138,13 +141,13 @@ function runSeedPlan(args: string[]): void {
   seeded(() => seedPlan(resolve(repo), planPath, job, at, oneOf(flag(args, 'findings'), FINDINGS, 'findings')))
 }
 
-/** `seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>]`: see `seedFeature`. */
+/** `seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>] [--feature <name>]`: see `seedFeature`. */
 function runSeedFeature(args: string[]): void {
   const [repo, featureDir] = args
-  if (!repo || !featureDir) die('seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>]')
+  if (!repo || !featureDir) die('seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>] [--feature slugify|member-count]')
   const at = oneOf(flag(args, 'at'), FEATURE_STAGES, 'at') ?? die('--at 4|5|6|7')
   seeded(() => seedFeature(resolve(repo), featureDir.replace(/\/+$/, ''), at,
-    { findings: oneOf(flag(args, 'findings'), FINDINGS, 'findings'), brief: flag(args, 'brief') }))
+    { findings: oneOf(flag(args, 'findings'), FINDINGS, 'findings'), brief: flag(args, 'brief'), feature: oneOf(flag(args, 'feature'), FEATURES, 'feature') }))
 }
 
 /* ---------- prompt ---------- */
@@ -247,7 +250,15 @@ function runCodex(repo: string, dir: string, label: string, codexArgs: string[],
   })
   const thread = events.find((event) => event.type === 'thread.started')?.thread_id
   if (thread) writeFileSync(join(dir, 'thread.txt'), thread)
-  const usage = events.filter((event) => event.type === 'turn.completed' && event.usage).map((event) => event.usage!)
+  // `turn.completed.usage` is the thread's running total, not the turn's: `codex exec resume` reports
+  // everything the thread has spent since it started (Codex CLI 0.162–0.164; a 7 s resumed turn once
+  // logged 955K). So a turn costs its total minus the total the thread had reached before it.
+  const reported = events.filter((event) => event.type === 'turn.completed' && event.usage).map((event) => event.usage!).at(-1)
+  const cumulativePath = join(dir, 'usage-cumulative.json')
+  const before: Usage & { thread?: string } | null = existsSync(cumulativePath) ? JSON.parse(readFileSync(cumulativePath, 'utf8')) : null
+  const base = before && before.thread === thread && reported && reported.input_tokens >= before.input_tokens ? before : null
+  const spent = (pick: (u: Usage) => number) => reported ? pick(reported) - (base ? pick(base) : 0) : 0
+  if (reported) writeFileSync(cumulativePath, JSON.stringify({ thread, ...reported }, null, 2))
   const commands = events.filter((event) => event.type === 'item.completed' && event.item?.type === 'command_execution').length
 
   const timingPath = join(dir, 'timing.json')
@@ -258,9 +269,9 @@ function runCodex(repo: string, dir: string, label: string, codexArgs: string[],
     label,
     turns: previous.turns + 1,
     seconds: previous.seconds + seconds,
-    input_tokens: previous.input_tokens + usage.reduce((sum, u) => sum + u.input_tokens, 0),
-    cached_input_tokens: previous.cached_input_tokens + usage.reduce((sum, u) => sum + u.cached_input_tokens, 0),
-    output_tokens: previous.output_tokens + usage.reduce((sum, u) => sum + u.output_tokens, 0),
+    input_tokens: previous.input_tokens + spent((u) => u.input_tokens),
+    cached_input_tokens: previous.cached_input_tokens + spent((u) => u.cached_input_tokens),
+    output_tokens: previous.output_tokens + spent((u) => u.output_tokens),
     commands: previous.commands + commands,
   }
   writeFileSync(timingPath, JSON.stringify(timing, null, 2))

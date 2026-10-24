@@ -1,0 +1,31 @@
+{
+  "id": "02",
+  "slug": "web-member-count",
+  "title": "Web app: show the member count on the workspace page",
+  "status": "ready-for-agent",
+  "spec": ".mysdd/features/01-member-count/spec.md",
+  "whatToBuild": "Web app: a team member opening the workspace page sees how many members the workspace has, read from the workspace service.",
+  "blockedBy": [
+    "01"
+  ],
+  "testBoundaries": [
+    "the workspace service's getWorkspace and GET /api/v1/workspaces/:slug through their exports in apps/web/test/ with node:test, asserting on memberCount (issue 01's tests); the page is checked in the running web app"
+  ],
+  "covers": [
+    "US-001"
+  ],
+  "codeCommit": null,
+  "reviewHistoryCommit": null,
+  "reviewCodeCommit": null,
+  "acceptanceCriteria": [
+    {
+      "text": "The web workspace page shows the member count under the member's role",
+      "done": false
+    },
+    {
+      "text": "Checked in the running web app",
+      "done": false
+    }
+  ],
+  "comments": []
+}

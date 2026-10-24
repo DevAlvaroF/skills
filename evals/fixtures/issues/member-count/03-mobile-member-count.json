@@ -1,0 +1,35 @@
+{
+  "id": "03",
+  "slug": "mobile-member-count",
+  "title": "Mobile app: show the member count on the workspace screen",
+  "status": "ready-for-agent",
+  "spec": ".mysdd/features/01-member-count/spec.md",
+  "whatToBuild": "Mobile app: a team member opening a workspace screen on their phone sees a Members row with the workspace's member count, read from the v1 workspace response; the row is left out when the response has no memberCount.",
+  "blockedBy": [
+    "01"
+  ],
+  "testBoundaries": [
+    "GET /api/v1/workspaces/:slug through its exported handler in apps/web/test/ with node:test (issue 01's tests); the screen is checked by the user on the iOS simulator"
+  ],
+  "covers": [
+    "US-002"
+  ],
+  "codeCommit": null,
+  "reviewHistoryCommit": null,
+  "reviewCodeCommit": null,
+  "acceptanceCriteria": [
+    {
+      "text": "The mobile workspace screen shows a Members row with memberCount from the v1 response, under Your role",
+      "done": false
+    },
+    {
+      "text": "The Members row is left out when the response has no memberCount",
+      "done": false
+    },
+    {
+      "text": "The screen is checked on the iOS simulator",
+      "done": false
+    }
+  ],
+  "comments": []
+}

@@ -1,0 +1,29 @@
+{
+  "id": "01",
+  "slug": "api-member-count",
+  "title": "Server: member count in the v1 workspace response",
+  "status": "ready-for-agent",
+  "spec": ".mysdd/features/01-member-count/spec.md",
+  "whatToBuild": "A team member who loads a workspace gets its member count from the server: the workspace service's getWorkspace returns memberCount, the number of memberships the workspace has, and GET /api/v1/workspaces/:slug returns it beside every field it returned before, so installed mobile builds keep working.",
+  "blockedBy": [],
+  "testBoundaries": [
+    "the workspace service's getWorkspace and GET /api/v1/workspaces/:slug through their exports in apps/web/test/ with node:test, asserting on memberCount"
+  ],
+  "covers": [
+    "US-003"
+  ],
+  "codeCommit": null,
+  "reviewHistoryCommit": null,
+  "reviewCodeCommit": null,
+  "acceptanceCriteria": [
+    {
+      "text": "getWorkspace returns memberCount, the workspace's number of memberships, for one member and for several",
+      "done": false
+    },
+    {
+      "text": "GET /api/v1/workspaces/:slug returns memberCount and every field it returned before, none renamed or removed",
+      "done": false
+    }
+  ],
+  "comments": []
+}

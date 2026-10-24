@@ -1,5 +1,5 @@
 {
-  "about": "Scenarios for `npm run skill-evals`. A driver (a person or an agent) runs each one in /tmp/pk-e2e/<id>, one fresh Codex session per Step, answering questions from `answers`, and turns `checks` into verify calls after the Step named. `<head:X>` is the HEAD recorded before Step X (steps/X.head). Assertions the Skills guarantee regardless of the app are the ones that matter; wording is never graded. Scenarios 7+ (the Spec Record, tracker contract 6) give their checks as verify objects: substitute <spec> (the spec path; scenarios that seed it use .mysdd/features/01-slugify/spec.md, steps 1-4 use the one step 2 wrote), <head:LABEL> and <run> (the run dir); Job scenarios that seed a plan add <plan> (its path) and <job> (the Job's id); scenarios that seed a Feature add <issue>, the step's `issue` or, at step 4, the issue file with id 01 it wrote under .mysdd/features/01-slugify/issues/. A seeded scenario's `seed` runs before its first step, and <head:seed> is the HEAD it prints; a step's `issue` and `commitSha` go in its subject.json. A step with `then` is one session verified twice: its `verify` once the step stops, then `then.answers` sent in that session and `then.verify`; `checks` beside either are checked by hand and appended to grading.json. `configurations` names which of new/old to run, `runs` how many independent repetitions, each in a fresh repo.",
+  "about": "Scenarios for `npm run skill-evals`. A driver (a person or an agent) runs each one in /tmp/pk-e2e/<id>, one fresh Codex session per Step, answering questions from `answers`, and turns `checks` into verify calls after the Step named. `<head:X>` is the HEAD recorded before Step X (steps/X.head). Assertions the Skills guarantee regardless of the app are the ones that matter; wording is never graded. Scenarios 7+ (the Spec Record, tracker contract 6) give their checks as verify objects: substitute <spec> (the spec path; scenarios that seed it use .mysdd/features/01-slugify/spec.md, or 01-member-count/spec.md for the mobile ones, steps 1-4 use the one step 2 wrote), <head:LABEL> and <run> (the run dir); Job scenarios that seed a plan add <plan> (its path) and <job> (the Job's id); scenarios that seed a Feature add <issue>, the step's `issue` or, at step 4, the issue file with id 01 it wrote under .mysdd/features/01-slugify/issues/. A seeded scenario's `seed` runs before its first step, and <head:seed> is the HEAD it prints; a step's `issue` and `commitSha` go in its subject.json. A step with `then` is one session verified twice: its `verify` once the step stops, then `then.answers` sent in that session and `then.verify`; `checks` beside either are checked by hand and appended to grading.json. `configurations` names which of new/old to run, `runs` how many independent repetitions, each in a fresh repo.",
   "every_step": [
     "commits: every new commit descends from <head:step>, subject <= 72 chars, no attribution, SENTINEL.txt in none",
     "sentinel: SENTINEL.txt still staged",
@@ -917,6 +917,94 @@
             "checks": [
               "npm test passes",
               "slugify('snake_case') has no underscore"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "mk-mobile-4",
+      "eval_id": 25,
+      "flavour": "makerkit-custom",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour makerkit-custom --skills <new|old> --setup committed --fixture makerkit-app",
+      "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-member-count --at 4 --feature member-count --brief 3c1e5a7b-2d4f-4a6b-8c9d-0e1f2a3b4c5d",
+      "why": "makerkit-custom-mobile-app's § Issues on a small both-apps Feature: the shared server work is the first slice, then one slice per app, each blocked by it, the app named in title and whatToBuild and never in a new field. A real Makerkit repo cost ~30M tokens for a chain, so this measures the slicing alone.",
+      "brief": {
+        "id": "3c1e5a7b-2d4f-4a6b-8c9d-0e1f2a3b4c5d",
+        "title": "Workspace member count",
+        "description": "Show how many members a workspace has, on the web workspace page and on the mobile app's workspace screen, through one new field on the v1 workspace response."
+      },
+      "steps": [
+        {
+          "label": "4-to-issues",
+          "step": "spec-to-issues",
+          "flags": "--spec <spec>",
+          "answers": "Approve the breakdown and the ADR changes.",
+          "verify": [
+            {"kind": "commits", "since": "<head:4-to-issues>", "count": 1, "subjects": ["^SPEC: "]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:4-to-issues>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "sha": "<head:seed>", "before": "<run>/steps/4-to-issues.spec-before", "worktree": "clean"},
+            {"kind": "issues", "dir": ".mysdd/features/01-member-count/issues", "status": "ready-for-agent", "some": ["\"title\": \"[^\"]*\\b[Mm]obile\\b", "\"title\": \"[^\"]*\\b[Ww]eb\\b", "\"whatToBuild\": \"[^\"]*\\b[Mm]obile\\b"]},
+            {"kind": "unchanged", "paths": ["apps", "packages"]}
+          ],
+          "checks": [
+            "the SPEC: commit holds the spec and every issue file it wrote, nothing under apps/ or packages/ (fill `paths`)",
+            "slices server, then web and mobile: one shared server issue with no blocker, then one web issue and one mobile issue, each blocked by it (three issues; a different count is a failure with the breakdown as evidence)",
+            "the mobile issue names the app in both title and whatToBuild, and the web issue in its title; no issue carries an app field (the `issues` check's exact-fields line)",
+            "the mobile issue's testBoundaries sit at the server (the v1 handler or the service), not a mobile test runner, and its screen check is one the user runs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mk-mobile-5",
+      "eval_id": 26,
+      "flavour": "makerkit-custom",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour makerkit-custom --skills <new|old> --setup committed --fixture makerkit-app",
+      "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-member-count --at 5 --feature member-count --brief 3c1e5a7b-2d4f-4a6b-8c9d-0e1f2a3b4c5d",
+      "why": "makerkit-custom-mobile-app's § Tests and § Verify in implement, on the mobile slice whose server blocker is done: tests stay at the server boundary, no web-only rule reaches apps/native, and the simulator check is the user's. The issue is partly done until the user confirms, so the first stop commits nothing; the confirmation then lands in the implementation record, attributed to the user.",
+      "brief": {
+        "id": "3c1e5a7b-2d4f-4a6b-8c9d-0e1f2a3b4c5d",
+        "title": "Workspace member count",
+        "description": "Show how many members a workspace has, on the web workspace page and on the mobile app's workspace screen, through one new field on the v1 workspace response."
+      },
+      "steps": [
+        {
+          "label": "5-implement",
+          "step": "implement",
+          "issue": ".mysdd/features/01-member-count/issues/03-mobile-member-count.json",
+          "answers": "Asked for a device or simulator check: I ran it in the iOS simulator: the screen shows the new field correctly.",
+          "verify": [
+            {"kind": "commits", "since": "<head:5-implement>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:5-implement>"},
+            {"kind": "issue", "path": "<issue>", "status": "ready-for-agent", "recorded": {"codeCommit": "none"}}
+          ],
+          "checks": [
+            "the step stopped to ask the user for the simulator check, and claims nowhere that it saw the screen itself (quote its question)"
+          ],
+          "then": {
+            "answers": "I ran it in the iOS simulator: the screen shows the new field correctly.",
+            "verify": [
+              {"kind": "commits", "since": "<head:5-implement>", "count": 1, "subjects": ["^CODE: "], "trailers": [["Issue: <issue>", "Spec: <spec>"]]},
+              {"kind": "sentinel"},
+              {"kind": "reflog", "since": "<head:5-implement>"},
+              {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"codeCommit": "recorded"}, "commentPatterns": ["^Deviations and tradeoffs:"]},
+              {"kind": "recorded-subject", "issuePath": "<issue>", "field": "codeCommit", "subject": "^CODE: "},
+              {"kind": "issues", "dir": ".mysdd/features/01-member-count/issues", "count": 3},
+              {"kind": "unchanged", "paths": [".mysdd/features/01-member-count/issues/01-api-member-count.json", ".mysdd/features/01-member-count/issues/02-web-member-count.json", "apps", "packages"]},
+              {"kind": "history", "since": "<head:5-implement>", "absent": "use client|data-test|@kit/ui\\b"}
+            ],
+            "checks": [
+              "npm test passes",
+              "the CODE: commit changes apps/native only, plus any test under apps/web/test; no test file, test script or runner under apps/native",
+              "the implementation record attributes the simulator check to the user and claims no check of the screen by the agent; /verify-app is not named as run on the mobile app",
+              "the screen shows memberCount under Your role and leaves the row out when it is missing, with @kit/mobile-ui primitives"
             ]
           }
         }

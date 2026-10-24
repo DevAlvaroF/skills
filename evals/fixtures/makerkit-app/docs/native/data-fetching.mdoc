@@ -1,0 +1,6 @@
+---
+title: Data fetching
+---
+
+The mobile app calls the web app's `/api/v1` route handlers with the user's bearer token, through one React Query hook
+per resource under `apps/native/lib/`. It never queries Supabase directly, so every rule stays on the server.

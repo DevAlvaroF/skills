@@ -34,6 +34,9 @@ export const FEATURE_STAGES = ['4', '5', '6', '7'] as const
 export type FeatureStage = (typeof FEATURE_STAGES)[number]
 export const SPEC_STATES = ['none', 'empty', 'saved', 'committed', 'recorded', 'malformed', 'duplicate'] as const
 export type SpecState = (typeof SPEC_STATES)[number]
+/** The Features `seed-feature` builds: slugify on `fixtures/node-app`, member-count on `fixtures/makerkit-app`. */
+export const FEATURES = ['slugify', 'member-count'] as const
+export type FeatureName = (typeof FEATURES)[number]
 
 /** The agents the seeded attempts name: the prompts' coder and reviewer labels. */
 const CODER = 'Claude'
@@ -82,12 +85,21 @@ function filesUnder(dir: string, base = dir): string[] {
   })
 }
 
-/** Lays a code fixture over the repo, which must be the node-app fixture it was written against; returns its paths. */
+/** The app fixture each code fixture was written against, and a file and text that only that app's repo holds. */
+const CODE_BASES: Record<string, { app: string; file: string; holds: string }> = {
+  slugify: { app: 'node-app', file: 'src/text.js', holds: 'export function capitalize' },
+  'word-count': { app: 'node-app', file: 'src/text.js', holds: 'export function capitalize' },
+  'member-count': { app: 'makerkit-app', file: 'apps/web/lib/server/workspace.service.js', holds: 'export function createWorkspaceService' },
+}
+
+/** Lays a code fixture over the repo, which must be built from the app fixture it was written against; returns its paths. */
 function applyCode(repo: string, fixture: string): string[] {
   const source = join(FIXTURES, 'code', fixture)
-  const current = join(repo, 'src/text.js')
-  if (!existsSync(current) || !readFileSync(current, 'utf8').includes('export function capitalize')) {
-    throw new Error(`the ${fixture} code fixture needs a repo built from fixtures/node-app (no capitalize in src/text.js)`)
+  const base = CODE_BASES[fixture]
+  if (!base) throw new Error(`no app fixture is named for the ${fixture} code fixture`)
+  const current = join(repo, base.file)
+  if (!existsSync(current) || !readFileSync(current, 'utf8').includes(base.holds)) {
+    throw new Error(`the ${fixture} code fixture needs a repo built from fixtures/${base.app} (repo --fixture ${base.app})`)
   }
   cpSync(source, repo, { recursive: true })
   return filesUnder(source).sort()
@@ -147,13 +159,15 @@ function checkSpec(full: string, state: SpecState): void {
  *
  * Every state but `committed`/`recorded` leaves the spec untracked, as Step 2 does. `secret` then appends a
  * secret-shaped line to Further Notes, uncommitted, for the publication check. `settled` starts from the fixture
- * with its open question answered, as a passing review leaves it.
+ * with its open question answered, as a passing review leaves it. `fixture` names the spec, `slugify` by default;
+ * `member-count` has only a settled one.
  */
 export function seedSpec(
   repo: string, specPath: string, state: SpecState,
-  options: { brief?: string; secret?: boolean; settled?: boolean } = {},
+  options: { brief?: string; secret?: boolean; settled?: boolean; fixture?: FeatureName } = {},
 ): Seeded {
-  let spec = readFileSync(join(FIXTURES, 'specs', options.settled ? 'slugify.settled.md' : 'slugify.md'), 'utf8')
+  const name = options.fixture ?? 'slugify'
+  let spec = readFileSync(join(FIXTURES, 'specs', options.settled ? `${name}.settled.md` : `${name}.md`), 'utf8')
   if (options.brief) spec = spec.replace(/^(# .*\n)/, `$1\nkanban-brief: ${options.brief}\n`)
   const withBlock = (block: string) => `${spec.trimEnd()}\n\n${block}\n`
   const full = join(repo, specPath)
@@ -324,10 +338,14 @@ const IMPLEMENTATION_RECORD = [
  *   E: `some` is `fixtures/reviews/slugify.findings.txt`, one real defect planted in the code (an underscore
  *   survives) and one arguable suggestion.
  */
-export function seedFeature(repo: string, featureDir: string, at: FeatureStage, options: { findings?: Findings; brief?: string } = {}): Seeded {
+export function seedFeature(
+  repo: string, featureDir: string, at: FeatureStage,
+  options: { findings?: Findings; brief?: string; feature?: FeatureName } = {},
+): Seeded {
   if (!FEATURE_STAGES.includes(at)) throw new Error(`--at ${String(at)}: 4, 5, 6 or 7`)
   if ((at === '7') !== (options.findings !== undefined)) throw new Error('--findings none|some goes with --at 7, and only there')
   if (!existsSync(join(repo, '.mysdd/issue-tracker.md'))) throw new Error('seed-feature needs a tracker: make the repo with --setup committed|local')
+  if (options.feature === 'member-count') return seedMemberCount(repo, featureDir, at, options.brief)
   const local = ignored(repo, '.mysdd/features/')
   const full = join(repo, featureDir)
   const specPath = `${featureDir}/spec.md`
@@ -366,5 +384,82 @@ export function seedFeature(repo: string, featureDir: string, at: FeatureStage, 
   writeIssue()
   issue.reviewHistoryCommit = commit(repo, ['REVIEW HISTORY: Record final review attempt 1', `Issue: ${issuePath}`], [issuePath], local)
   writeIssue()
+  return { full, head: head(repo) }
+}
+
+/* ---------- the mobile Feature (steps 4–5, makerkit-custom) ---------- */
+
+const MEMBER_COUNT_ISSUES = join(FIXTURES, 'issues/member-count')
+
+const SERVER_IMPLEMENTATION_RECORD = [
+  'Implementation record',
+  'Verification: npm test, 4 tests, 4 passed.',
+  'Review: spec fidelity against US-003 and the Implementation Decisions found nothing to change; /makerkit-custom-kit-conformance: CONFORMS.',
+  'Left open: none. ADRs superseded: none.',
+  'Deviations and tradeoffs: None.',
+].join('\n')
+
+/**
+ * The both-apps Feature on `fixtures/makerkit-app` (`repo --fixture makerkit-app`), committed mode only: the
+ * `member-count` spec (one field added to the v1 workspace response, shown by the web app and the mobile app) and
+ * the three issues `/makerkit-custom-mobile-app` asks for — the shared server slice first, then one slice per app,
+ * each blocked by it.
+ *
+ * - `4`: the settled spec with a finished first review (`seedSpec … recorded`), as Step 3 leaves it.
+ * - `5`: plus the issues committed with the spec as `SPEC: …`, and issue 01 (server) carried through steps 5–7 with
+ *   no findings: `CODE: Add memberCount to the workspace response` (`fixtures/code/member-count`), a PASS phase 1
+ *   record committed as `REVIEW HISTORY: Record final review attempt 1`, then a COMPLETE phase 2 record and
+ *   `done-final-review` committed as `Closed Issue: <path>`. So 02 (web) and 03 (mobile) are both on the frontier,
+ *   and the tree is clean.
+ */
+function seedMemberCount(repo: string, featureDir: string, at: FeatureStage, brief?: string): Seeded {
+  if (at !== '4' && at !== '5') throw new Error('--feature member-count seeds --at 4 or 5 only')
+  if (ignored(repo, '.mysdd/features/')) throw new Error('--feature member-count needs committed mode: repo --setup committed')
+  const full = join(repo, featureDir)
+  const specPath = `${featureDir}/spec.md`
+
+  seedSpec(repo, specPath, 'recorded', { brief, settled: true, fixture: 'member-count' })
+  if (at === '4') return { full, head: head(repo) }
+
+  const issuesDir = join(full, 'issues')
+  mkdirSync(issuesDir, { recursive: true })
+  const issuePaths = readdirSync(MEMBER_COUNT_ISSUES).sort().map((name) => {
+    const issue = JSON.parse(readFileSync(join(MEMBER_COUNT_ISSUES, name), 'utf8')) as JsonObject
+    issue.spec = specPath
+    writeFileSync(join(issuesDir, name), `${JSON.stringify(issue, null, 2)}\n`)
+    return `${featureDir}/issues/${name}`
+  })
+  checkIssues(issuesDir)
+  commit(repo, ['SPEC: Split the member count into server, web and mobile'], [specPath, ...issuePaths])
+
+  const issuePath = issuePaths[0]!
+  const issueFull = join(repo, issuePath)
+  const issue = JSON.parse(readFileSync(issueFull, 'utf8')) as JsonObject & { acceptanceCriteria: JsonObject[]; comments: JsonObject[] }
+  const writeIssue = () => {
+    writeFileSync(issueFull, `${JSON.stringify(issue, null, 2)}\n`)
+    checkIssues(issuesDir)
+  }
+  const code = commit(repo, ['CODE: Add memberCount to the workspace response', `Issue: ${issuePath}\nSpec: ${specPath}`],
+    applyCode(repo, 'member-count'))
+  for (const criterion of issue.acceptanceCriteria) criterion.done = true
+  issue.status = 'done-coding-awaiting-final-review'
+  issue.codeCommit = code
+  issue.comments.push({ author: CODER, body: SERVER_IMPLEMENTATION_RECORD })
+  issue.comments.push({ author: REVIEWER, body: phaseOneRecord(code, 'none') })
+  writeIssue()
+  issue.reviewHistoryCommit = commit(repo, ['REVIEW HISTORY: Record final review attempt 1', `Issue: ${issuePath}`], [issuePath])
+  issue.comments.push({ author: CODER, body: [
+    'Final review, phase 2, attempt 1',
+    `Answers: phase 1 attempt 1, reviewed commits ${code}`,
+    'Outcome: COMPLETE',
+    'Verdicts: None.',
+    'Checks: npm test, 4 tests, 4 passed; /makerkit-custom-kit-conformance: CONFORMS.',
+    'Fix commit: None.',
+    'Attempt plans: []',
+    'ADRs superseded: None.',
+  ].join('\n') })
+  issue.status = 'done-final-review'
+  writeIssue()
+  commit(repo, [`Closed Issue: ${issuePath}`], [issuePath])
   return { full, head: head(repo) }
 }

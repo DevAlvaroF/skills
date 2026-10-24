@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { GitHistoryService } from '@main/services/git-history.service'
 import { IssueFileSchema, RECORDED_SHA_PATTERN, parseSpecMarker, planJobIds, readJobRecord, readPlanRecord, readSpecRecord, readSpecReviewCommit, type JobRecordRead, type PlanRecordStepKey } from '@shared/domain'
@@ -46,6 +46,13 @@ export type Check =
   | { kind: 'spec'; path: string; state?: 'read' | 'unusable' | 'none'; attempts?: number; recorded?: boolean; sha?: string; before?: string; unchanged?: boolean; worktree?: 'dirty' | 'clean'; committedAttempt?: boolean; patterns?: string[] }
   /** No commit after `since` adds a line matching `absent`: what the publication check keeps out of history. */
   | { kind: 'history'; since: string; absent: string }
+  /**
+   * Every issue file directly under `dir` (not `archive/`) parses with `IssueFileSchema` and holds exactly the
+   * schema's fields, since the issue shape is fixed and a new field is a format break; `count` is the exact number,
+   * `status` each one's. Each `some` pattern (a regex over the file's text) matches at least one issue, each `every`
+   * pattern all of them.
+   */
+  | { kind: 'issues'; dir: string; count?: number; status?: string; some?: string[]; every?: string[] }
   /** A file exists and every pattern (a regex, multiline) matches it. */
   | { kind: 'file'; path: string; patterns?: string[]; absent?: boolean }
   /** A SHA the agent recorded is exactly the commit it made: its subject matches. */
@@ -328,6 +335,34 @@ async function check(repo: string, item: Check, history: GitHistoryService): Pro
         else if (line.startsWith('+') && !line.startsWith('+++') && pattern.test(line)) hits.push(current)
       }
       return [{ text: `no commit since ${item.since.slice(0, 8)} adds a line matching /${item.absent}/`, passed: hits.length === 0, evidence: hits.length ? `in ${[...new Set(hits)].join(', ')}` : 'none' }]
+    }
+    case 'issues': {
+      const full = join(repo, item.dir)
+      const names = existsSync(full) ? readdirSync(full).filter((name) => name.endsWith('.json')).sort() : []
+      const fields = Object.keys(IssueFileSchema.shape).sort()
+      const texts = names.map((name) => readFileSync(join(full, name), 'utf8'))
+      const out: Expectation[] = []
+      if (item.count !== undefined) out.push({ text: `${item.dir} holds exactly ${item.count} issue(s)`, passed: names.length === item.count, evidence: names.join(', ') || 'none' })
+      names.forEach((name, index) => {
+        const read = readIssue(repo, `${item.dir}/${name}`)
+        out.push({ text: `${name} parses as an Issue`, passed: !('error' in read), evidence: 'error' in read ? read.error ?? '' : `status ${read.issue.status}` })
+        let keys: string[] = []
+        try { keys = Object.keys(JSON.parse(texts[index]!)).sort() } catch { /* reported above */ }
+        const extra = keys.filter((key) => !fields.includes(key))
+        const missing = fields.filter((key) => !keys.includes(key))
+        out.push({ text: `${name} holds exactly the issue shape's fields`, passed: extra.length + missing.length === 0,
+          evidence: [extra.length ? `extra ${extra.join(', ')}` : '', missing.length ? `missing ${missing.join(', ')}` : ''].filter(Boolean).join('; ') || 'exact' })
+        if (item.status && !('error' in read)) out.push({ text: `${name} status is ${item.status}`, passed: read.issue.status === item.status, evidence: read.issue.status })
+      })
+      for (const pattern of item.some ?? []) {
+        const hits = names.filter((_, index) => new RegExp(pattern, 'm').test(texts[index]!))
+        out.push({ text: `some issue in ${item.dir} matches /${pattern}/`, passed: hits.length > 0, evidence: hits.join(', ') || `none of ${names.length}` })
+      }
+      for (const pattern of item.every ?? []) {
+        const misses = names.filter((_, index) => !new RegExp(pattern, 'm').test(texts[index]!))
+        out.push({ text: `every issue in ${item.dir} matches /${pattern}/`, passed: names.length > 0 && misses.length === 0, evidence: misses.length ? `not ${misses.join(', ')}` : `all ${names.length}` })
+      }
+      return out
     }
     case 'file': {
       const full = join(repo, item.path)
