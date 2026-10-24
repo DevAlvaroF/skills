@@ -30,6 +30,9 @@ Then read [SUPABASE.md](./SUPABASE.md) or, for Prisma and Drizzle, [BETTER-AUTH.
 concrete names the checks below look for. For another kit (TanStack Start, React Router), read the file for the same
 data layer and say so in the report.
 
+**Mobile app.** If the change touches `apps/native` or `packages/mobile-ui`, invoke `/makerkit-custom-mobile-app` and
+apply its § Review there.
+
 ## Ground in the sources, in this order
 
 1. Binding ADRs under `.mysdd/docs/adr/` whose scope covers the path.
@@ -49,7 +52,8 @@ the repo ships none of it, cite the flavour file and say so.
 ## What fighting the kit looks like
 
 1. **Editing upstream-owned code.** A changed path that exists in the upstream tree is kit code (`git remote -v` for
-   the Makerkit remote, then its tree; with none, `packages/**` minus paths the repo's own history added). Also a
+   the Makerkit remote, then its tree; with none, the flavour file's upstream, fetched without adding a remote; if
+   that fails too, `packages/**` minus paths the repo's own history added). Also a
    hand-edited generated file, or a migration already applied. Name the extension point the kit offers instead.
 2. **Bypassing a kit primitive:** action clients, the route-handler wrapper, data and auth clients, the logger, the
    mailer, i18n, `@kit/ui`, forms.

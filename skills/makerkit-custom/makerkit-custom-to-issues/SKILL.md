@@ -30,6 +30,9 @@ Before exploring, read the project's own documentation, because where it and thi
 - the Makerkit docs, through one sub-agent, per `.mysdd/docs/agents/domain.md` § Makerkit docs; draft the slices that
   don't depend on its answer while it works.
 
+**Mobile app.** If `apps/native` exists and the work may touch it, invoke `/makerkit-custom-mobile-app` and apply its
+§ Issues before drafting slices.
+
 Use the glossary's vocabulary in titles and descriptions. Look for prefactoring that makes the work easier: "make the
 change easy, then make the easy change."
 

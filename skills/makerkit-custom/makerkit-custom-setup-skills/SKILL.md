@@ -30,6 +30,8 @@ under `.mysdd/`; and what Git ignores and tracks under `.mysdd/`.
 If you found a tracker not at contract 7, existing issues, or an `AGENTS.md` with a `## Vocabulary` or `## Decisions`
 section, read [UPGRADE.md](./UPGRADE.md) now; a fresh repo never needs it.
 
+**Mobile app.** If `apps/native` exists, invoke `/makerkit-custom-mobile-app` and apply its § Setup.
+
 ## 2. Present and ask
 
 Summarise what's there and what's missing, then one section at a time, leading with the recommended answer so the user
@@ -90,8 +92,8 @@ ending `, when installed.`:
 Write each generated file from its seed. An existing `domain.md` takes the seed's changes and keeps the user's own
 sections, named in the report; an existing tracker follows [UPGRADE.md](./UPGRADE.md). The tracker must end with
 exactly one `Tracker contract: 7` line, directly under the title: every reader stops on anything else. Beyond the
-block, its § Verification line, a root file seeded on request and the UPGRADE.md moves, leave every `AGENTS.md`
-alone.
+block, its § Verification line, a root file seeded on request, the UPGRADE.md moves and approved mobile stubs, leave
+every `AGENTS.md` alone.
 
 ## 5. Done
 

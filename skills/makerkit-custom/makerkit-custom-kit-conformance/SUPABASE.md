@@ -2,6 +2,9 @@
 
 Names as of kit v3/v4. Where the repo differs, the repo wins: it is the version you'll merge with.
 
+- **Upstream:** `git@github.com:makerkit/next-supabase-saas-kit-turbo.git`; for a repo with `apps/native`,
+  `git@github.com:makerkit/expo-supabase-turbo-saas-kit.git`. Both are private, so a fetch needs the user's access.
+
 - **Actions:** `authActionClient`, `publicActionClient`, `captchaActionClient` from `@kit/next/safe-action`, extra
   checks composed with `.use()`; `useAction` on the client. `adminActionClient` only in admin features. Mutations only,
   never fetching.

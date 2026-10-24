@@ -25,6 +25,9 @@ Before exploring, read the project's own documentation, because where it and thi
 - the Makerkit docs, through one sub-agent, per `.mysdd/docs/agents/domain.md` § Makerkit docs; synthesise whatever
   doesn't depend on its answer while it works.
 
+**Mobile app.** If `apps/native` exists and the spec may touch it, invoke `/makerkit-custom-mobile-app` and apply its
+§ Spec, in a review too.
+
 ## Process
 
 1. Explore the repo until you understand its current state. Use the glossary's vocabulary throughout.

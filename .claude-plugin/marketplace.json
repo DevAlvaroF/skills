@@ -24,6 +24,7 @@
         "./makerkit-custom-grill-with-docs",
         "./makerkit-custom-implement",
         "./makerkit-custom-kit-conformance",
+        "./makerkit-custom-mobile-app",
         "./makerkit-custom-setup-skills",
         "./makerkit-custom-tdd",
         "./makerkit-custom-to-issues",

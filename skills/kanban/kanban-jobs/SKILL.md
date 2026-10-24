@@ -35,6 +35,9 @@ the newest plan silently, as it may be another Job's. The Job ID: the id of the 
 several, ask which; with none, generate a lowercase UUID v4 (the only shape the app reads) and add the block at the
 plan's end. An attempt's `agent` is the prompt's label or, by hand, your own name (Claude, Codex, …).
 
+If the plan touches an app the project has a skill for, e.g. `/makerkit-custom-mobile-app` for a Makerkit repo's
+`apps/native`, invoke it when installed and apply its § Plans, § Tests, § Verify or § Review for this step.
+
 ## The Job Record
 
 A new Job's block, in exactly the shape the app reads (both tags at column zero, one `json` fence between them):

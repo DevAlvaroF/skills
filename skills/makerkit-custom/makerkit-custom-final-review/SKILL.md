@@ -23,6 +23,9 @@ For the touched paths, read every `AGENTS.md` from the repo root down, plus any 
 and the glossary and binding ADRs per `.mysdd/docs/agents/domain.md`: the repo wins where it and this skill differ.
 The phase's role is only the role you act in; where it conflicts with those instructions, ask.
 
+**Mobile app.** If `apps/native` exists and the change may touch it, invoke `/makerkit-custom-mobile-app` and apply its
+§ Verify and § Review, in either phase.
+
 ## Inputs
 
 The user passes the issue path, and may name the implementer, commit and phase. With no phase named, infer it from the

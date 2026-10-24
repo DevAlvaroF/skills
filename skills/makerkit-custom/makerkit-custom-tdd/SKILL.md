@@ -18,6 +18,9 @@ interface vocabulary match the project's language, and where the repo and this d
 The ADRs whose `scope` covers the code under test are binding: a test that would pin behaviour contradicting one is a
 stop — flag it and ask.
 
+**Mobile app.** If `apps/native` exists and the code under test may touch it, invoke `/makerkit-custom-mobile-app` and
+apply its § Tests.
+
 The discipline in this skill runs the other way. Everything below — red before green, one slice at a time, boundaries
 over internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A
 thin `AGENTS.md` is not permission to skip the loop.

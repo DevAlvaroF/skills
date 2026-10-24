@@ -3,12 +3,12 @@
 Custom skills for Claude Code and Codex, installed per project with
 [`npx skills`](https://github.com/vercel-labs/skills).
 
-The repo ships two flavours of the same eight skills; Makerkit Custom adds a
-ninth, `kit-conformance`. **Install one per project, never both.**
+The repo ships two flavours of the same eight skills; Makerkit Custom adds two
+more, `kit-conformance` and `mobile-app`. **Install one per project, never both.**
 
 | Flavour | Use it for |
 |---|---|
-| **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — knows its `AGENTS.md` layout, RLS and `.mdoc` docs; keeps the glossary and scoped, binding ADRs under `.mysdd/docs/`, out of the always-loaded `AGENTS.md` |
+| **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — knows its `AGENTS.md` layout, RLS and `.mdoc` docs; keeps the glossary and scoped, binding ADRs under `.mysdd/docs/`, out of the always-loaded `AGENTS.md`; guides the optional Expo mobile app in `apps/native` |
 | **Modified Matt Skills** (`modified-matt-*`) | Any other repo — root `CONTEXT.md` glossary, scoped and binding ADRs under `.mysdd/docs/adr/` |
 
 A third group, **Prompt-kanban companion**, holds one flavour-neutral skill,
@@ -255,6 +255,14 @@ Same steps, gates and commits under `makerkit-custom-*`, except:
 - **Slicing.** A slice crossing migration, policy, types, action, page and
   tests is still one slice; a shared migration or RLS policy is done before
   work is split across sub-agents.
+- **Mobile app.** A repo may also ship the optional Expo mobile app in
+  `apps/native`, a second app of the monorepo beside the web app. Each step
+  checks for it and, when the work may touch it, invokes
+  `/makerkit-custom-mobile-app` and applies that step's section: which app,
+  the `/api/v1` contract with installed builds, one slice per app, a
+  verification only the user can run. Without `apps/native` nothing changes.
+  These pointers are temporary: once the mobile kit stabilises, each section
+  moves into its step's skill and the pointer goes.
 
 ### Steps A–E: a Job (`kanban-jobs`)
 
@@ -381,7 +389,7 @@ Each agent needs its own switch — keep them in sync:
 
 Currently user-invoked: `grill-with-docs`, `implement`, `final-review`,
 `setup-skills`, `to-spec`, `to-issues`, and `kanban-jobs`. Model-invoked:
-`domain-modeling`, `tdd`, `kit-conformance`.
+`domain-modeling`, `tdd`, `kit-conformance`, `mobile-app`.
 
 ---
 

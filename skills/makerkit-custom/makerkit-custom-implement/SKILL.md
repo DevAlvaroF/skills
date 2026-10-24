@@ -26,6 +26,9 @@ Before writing any code, read the project's own documentation, because where it 
 - the Makerkit docs, through one sub-agent, per `.mysdd/docs/agents/domain.md` § Makerkit docs; start on whatever
   doesn't depend on its answer while it works.
 
+**Mobile app.** If `apps/native` exists and the issue may touch it, invoke `/makerkit-custom-mobile-app` and apply its
+§ Tests and § Verify, so step 2 runs the mobile checks too.
+
 ## Build
 
 - Use `/makerkit-custom-tdd` where possible, at the issue's `testBoundaries`. A boundary the issue doesn't list, or one

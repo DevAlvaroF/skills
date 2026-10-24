@@ -9,6 +9,9 @@ Actively build and sharpen the project's domain model as you design: challenge t
 write the vocabulary and decisions down the moment they crystallise. (Merely
 _reading_ the glossary and ADRs is not this skill: `.mysdd/docs/agents/domain.md` covers that.)
 
+**Mobile app.** If `apps/native` exists and a term or decision concerns it, invoke `/makerkit-custom-mobile-app` and
+apply its § Domain modelling.
+
 ## Where the model lives
 
 - **Glossary**: `.mysdd/docs/CONTEXT.md`, one for the whole repo, in the format of [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
