@@ -18,11 +18,11 @@ run `npx skills update -p`. Its § Comment records and § Commits define every r
 and § Committed or local must resolve before you write. Read the glossary and binding ADRs for the touched paths, per
 `.mysdd/docs/agents/domain.md`. The phase's role doesn't outrank the project's own instructions: on a conflict, ask.
 
-**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching,
-checks and the fixes your phase allows, including fixes a sub-agent's report calls for, to sub-agents where you can,
-each pass where the phase file runs it. Phase 1 fixes nothing, and phase 2 only what the user approved. Brief each one
-with what it needs and have it report back with enough information to act on, never trimmed to save context: it spares
-you the reading, not the findings. A recorded SHA must be a commit this session made.
+**Context.** Keep this session lean, for orchestration, the user's decisions, commits and records: hand reading,
+searching, checks and the fixes your phase allows to sub-agents where that helps, each pass where the phase file runs
+it. Phase 1 fixes nothing, and phase 2 only what the user approved. Brief each one with what it needs and read what it
+returns, which is how you know what is going on: ask for what you need to act on, not raw output. Its edits are your own
+paths to commit; it commits nothing, as a recorded SHA must be a commit this session made.
 
 ## Inputs
 

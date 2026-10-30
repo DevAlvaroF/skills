@@ -25,10 +25,10 @@ The discipline in this skill runs the other way. Everything below — red before
 over internals, the anti-patterns — is **owned by this skill and applies even where the repo says nothing about it**. A
 thin `AGENTS.md` is not permission to skip the loop.
 
-**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching,
-checks and fixes, including fixes a sub-agent's report calls for, to sub-agents where you can. Brief each one with what
-it needs and have it report back with enough information to act on, never trimmed to save context: it spares you the
-reading, not the findings. A recorded SHA must be a commit this session made.
+**Context.** Keep this session lean, for orchestration, the user's decisions, commits and records: hand reading,
+searching, checks and fixes to sub-agents where that helps. Brief each one with what it needs and read what it returns,
+which is how you know what is going on: ask for what you need to act on, not raw output. Its edits are your own paths to
+commit; it commits nothing, as a recorded SHA must be a commit this session made.
 
 ## What a good test is
 
