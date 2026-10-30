@@ -11,7 +11,7 @@ differs, the repo wins: it is the version you'll merge with.
   swallowed.
 - **Fetching:** Server Components and page loaders, never an action.
 - **Forms** with `react-hook-form` and the kit's `@kit/ui/form`; `next-intl` messages for every visible string.
-- **Client config** is `NEXT_PUBLIC_*`; account mode is `NEXT_PUBLIC_ACCOUNT_MODE`, not an ad hoc toggle.
+- **Client config** is `NEXT_PUBLIC_*`; account mode is the row's flag, not an ad hoc toggle.
 - **Deprecated:** `withI18n` and `react-i18next` (now `next-intl`).
 
 ## Kits
@@ -23,15 +23,17 @@ checked at (§ Skill drift in SKILL.md).
   `apps/native`: `expo-supabase-turbo-saas-kit`; both private) · docs `next-supabase-turbo` · actions
   `authActionClient`, `publicActionClient`, `captchaActionClient` from `@kit/next/safe-action`, `adminActionClient`
   only in admin features (`enhanceAction` is deprecated) · route handlers `enhanceRouteHandler` from
-  `@kit/next/routes` · routes `app/[locale]/home/(user)/` personal, `app/[locale]/home/[account]/` team by slug,
-  feature server code in `_lib/server/` · `packages/next/**` is upstream-owned · kit skills: architect, bug-hunt,
-  bug-hunt-lite, frontend-design, playwright-e2e, postgres-expert, react-form-builder, reviewer, rls-review,
-  server-action-builder, service-builder, verify-app
+  `@kit/next/routes` · account mode `NEXT_PUBLIC_ENABLE_TEAM_ACCOUNTS*` · routes
+  `app/[locale]/home/(user)/` personal, `app/[locale]/home/[account]/` team by slug, feature server code in
+  `_lib/server/` · `packages/next/**` is upstream-owned · kit skills: architect, bug-hunt, bug-hunt-lite,
+  playwright-e2e, postgres-expert, react-form-builder, reviewer, rls-review, server-action-builder, service-builder,
+  verify-app
 - **Drizzle** — checked at 2.3.2 · upstream `git@github.com:makerkit/next-drizzle-saas-kit-turbo.git` · docs
   `nextjs-drizzle` · actions `authenticatedActionClient`, `organizationActionClient`, `adminActionClient` from
   `@kit/action-middleware`, gates `withMinRole`, `withFeaturePermission`, `withAdminPermission`, never an inline
-  `ctx.role === 'admin'` · routes `app/[locale]/(internal)/<feature>/_lib/{actions,schemas,loaders}` · kit skills:
-  architect, bug-hunt, bug-hunt-lite, drizzle-expert, frontend-design, playwright-e2e-expert, react-form-builder,
-  reviewer, server-actions-expert, verify-app
+  `ctx.role === 'admin'` · account mode `NEXT_PUBLIC_ACCOUNT_MODE` · routes
+  `app/[locale]/(internal)/<feature>/_lib/{actions,schemas,loaders}` · kit skills: architect, bug-hunt, bug-hunt-lite,
+  drizzle-expert, frontend-design, playwright-e2e-expert, react-form-builder, reviewer, server-actions-expert,
+  verify-app
 - **Prisma** — not checked against a copy: as Drizzle, with docs `nextjs-prisma`; take the upstream from
   `git remote -v`.
