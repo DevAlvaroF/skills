@@ -7,10 +7,10 @@ A Makerkit kit already answers actions, data access, tenancy, authorization, sch
 bypasses those answers is code the kit's updates stop protecting, a conflict on the next upstream pull, or a guarantee
 — RLS, the action middleware, a tenant filter — silently lost. This review looks only for that.
 
-**Context.** Keep this session for orchestration, the user's decisions and the report: hand reading, searching and
-checks to sub-agents where you can, split as § Running it says. This review changes no file (§ Scope), so it hands out
-no fixes. Brief each one with what it needs and have it report back with enough information to act on, never trimmed to
-save context: it spares you the reading, not the findings.
+**Context.** Keep this session lean, for orchestration, the user's decisions and the report: hand reading, searching and
+checks to sub-agents where that helps, split as § Running it says. This review changes no file (§ Scope), so it hands
+out no fixes. Brief each one with what it needs and read what it returns, which is how you know what is going on: ask
+for what you need to act on, not raw output.
 
 ## Scope
 
@@ -105,12 +105,14 @@ phase 1 takes the findings as they are.
 Makerkit ships often, TanStack fastest, and these skills go stale unseen. The user wants to know when they conflict
 with the kit, so they can update them; nothing more.
 
-- **Check** when the kit's version — the top `## [x.y.z]` of the root `CHANGELOG.md`, else the root `package.json`'s —
-  is newer than the row's "checked at", or there is no row: verify against the code the names this review relies on,
-  and read the kit skills (`.agents/skills/` minus this pack and `kanban-jobs`) the row's list lacks for overlap with a
-  step these skills own. The list only marks which are new; it is not a roster to keep in sync. At the same version
-  trust the files: re-checking every run costs more than it finds. An older kit has not caught up with the row, so
-  its names may not exist there yet: follow the repo and report no drift.
+- **Check** when the kit's version — the higher of the root `CHANGELOG.md`'s top `## [x.y.z]` and the root
+  `package.json`'s, as Makerkit doesn't always bump both — is newer than the row's "checked at", or there is no row:
+  verify against the code the names this review relies on, and read the kit skills (`.agents/skills/` minus this pack
+  and `kanban-jobs`) the row's list lacks for overlap with a step these skills own. The list only marks which are new;
+  it is not a roster to keep in sync. At the same version don't go looking, since re-checking every run costs more
+  than it finds; but a name the review relied on that the code contradicts is drift there too, as the version can lag
+  the code. An older kit has not caught up with the row, so its names may not exist there yet: follow the repo and
+  report no drift.
 - **Drift** is a name, path, command or workflow these skills give that the repo lacks, renamed or contradicts; a kit
   with no file or row; a kit skill they call that is gone, renamed or changed how it is called; a new kit skill
   covering a step they own, whose entry names that step and what overlaps and leaves the user to call it, defer to it
