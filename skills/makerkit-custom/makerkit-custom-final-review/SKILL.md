@@ -17,6 +17,12 @@ Read `.mysdd/issue-tracker.md` whole before writing anything: its issue shape, c
 the ones both phases write to. It must hold exactly one `Tracker contract: 7` line; missing, lower or none → stop and
 tell the user to re-run `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
+**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching,
+checks and the fixes your phase allows, including fixes a sub-agent's report calls for, to sub-agents where you can,
+each pass where the phase file runs it. Phase 1 fixes nothing, and phase 2 only what the user approved. Brief each one
+with what it needs and have it report back with enough information to act on, never trimmed to save context: it spares
+you the reading, not the findings. A recorded SHA must be a commit this session made.
+
 ## Ground yourself first
 
 For the touched paths, read every `AGENTS.md` from the repo root down, plus any the chain routes a touched concern to,

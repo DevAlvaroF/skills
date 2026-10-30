@@ -6,6 +6,12 @@ disable-model-invocation: true
 
 Implement the issues the user names, working from each issue and the spec it came from.
 
+**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching,
+checks and fixes, including fixes a sub-agent's report calls for (a review finding once weighed per
+[REVIEW.md](./REVIEW.md) § Refactors), to sub-agents where you can, on the disjoint files § Do the work splits. Brief
+each one with what it needs and have it report back with enough information to act on, never trimmed to save context: it
+spares you the reading, not the findings. A recorded SHA must be a commit this session made.
+
 ## Before you start
 
 - Read `.mysdd/issue-tracker.md` whole; it must hold exactly one `Tracker contract: 7` line: with none (or no file) or

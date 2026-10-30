@@ -15,6 +15,12 @@ Read each issue and work from its `whatToBuild`, `acceptanceCriteria`, `testBoun
 `/makerkit-custom-final-review`, so stop for that issue and say so. Start only once § Committed or local resolves to a
 mode, and note which paths were already dirty: they are the user's, not the change.
 
+**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching,
+checks and fixes, including fixes a sub-agent's report calls for (a review finding once weighed per
+[REVIEW.md](./REVIEW.md)), to sub-agents where you can, on the disjoint files § Build splits. Brief each one with what
+it needs and have it report back with enough information to act on, never trimmed to save context: it spares you the
+reading, not the findings. A recorded SHA must be a commit this session made.
+
 ## Ground yourself first
 
 Before writing any code, read the project's own documentation, because where it and this skill differ, the repo wins:

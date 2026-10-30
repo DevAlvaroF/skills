@@ -7,6 +7,8 @@ description: Builds and sharpens a project's domain model — the glossary, the 
 
 Actively build and sharpen the project's domain model as you design. This is the _active_ discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely _reading_ the glossary and ADRs is not this skill: `.mysdd/docs/agents/domain.md` covers that.)
 
+**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching, checks and fixes, including fixes a sub-agent's report calls for, to sub-agents where you can. Brief each one with what it needs and have it report back with enough information to act on, never trimmed to save context: it spares you the reading, not the findings. A recorded SHA must be a commit this session made.
+
 ## Where the model lives
 
 - **Glossary**: a root `CONTEXT.md`, or a root `CONTEXT-MAP.md` pointing at per-context files, in the format of [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).

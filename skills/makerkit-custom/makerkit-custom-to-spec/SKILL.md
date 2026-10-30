@@ -14,6 +14,11 @@ Read `.mysdd/issue-tracker.md` whole before writing anything: it defines the lay
 hold exactly one `Tracker contract: 7` line; missing, lower or none → stop and tell the user to re-run
 `/makerkit-custom-setup-skills`; higher → stop and tell them to run `npx skills update -p`.
 
+**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching,
+checks and fixes, including fixes a sub-agent's report calls for, to sub-agents where you can. Brief each one with what
+it needs and have it report back with enough information to act on, never trimmed to save context: it spares you the
+reading, not the findings. A recorded SHA must be a commit this session made.
+
 ## Ground yourself first
 
 Before exploring, read the project's own documentation, because where it and this skill differ, the repo wins:

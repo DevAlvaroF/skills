@@ -1,14 +1,8 @@
-# Supabase kit: the kit's way
+# Supabase kits: the data layer
 
-Names as of kit v3/v4. Where the repo differs, the repo wins: it is the version you'll merge with.
+For the Next.js and TanStack Start Supabase kits; actions or server functions, routes, the upstream and the kit's
+skills are in the framework file's kit row. Where the repo differs, the repo wins: it is the version you'll merge with.
 
-- **Upstream:** `git@github.com:makerkit/next-supabase-saas-kit-turbo.git`; for a repo with `apps/native`,
-  `git@github.com:makerkit/expo-supabase-turbo-saas-kit.git`. Both are private, so a fetch needs the user's access.
-
-- **Actions:** `authActionClient`, `publicActionClient`, `captchaActionClient` from `@kit/next/safe-action`, extra
-  checks composed with `.use()`; `useAction` on the client. `adminActionClient` only in admin features. Mutations only,
-  never fetching.
-- **Route handlers:** `enhanceRouteHandler` from `@kit/next/routes`.
 - **Data and auth:** `getSupabaseServerClient()` and `useSupabase()` enforce RLS, so trust it — a manual ownership
   check beside them duplicates the policy. `getSupabaseServerAdminClient()` bypasses RLS: only webhooks, admin work and
   background jobs, after explicit validation. Accounts through `createAccountsApi` / `createTeamAccountsApi`.
@@ -16,8 +10,7 @@ Names as of kit v3/v4. Where the repo differs, the repo wins: it is the version 
   never recreate one. Row types from `Tables<'name'>`, never a hand-written copy.
 - **Policies:** business rules via `definePolicy` in a registry (`@kit/policies`), never inline.
 - **Other primitives:** `getLogger()` from `@kit/shared/logger`, never `console.log`; `getMailer()` with the email
-  templates package; `Trans` and `next-intl` messages for every visible string; `@kit/ui/<name>` imports, no deep
-  paths; forms with `react-hook-form` and the kit's `Form` components.
+  templates package; `@kit/ui/<name>` imports, no deep paths.
 - **Schema workflow:** write `apps/web/supabase/schemas/NN-*.sql`, then the migration (`supabase:db:diff` or
   `migrations new`), then `supabase:web:typegen`. Every new table enables RLS; revoke from `anon`, `authenticated` and
   `service_role`, then grant `UPDATE` per column, never table-level. Never change schema in the hosted Studio, never
@@ -26,10 +19,7 @@ Names as of kit v3/v4. Where the repo differs, the repo wins: it is the version 
   model.
 - **Upstream-owned paths and their extension points:**
   - `packages/ui/src/shadcn/` → wrap and re-export in `packages/ui/src/makerkit/<name>.tsx`, or a companion token map;
-  - `packages/features/**`, `packages/supabase/**`, `packages/next/**` → compose from the app, don't patch;
-  - `apps/web/config/*.ts`, the navigation configs and `apps/web/i18n/messages` are meant to be edited: no finding.
-- **Deprecated:** `enhanceAction` (now the safe-action clients), `withI18n` and `react-i18next` (now `next-intl`),
-  `asChild` and `@radix-ui/*` (now Base UI's `render`), `import { z } from 'zod'` (now `import * as z`),
-  `router.refresh()` / `router.push()` after an action (revalidate or redirect in the action).
-- **Routes:** `app/[locale]/home/(user)/` for the personal account, `app/[locale]/home/[account]/` for a team, keyed by
-  slug; feature server code under a `_lib/server/` beside the route.
+  - `packages/features/**`, `packages/supabase/**` and the framework package the kit row names → compose from the app,
+    don't patch;
+  - the app's `config/` files, navigation configs and i18n messages are meant to be edited: no finding.
+- **Deprecated:** `asChild` and `@radix-ui/*` (now Base UI's `render`), `import { z } from 'zod'` (now `import * as z`).

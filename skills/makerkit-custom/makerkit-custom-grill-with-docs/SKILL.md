@@ -11,6 +11,11 @@ crystallise, rather than at the end.
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision
 branches into the decisions that hang off it.
 
+**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching and
+checks to sub-agents where you can; a fix a sub-agent's report calls for is a decision, put to the user like any other.
+Brief each one with what it needs and have it report back with enough information to act on, never trimmed to save
+context: it spares you the reading, not the findings. A recorded SHA must be a commit this session made.
+
 Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions
 you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each
 question and give your recommended answer. Then wait for the user's answers before the next round.
