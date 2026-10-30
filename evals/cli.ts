@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process'
-import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import {
   ALL_STEP_BLUEPRINTS,
@@ -224,7 +224,41 @@ function renderPrompt(args: string[]): void {
 /* ---------- step / answer ---------- */
 
 interface Usage { input_tokens: number; cached_input_tokens: number; output_tokens: number; reasoning_output_tokens: number }
-interface StepTiming { label: string; turns: number; seconds: number; input_tokens: number; cached_input_tokens: number; output_tokens: number; commands: number }
+interface StepTiming {
+  label: string; turns: number; seconds: number; input_tokens: number; cached_input_tokens: number; output_tokens: number; commands: number
+  /** The part of the tokens above that sub-agents spent, and how many ran. */
+  subagent_tokens: number; subagents: number
+}
+type Cumulative = Usage & { thread?: string; since?: number; subagents?: Usage & { threads: number } }
+
+/**
+ * What the root thread's sub-agents have spent so far. `--json` reports the root thread alone; each
+ * sub-agent is its own thread, whose rollout under `$CODEX_HOME/sessions` logs a `token_usage_record` per
+ * response with the root's id as `session_id` (Codex CLI 0.166). The root's own records are skipped,
+ * since `turn.completed` already counts them. Before 2026-10-30 the harness missed these: a step E that
+ * delegated its fix reported 0.83M of its 1.36M.
+ */
+function subagentUsage(root: string, since: number): Usage & { threads: number } {
+  const total = { input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, reasoning_output_tokens: 0, threads: 0 }
+  const sessions = join(process.env.CODEX_HOME ?? join(process.env.HOME ?? '', '.codex'), 'sessions')
+  if (!existsSync(sessions)) return total
+  const threads = new Set<string>()
+  for (const name of readdirSync(sessions, { recursive: true }) as string[]) {
+    const path = join(sessions, name)
+    if (!name.endsWith('.jsonl') || name.includes(root) || statSync(path).mtimeMs < since) continue
+    for (const line of readFileSync(path, 'utf8').split('\n')) {
+      if (!line.includes('"token_usage_record"') || !line.includes(root)) continue
+      const record = JSON.parse(line).payload as { session_id?: string; thread_id?: string; usage?: Partial<Usage> }
+      if (record.session_id !== root || !record.thread_id || record.thread_id === root || !record.usage) continue
+      threads.add(record.thread_id)
+      total.input_tokens += record.usage.input_tokens ?? 0
+      total.cached_input_tokens += record.usage.cached_input_tokens ?? 0
+      total.output_tokens += record.usage.output_tokens ?? 0
+      total.reasoning_output_tokens += record.usage.reasoning_output_tokens ?? 0
+    }
+  }
+  return { ...total, threads: threads.size }
+}
 
 const SENTINEL = 'SENTINEL.txt'
 
@@ -255,16 +289,24 @@ function runCodex(repo: string, dir: string, label: string, codexArgs: string[],
   // logged 955K). So a turn costs its total minus the total the thread had reached before it.
   const reported = events.filter((event) => event.type === 'turn.completed' && event.usage).map((event) => event.usage!).at(-1)
   const cumulativePath = join(dir, 'usage-cumulative.json')
-  const before: Usage & { thread?: string } | null = existsSync(cumulativePath) ? JSON.parse(readFileSync(cumulativePath, 'utf8')) : null
+  const before: Cumulative | null = existsSync(cumulativePath) ? JSON.parse(readFileSync(cumulativePath, 'utf8')) : null
   const base = before && before.thread === thread && reported && reported.input_tokens >= before.input_tokens ? before : null
-  const spent = (pick: (u: Usage) => number) => reported ? pick(reported) - (base ? pick(base) : 0) : 0
-  if (reported) writeFileSync(cumulativePath, JSON.stringify({ thread, ...reported }, null, 2))
+  // Sub-agents are counted the same way, from their running total across the thread's turns.
+  const since = base?.since ?? started
+  const subagents = thread ? subagentUsage(thread, since) : null
+  const spent = (pick: (u: Usage) => number) =>
+    (reported ? pick(reported) - (base ? pick(base) : 0) : 0) +
+    (subagents ? pick(subagents) - (base?.subagents ? pick(base.subagents) : 0) : 0)
+  const subagentSpent = subagents
+    ? subagents.input_tokens + subagents.output_tokens - (base?.subagents ? base.subagents.input_tokens + base.subagents.output_tokens : 0)
+    : 0
+  if (reported) writeFileSync(cumulativePath, JSON.stringify({ thread, since, ...reported, subagents }, null, 2))
   const commands = events.filter((event) => event.type === 'item.completed' && event.item?.type === 'command_execution').length
 
   const timingPath = join(dir, 'timing.json')
   const previous: StepTiming = existsSync(timingPath)
     ? JSON.parse(readFileSync(timingPath, 'utf8'))
-    : { label, turns: 0, seconds: 0, input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, commands: 0 }
+    : { label, turns: 0, seconds: 0, input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, commands: 0, subagent_tokens: 0, subagents: 0 }
   const timing: StepTiming = {
     label,
     turns: previous.turns + 1,
@@ -273,6 +315,8 @@ function runCodex(repo: string, dir: string, label: string, codexArgs: string[],
     cached_input_tokens: previous.cached_input_tokens + spent((u) => u.cached_input_tokens),
     output_tokens: previous.output_tokens + spent((u) => u.output_tokens),
     commands: previous.commands + commands,
+    subagent_tokens: (previous.subagent_tokens ?? 0) + subagentSpent,
+    subagents: Math.max(previous.subagents ?? 0, subagents?.threads ?? 0),
   }
   writeFileSync(timingPath, JSON.stringify(timing, null, 2))
   process.stdout.write(`--- ${label} turn ${turn} (${seconds.toFixed(0)}s, exit ${result.status}) ---\n`)
@@ -325,6 +369,7 @@ function rollUp(runDir: string): void {
     total_tokens: sum((step) => step.input_tokens + step.output_tokens),
     uncached_input_tokens: sum((step) => step.input_tokens - step.cached_input_tokens),
     output_tokens: sum((step) => step.output_tokens),
+    subagent_tokens: sum((step) => step.subagent_tokens ?? 0),
     total_duration_seconds: Math.round(sum((step) => step.seconds)),
     commands: sum((step) => step.commands),
     steps,

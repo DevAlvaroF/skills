@@ -62,6 +62,15 @@ a step of n turns counted its first turn n times and its last once: the mobile
 pilot's 15.4M was 8.0M, and three step-B runs of 3–4 turns read 1.9–2.4× their
 real cost. A one-turn step was exact.
 
+That usage is the root thread's alone. A sub-agent Codex spawns runs as its own
+thread, so `step` and `answer` also read its `token_usage_record`s from the
+rollouts under `$CODEX_HOME/sessions` (they carry the root's id as
+`session_id`), add them the same way, and keep the share in `subagent_tokens`
+with the count in `subagents`. Before 2026-10-30 they were missed: in iteration
+`drift-fixes`, where every Job and implement step delegated, a step E that
+reported 0.83M had spent 1.37M. Figures from before then, the baselines above
+included, leave out any sub-agents a step ran.
+
 ## Seeded steps
 
 A seed writes, without a Codex session, the state the step before leaves, so
