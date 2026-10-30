@@ -19,9 +19,11 @@ Grill, to-spec, to-issues and implement send you here before they start. Read th
   `apps/web/AGENTS.md`, then `apps/web/app/[locale]/admin/AGENTS.md`), including each one's `## Skills` and any
   verification it adds, plus every `AGENTS.md` a file on that chain routes a touched concern to (e.g., on the Supabase
   kit, the root's Key Patterns table routes server actions to `packages/next/AGENTS.md` and the admin client to
-  `packages/supabase/AGENTS.md`). The root file is already loaded; read the rest directly, because not every agent
-  loads nested files. Add any vendored Next.js docs for anything Next.js. They're small and targeted. Where they and
-  the skill you are running differ, **follow the repo**.
+  `packages/supabase/AGENTS.md`). The root file is already loaded; read the rest directly, because not every agent loads
+  nested files. Add any vendored framework docs (Next.js ships them) for anything the framework does. They're small and
+  targeted. Where they and the skill you are running differ, **follow the repo**; when the skill is the stale side —
+  Makerkit changed or the skill was wrong, not this repo's own customisation — end your output with the Skill drift
+  block `/makerkit-custom-kit-conformance` § Skill drift defines, so the user can update the skills.
 - the glossary and the ADRs whose `scope` covers the touched paths, per § Before exploring, read these. ADRs are
   binding.
 - the `README.md` of each app or package **actually involved** (`apps/*/README.md`, `packages/*/README.md`) — what that

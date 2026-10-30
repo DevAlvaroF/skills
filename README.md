@@ -8,7 +8,7 @@ more, `kit-conformance` and `mobile-app`. **Install one per project, never both.
 
 | Flavour | Use it for |
 |---|---|
-| **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — knows its `AGENTS.md` layout, RLS and `.mdoc` docs; keeps the glossary and scoped, binding ADRs under `.mysdd/docs/`, out of the always-loaded `AGENTS.md`; guides the optional Expo mobile app in `apps/native` |
+| **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — Next.js or TanStack Start, on Supabase or Drizzle; knows its `AGENTS.md` layout, RLS or app-level tenancy and `.mdoc` docs; reports where it has fallen behind the kit; keeps the glossary and scoped, binding ADRs under `.mysdd/docs/`, out of the always-loaded `AGENTS.md`; guides the optional Expo mobile app in `apps/native` |
 | **Modified Matt Skills** (`modified-matt-*`) | Any other repo — root `CONTEXT.md` glossary, scoped and binding ADRs under `.mysdd/docs/adr/` |
 
 A third group, **Prompt-kanban companion**, holds one flavour-neutral skill,
@@ -245,8 +245,9 @@ Same steps, gates and commits under `makerkit-custom-*`, except:
   belong to the `/reviewer` that § Verification names. Its Standards fallback
   (the smell baseline) runs only when no general review skill is named or
   installed, or only a specialist one like `/rls-review`. Step 6's standards
-  pass is `/reviewer` on the same terms, plus `/rls-review` when the change
-  touches migrations or RLS policies, else the smell baseline run in place,
+  pass is `/reviewer` on the same terms, plus the data specialist
+  § Verification names (`/rls-review`, `/drizzle-expert`) when the change
+  touches the schema, migrations or policies, else the smell baseline run in place,
   and `/makerkit-custom-kit-conformance` when installed: it reports only
   whether the change embraces the kit or fights it (bypassed wrappers,
   edited upstream code, broken tenancy or schema workflow). Setup-skills seeds
@@ -263,6 +264,15 @@ Same steps, gates and commits under `makerkit-custom-*`, except:
   verification only the user can run. Without `apps/native` nothing changes.
   These pointers are temporary: once the mobile kit stabilises, each section
   moves into its step's skill and the pointer goes.
+- **Four kits.** Kit-conformance reads one framework file (Next.js,
+  TanStack Start) and one data-layer file (Supabase; Better Auth with
+  Drizzle or Prisma). Each kit's fast-changing names sit in one row, with
+  the kit version they were checked at.
+- **Skill drift.** When a skill names something the kit no longer has, or a
+  kit skill conflicts with one it calls, it follows the repo, finishes, and
+  ends its output with a `Skill drift` block: what it says, what the repo
+  shows, the upstream cause. It never edits itself; you update the pack
+  here. A change the repo made itself is not drift.
 
 ### Steps A–E: a Job (`kanban-jobs`)
 

@@ -6,7 +6,7 @@ description: "Guides work on the optional Expo mobile app (`apps/native`) of a M
 # The mobile app
 
 The repo may also ship a mobile app: an Expo (React Native) app in `apps/native`, present from the start or added
-later. It is a second app of this monorepo, beside the web app (Next.js, `apps/web`), not a separate project: both
+later. It is a second app of this monorepo, beside the web app (`apps/web`), not a separate project: both
 share the database, the `@kit/*` packages, the tracker and `.mysdd/`. The mobile app covers a subset of the web app's
 features, and reaches data through the web app's `/api/v1` route handlers.
 

@@ -13,12 +13,13 @@ run is its retry: go to step 5 and make only what is missing, because one review
    - **Spec**, scoped to this issue: what is missing or partial (a requirement outside its `covers` is not a finding),
      behaviour nobody asked for, requirements implemented wrongly, contradictions of the Decision log or a binding ADR,
      and each acceptance criterion met, unmet or unverified, with its evidence.
-   - **Standards**: `/reviewer` when an `AGENTS.md` § Verification names it and it's installed; `/rls-review` when the
-     change touches migrations or RLS policies; `/makerkit-custom-kit-conformance` always, as it ships with these
-     skills. With no general review skill both named and installed, give it to a sub-agent with the `AGENTS.md` chain,
-     the ADRs' paths and Fowler's smell baseline as judgement calls — Mysterious Name, Duplicated Code, Feature Envy,
-     Data Clumps, Primitive Obsession, Repeated Switches, Shotgun Surgery, Divergent Change, Speculative Generality,
-     Message Chains, Middle Man, Refused Bequest — dropping any a documented rule or ADR endorses.
+   - **Standards**: `/reviewer` when an `AGENTS.md` § Verification names it and it's installed; the data specialist it
+     names (`/rls-review`, `/drizzle-expert`) when the change touches the schema, migrations or policies;
+     `/makerkit-custom-kit-conformance` always, as it ships with these skills. With no general review skill both named
+     and installed, give it to a sub-agent with the `AGENTS.md` chain, the ADRs' paths and Fowler's smell baseline as
+     judgement calls — Mysterious Name, Duplicated Code, Feature Envy, Data Clumps, Primitive Obsession, Repeated
+     Switches, Shotgun Surgery, Divergent Change, Speculative Generality, Message Chains, Middle Man, Refused Bequest —
+     dropping any a documented rule or ADR endorses.
 2. **Verify, don't assume.** Every acceptance criterion needs evidence: take it from the Spec pass and verify here only
    what it left open. One nobody could verify — no way to drive the UI, a service you don't have — is a failure, not a
    pass: say what was blocked and why.
@@ -37,4 +38,6 @@ run is its retry: go to step 5 and make only what is missing, because one review
 Fix nothing, and never write `status` or `reviewCodeCommit` or make a close commit: phase 2 closes, even after a clean
 PASS. Report the record saved, the record committed with its SHA (in local mode, "local record saved; marker
 committed"), and the SHA written to `reviewHistoryCommit`; then the verdict and the findings by number. Tell the user
-phase 2 is next, even with zero findings, run by the coder in a fresh session.
+phase 2 is next, even with zero findings, run by the coder in a fresh session. Last, any Skill drift block
+(`/makerkit-custom-kit-conformance` § Skill drift) the reviews or you raised, kept out of the record: it concerns
+these skills, not the change.

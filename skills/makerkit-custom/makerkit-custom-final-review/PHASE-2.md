@@ -28,10 +28,10 @@ or an assumed empty finding list. Keep the additional-plans inventory (below) fr
    superseding the ADR per `/makerkit-custom-domain-modeling`, which needs the user's own agreement. Never edit the
    spec. Keep asking, and never record a finding undecided: nobody would act on it.
 4. **Implement the approved fixes**, nothing more, with `/makerkit-custom-tdd` where behaviour changes.
-5. **Check** with the root `AGENTS.md` § Verification in its order, plus what nested files add, whole-repo runs
-   through a sub-agent reporting failures only. A review skill there sees only this attempt's fixes and the ADRs'
-   paths (`/rls-review` only when they touch migrations or policies); its findings are triaged with the user as in
-   step 3, never recorded UNRESOLVED unasked. Checks run even with nothing fixed: no DEFER waives one. No fix commit
+5. **Check** with the root `AGENTS.md` § Verification in its order, plus what nested files add, whole-repo runs through
+   a sub-agent reporting failures only. A review skill there sees only this attempt's fixes and the ADRs' paths (the
+   data specialist only when they touch the schema, migrations or policies); its findings are triaged with the user as
+   in step 3, never recorded UNRESOLVED unasked. Checks run even with nothing fixed: no DEFER waives one. No fix commit
    until the fixes are verified: a failing check or a fix that falls short is work to finish, not a place to stop. A
    pass that needs an uncommitted rewrite hasn't passed: ask.
 6. **Commit verified fixes** as the `CODE REVIEW FIXES:` commit per § Commits, with its `Issue:` and `Spec:` trailers:
@@ -53,7 +53,7 @@ or an assumed empty finding list. Keep the additional-plans inventory (below) fr
    unresolved and stop; the next attempt continues from this record.
 
 Report the fix SHA and subject, each disposition, the checks, the final status and the close SHA or its absence; then,
-apart, the plans commit and each plan left out with its reason.
+apart, the plans commit and each plan left out with its reason; last, any Skill drift block this attempt raised.
 
 ## Additional plans
 
