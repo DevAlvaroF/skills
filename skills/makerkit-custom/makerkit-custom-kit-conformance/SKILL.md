@@ -58,10 +58,14 @@ the repo ships none of it, cite the kit file and say so.
 
 ## What fighting the kit looks like
 
-1. **Editing upstream-owned code.** A changed path that exists in the upstream tree is kit code (`git remote -v` for
-   the Makerkit remote, then its tree; with none, the kit row's upstream, fetched without adding a remote; if that
-   fails too, `packages/**` minus paths the repo's own history added). Also a hand-edited generated file, or a
-   migration already applied. Name the extension point the kit offers instead.
+1. **Editing upstream-owned code without need.** Upstream-owned is a changed `packages/**` path that exists in the
+   upstream tree (`git remote -v` for the Makerkit remote, then its tree; with none, the kit row's upstream, fetched
+   without adding a remote; if that fails too, `packages/**` minus paths the repo's own history added), a hand-edited
+   generated file, or a migration already applied. Name the extension point the kit offers instead. Need is when none
+   exists and avoiding the edit would leave the kit's version unused, duplicated or shadowed: a parallel copy (a second
+   admin sidebar beside the kit's, the original left dead) costs more than a conflict on the next pull, so edit in
+   place and say why. `apps/**` is the app's starting point, and its `config/` files, navigation configs and i18n
+   messages are meant to be edited: no finding.
 2. **Bypassing a kit primitive:** action clients or server-function middleware, the route-handler wrapper, data and
    auth clients, the logger, the mailer, i18n, `@kit/ui`, forms.
 3. **Re-implementing what the kit ships.** Search the kit before accepting anything new.
@@ -95,10 +99,10 @@ Verdict: CONFORMS | FIGHTS THE KIT
 Notes: source conflicts; checks skipped and why; the data specialist recommended or not; skill drift, last.
 ```
 
-A finding is **BLOCKING** when the change edits upstream-owned or generated code without need, loses a security
-guarantee, breaks a MUST, ALWAYS or NEVER rule in an ADR or `AGENTS.md`, or uses a deprecated kit API. Anything else is
-a **SUGGESTION**. The verdict is CONFORMS only when no finding is BLOCKING. The labels match final-review's, so its
-phase 1 takes the findings as they are.
+A finding is **BLOCKING** when the change edits upstream-owned or generated code without need, copies kit code to
+avoid a needed edit, loses a security guarantee, breaks a MUST, ALWAYS or NEVER rule in an ADR or `AGENTS.md`, or uses
+a deprecated kit API. Anything else is a **SUGGESTION**. The verdict is CONFORMS only when no finding is BLOCKING. The
+labels match final-review's, so its phase 1 takes the findings as they are.
 
 ## Skill drift
 

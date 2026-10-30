@@ -23,8 +23,7 @@ review; it doesn't replace it.
 
 ## Ownership
 
-The mobile paths get kit-conformance's upstream test, the same as the web app's: a changed file that exists in the
-kit's upstream is kit code, and editing it costs a conflict on the next upstream pull.
+The mobile paths get kit-conformance's upstream test, the same as the web app's.
 
 ## Report
 
