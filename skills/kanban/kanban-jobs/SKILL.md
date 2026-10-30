@@ -27,6 +27,12 @@ plan in the repository. Read this file and the step's file in full before writin
 Let whole-repo checks (full suite, build, lint) reach you as failures and a verdict only, through a sub-agent where you
 have one: a full log crowds out the plan and the record you write from.
 
+**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching,
+checks and the fixes your step allows, including fixes a sub-agent's report calls for, to sub-agents where you can; in
+E, only the fixes the user approved. Brief each one with what it needs and have it report back with enough information
+to act on, never trimmed to save context: it spares you the reading, not the findings. A recorded SHA must be a commit
+this session made.
+
 ## Inputs
 
 A prompt-kanban prompt hands them over. Invoked directly, ask for anything missing rather than guess. The step: the

@@ -7,6 +7,11 @@ A Makerkit kit already answers actions, data access, tenancy, authorization, sch
 bypasses those answers is code the kit's updates stop protecting, a conflict on the next upstream pull, or a guarantee
 — RLS, the action middleware, a tenant filter — silently lost. This review looks only for that.
 
+**Context.** Keep this session for orchestration, the user's decisions and the report: hand reading, searching and
+checks to sub-agents where you can, split as § Running it says. This review changes no file (§ Scope), so it hands out
+no fixes. Brief each one with what it needs and have it report back with enough information to act on, never trimmed to
+save context: it spares you the reading, not the findings.
+
 ## Scope
 
 Review exactly what the caller names: SHAs, a range, paths or an issue. Commits a caller hands over (final-review

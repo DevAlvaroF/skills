@@ -12,6 +12,11 @@ features, and reaches data through the web app's `/api/v1` route handlers.
 
 The skill that sent you here keeps its whole workflow. Apply its step's section below on top of it.
 
+**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching,
+checks and fixes, including fixes a sub-agent's report calls for, to sub-agents where you can. Brief each one with what
+it needs and have it report back with enough information to act on, never trimmed to save context: it spares you the
+reading, not the findings. A recorded SHA must be a commit this session made.
+
 ## Settle the target
 
 A change targets the web app, the mobile app or both. When the user hasn't said which, ask: a guess builds half a

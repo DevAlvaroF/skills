@@ -12,6 +12,11 @@ _reading_ the glossary and ADRs is not this skill: `.mysdd/docs/agents/domain.md
 **Mobile app.** If `apps/native` exists and a term or decision concerns it, invoke `/makerkit-custom-mobile-app` and
 apply its § Domain modelling.
 
+**Context.** Keep this session for orchestration, the user's decisions, commits and records: hand reading, searching,
+checks and fixes, including fixes a sub-agent's report calls for, to sub-agents where you can. Brief each one with what
+it needs and have it report back with enough information to act on, never trimmed to save context: it spares you the
+reading, not the findings. A recorded SHA must be a commit this session made.
+
 ## Where the model lives
 
 - **Glossary**: `.mysdd/docs/CONTEXT.md`, one for the whole repo, in the format of [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
