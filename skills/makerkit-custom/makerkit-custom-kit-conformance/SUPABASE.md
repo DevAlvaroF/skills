@@ -20,6 +20,5 @@ skills are in the framework file's kit row. Where the repo differs, the repo win
 - **Upstream-owned paths and their extension points:**
   - `packages/ui/src/shadcn/` → wrap and re-export in `packages/ui/src/makerkit/<name>.tsx`, or a companion token map;
   - `packages/features/**`, `packages/supabase/**` and the framework package the kit row names → compose from the app,
-    don't patch;
-  - the app's `config/` files, navigation configs and i18n messages are meant to be edited: no finding.
+    don't patch.
 - **Deprecated:** `asChild` and `@radix-ui/*` (now Base UI's `render`), `import { z } from 'zod'` (now `import * as z`).
