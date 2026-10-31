@@ -21,6 +21,11 @@ on the disjoint files § Build splits. Brief each one with what it needs and rea
 what is going on: ask for what you need to act on, not raw output. Its edits are your own paths to commit; it commits
 nothing, as a recorded SHA must be a commit this session made.
 
+**Plan Mode.** When you run in it, the plan covers the whole run, § Ground yourself first through § Advance, and names
+the issues, this skill and its own path: accepting it may clear this context and leave only the plan. The plan file
+this run wrote inside the repository, not ignored, is part of the work: it joins the inventory and the first `CODE:`
+commit. Name one outside the repository, or ignored, in the report instead.
+
 ## Ground yourself first
 
 Before writing any code, read the project's own documentation, because where it and this skill differ, the repo wins:

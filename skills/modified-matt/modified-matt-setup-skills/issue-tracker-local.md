@@ -178,7 +178,7 @@ Subjects you write are ≤72 characters. The fixed subjects that embed `<issue p
 |---|---|---|---|---|
 | spec review | `REVIEW HISTORY: Record spec review attempt <N>` | `Spec: <spec path>` | the spec | the empty marker |
 | to-issues | `SPEC: <subject>` | optional why | spec, the issues it wrote, changed `CONTEXT.md`/`CONTEXT-MAP.md` and ADRs | glossary and ADRs only, else none |
-| implement | `CODE: <subject>` | optional why; `Issue: <issue path>` per issue; `Spec: <spec path>` unless `null` | the implementation, plus agreed ADRs and `AGENTS.md` convention lines | same |
+| implement | `CODE: <subject>` | optional why; `Issue: <issue path>` per issue; `Spec: <spec path>` unless `null` | the implementation, plus agreed ADRs, `AGENTS.md` convention lines and the run's plan file | same |
 | phase 2 fixes | `CODE REVIEW FIXES: <subject>` | as `CODE:` | the approved fixes, agreed ADRs, check rewrites in the change's files | same |
 | phase 1 | `REVIEW HISTORY: Record final review attempt <N>` | `Issue: <issue path>` | the issue file and its uncommitted Sub-issue | the empty marker |
 | phase 2 plans | `ATTEMPT PLANS: final review <issue path> attempt <K>` | none | plans this attempt provably created, not ignored or bound elsewhere | same |
