@@ -51,6 +51,9 @@ Before writing any code, read the project's own documentation, because where it 
   dirty goes in marked **mixed**. Files a `lint:fix` or typegen run rewrote join the change when they belong to it;
   list any other rewrite in the report, uncommitted. A convention line or routing row the issue carries is written
   into its `AGENTS.md`, which joins the inventory.
+- An edit to a `packages/**` file Makerkit ships that the spec's Decision log doesn't name is agreed with the user
+  first, since it costs a conflict on every upstream pull. Every edit to a file Makerkit ships carries a `kit-edit:`
+  comment saying why, per the root `AGENTS.md` § Kit edits: `/makerkit-custom-kit-conformance` blocks on a missing one.
 - Typecheck and run single test files often; run the full suite once at the end, in step 2.
 
 ## Finish
