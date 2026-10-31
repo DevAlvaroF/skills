@@ -85,6 +85,14 @@ Conventions live in a distribution of `AGENTS.md` files (root, per app/package, 
 from the root down to each directory you touch, in order, plus every one those files route a concern you touch to: the
 root is already loaded; read the rest directly, because not every agent loads nested files. Invoke the skills a nested
 `AGENTS.md` names when writing code there, and run any verification it adds.
+
+### Kit edits
+
+Prefer the kit's extension points, and edit a `packages/**` file Makerkit ships only once the user agrees none fits.
+Mark every edit to a file Makerkit ships with a `kit-edit:` comment, in the file's own syntax at the changed lines,
+saying why and naming the issue or ADR: the next upstream merge conflicts there, and `git grep kit-edit:` lists every
+local change before one. The app's `config/`, navigation and i18n files are meant to be edited and need none; a file
+that can't hold a comment (JSON) or a deleted one is named, with its why, in the commit body.
 ```
 
 Add this line once to the same file's `## Verification`, creating the section if missing and replacing an older one

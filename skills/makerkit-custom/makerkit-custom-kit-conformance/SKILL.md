@@ -64,18 +64,23 @@ the repo ships none of it, cite the kit file and say so.
    generated file, or a migration already applied. Name the extension point the kit offers instead. Need is when none
    exists and avoiding the edit would leave the kit's version unused, duplicated or shadowed: a parallel copy (a second
    admin sidebar beside the kit's, the original left dead) costs more than a conflict on the next pull, so edit in
-   place and say why. `apps/**` is the app's starting point, and its `config/` files, navigation configs and i18n
-   messages are meant to be edited: no finding.
-2. **Bypassing a kit primitive:** action clients or server-function middleware, the route-handler wrapper, data and
+   place. `apps/**` is the app's starting point, and its `config/` files, navigation configs and i18n messages are
+   meant to be edited: no finding.
+2. **An unmarked kit edit.** Every change to a file the upstream tree holds (rule 1's test, over every path, so
+   `apps/**` too, minus those config, navigation and i18n files) carries a `kit-edit:` comment at it, in the file's
+   syntax, saying why and naming the issue or ADR — one per change, the imports it needs included: the next upstream
+   merge conflicts there, and the diff against upstream shows only what changed. A file that can't hold a comment
+   (JSON) or a deleted one is exempt when the commit body names it with its why.
+3. **Bypassing a kit primitive:** action clients or server-function middleware, the route-handler wrapper, data and
    auth clients, the logger, the mailer, i18n, `@kit/ui`, forms.
-3. **Re-implementing what the kit ships.** Search the kit before accepting anything new.
-4. **Wrong layer:** business logic in actions or server functions rather than services; mutations used for fetching;
+4. **Re-implementing what the kit ships.** Search the kit before accepting anything new.
+5. **Wrong layer:** business logic in actions or server functions rather than services; mutations used for fetching;
    the framework file's server/client split missing; a new package for app-only code; files outside the kit's route
    layout.
-5. **Breaking tenancy or authorization:** data not owned by an account or organization; authorization in the wrong
+6. **Breaking tenancy or authorization:** data not owned by an account or organization; authorization in the wrong
    layer for the data layer; a privileged client in a user flow.
-6. **Skipping the data layer's schema workflow.**
-7. **APIs or patterns the current kit version deprecated,** and the platform rules `AGENTS.md` adds (e.g. Cache
+7. **Skipping the data layer's schema workflow.**
+8. **APIs or patterns the current kit version deprecated,** and the platform rules `AGENTS.md` adds (e.g. Cache
    Components).
 
 Bugs, general quality and tenant-isolation proofs belong to `/reviewer` and the data specialist the root `AGENTS.md`
@@ -99,10 +104,11 @@ Verdict: CONFORMS | FIGHTS THE KIT
 Notes: source conflicts; checks skipped and why; the data specialist recommended or not; skill drift, last.
 ```
 
-A finding is **BLOCKING** when the change edits upstream-owned or generated code without need, copies kit code to
-avoid a needed edit, loses a security guarantee, breaks a MUST, ALWAYS or NEVER rule in an ADR or `AGENTS.md`, or uses
-a deprecated kit API. Anything else is a **SUGGESTION**. The verdict is CONFORMS only when no finding is BLOCKING. The
-labels match final-review's, so its phase 1 takes the findings as they are.
+A finding is **BLOCKING** when the change edits upstream-owned or generated code without need, copies kit code to avoid
+a needed edit, edits a kit file without its `kit-edit:` comment, loses a security guarantee, breaks a MUST, ALWAYS or
+NEVER rule in an ADR or `AGENTS.md`, or uses a deprecated kit API. Anything else is a **SUGGESTION**. The verdict is
+CONFORMS only when no finding is BLOCKING. The labels match final-review's, so its phase 1 takes the findings as they
+are.
 
 ## Skill drift
 
