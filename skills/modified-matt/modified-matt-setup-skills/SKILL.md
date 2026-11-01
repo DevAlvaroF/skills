@@ -71,7 +71,7 @@ Update an existing `## Agent skills` block in place, leaving the rest of the fil
 ```
 
 Write each generated file from its seed. An existing `domain.md` takes the seed's changes and keeps the user's own
-sections, named in the report; an existing tracker follows [UPGRADE.md](./UPGRADE.md). The tracker must end with
+sections, named in the report; an existing tracker follows [UPGRADE.md](./UPGRADE.md). The tracker must hold
 exactly one `Tracker contract: 7` line, directly under the title: every reader stops on anything else.
 
 ## 5. Done

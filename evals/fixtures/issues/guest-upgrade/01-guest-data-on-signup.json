@@ -1,0 +1,30 @@
+{
+  "id": "01",
+  "slug": "guest-data-on-signup",
+  "title": "Move a guest's chats and credits to the account they link",
+  "status": "ready-for-agent",
+  "spec": ".mysdd/features/01-guest-upgrade/spec.md",
+  "whatToBuild": "A guest who signs up or signs in keeps their work: linkGuest, exported from packages/auth/src/server.js and passed to the anonymous plugin as onLinkAccount in packages/auth/src/config.js, moves every chat of the anonymous user to the new user and adds the guest's credit balance to the new user's, before the anonymous user is deleted.",
+  "blockedBy": [],
+  "testBoundaries": [
+    "linkGuest through its export from packages/auth/src/server.js, in test/ with node:test, over in-memory chat and ai_credit tables"
+  ],
+  "covers": [
+    "US-001",
+    "US-002"
+  ],
+  "codeCommit": null,
+  "reviewHistoryCommit": null,
+  "reviewCodeCommit": null,
+  "acceptanceCriteria": [
+    {
+      "text": "Every chat of the anonymous user belongs to the new user after the link",
+      "done": false
+    },
+    {
+      "text": "The guest's credits are added to the new user's balance, or become it when the new user has none",
+      "done": false
+    }
+  ],
+  "comments": []
+}

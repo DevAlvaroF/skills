@@ -22,7 +22,7 @@ import {
  * the eval `spec` check call it too.
  */
 
-export const FLAVOURS = ['modified-matt', 'makerkit-custom'] as const
+export const FLAVOURS = ['modified-matt', 'makerkit-custom', 'turbostarter-custom'] as const
 
 /** The fields every Spec Record attempt carries, as REVIEW.md's example shows them. */
 export const ATTEMPT_FIELDS = ['attempt', 'agent', 'commit', 'summary'] as const

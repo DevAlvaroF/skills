@@ -18,10 +18,10 @@ import { runChecks, type Check } from './verify'
  * The skill-eval harness: disposable repos, the app's own Step prompts, one
  * Codex session per Step, and a verifier built on the app's parsers.
  *
- *   npm run skill-evals -- repo <dir> --flavour modified-matt|makerkit-custom --skills new|old [--clone <src> | --fixture node-app|makerkit-app] [--setup committed|local]
+ *   npm run skill-evals -- repo <dir> --flavour modified-matt|makerkit-custom|turbostarter-custom --skills new|old [--clone <src> | --fixture node-app|makerkit-app|turbostarter-app] [--setup committed|local]
  *   npm run skill-evals -- seed-spec <repo> <spec path> --record none|empty|saved|committed|recorded|malformed|duplicate [--brief <id>] [--secret]
  *   npm run skill-evals -- seed-plan <repo> <plan path> --job <uuid> [--at B|C|D|E] [--findings none|some]
- *   npm run skill-evals -- seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>] [--feature slugify|member-count]
+ *   npm run skill-evals -- seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>] [--feature slugify|member-count|guest-upgrade]
  *   npm run skill-evals -- prompt <step-key> --templates new|old --subject <subject.json>
  *   npm run skill-evals -- step <repo> <run-dir> <label> <prompt-file> [--no-sentinel] [--plan <path>] [--spec <path>]
  *   npm run skill-evals -- answer <repo> <run-dir> <label> <text-or-@file>
@@ -66,13 +66,13 @@ function git(repo: string, args: string[]): string {
 function makeRepo(args: string[]): void {
   const dir = resolve(args[0] ?? die('repo needs a directory'))
   if (!dir.startsWith('/tmp/pk-e2e/') && !dir.startsWith('/private/tmp/pk-e2e/')) die('repos live under /tmp/pk-e2e/')
-  const flavour = flag(args, 'flavour') ?? die('--flavour modified-matt|makerkit-custom')
+  const flavour = flag(args, 'flavour') ?? die('--flavour modified-matt|makerkit-custom|turbostarter-custom')
   const which = flag(args, 'skills') ?? die('--skills new|old')
   const source = which === 'old' ? OLD_SKILLS : NEW_SKILLS
   const clone = flag(args, 'clone')
   const fixture = flag(args, 'fixture') ?? 'node-app'
   if (clone && flag(args, 'fixture')) die('--clone or --fixture, not both')
-  if (!['node-app', 'makerkit-app'].includes(fixture)) die('--fixture node-app|makerkit-app')
+  if (!['node-app', 'makerkit-app', 'turbostarter-app'].includes(fixture)) die('--fixture node-app|makerkit-app|turbostarter-app')
 
   rmSync(dir, { recursive: true, force: true })
   mkdirSync(dirname(dir), { recursive: true })
@@ -144,7 +144,7 @@ function runSeedPlan(args: string[]): void {
 /** `seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>] [--feature <name>]`: see `seedFeature`. */
 function runSeedFeature(args: string[]): void {
   const [repo, featureDir] = args
-  if (!repo || !featureDir) die('seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>] [--feature slugify|member-count]')
+  if (!repo || !featureDir) die('seed-feature <repo> <feature dir> --at 4|5|6|7 [--findings none|some] [--brief <id>] [--feature slugify|member-count|guest-upgrade]')
   const at = oneOf(flag(args, 'at'), FEATURE_STAGES, 'at') ?? die('--at 4|5|6|7')
   seeded(() => seedFeature(resolve(repo), featureDir.replace(/\/+$/, ''), at,
     { findings: oneOf(flag(args, 'findings'), FINDINGS, 'findings'), brief: flag(args, 'brief'), feature: oneOf(flag(args, 'feature'), FEATURES, 'feature') }))

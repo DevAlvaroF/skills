@@ -13,8 +13,9 @@ run is its retry: go to step 5 and make only what is missing, because one review
    - **Spec**, scoped to this issue: what is missing or partial (a requirement outside its `covers` is not a finding),
      behaviour nobody asked for, requirements implemented wrongly, contradictions of the Decision log or a binding ADR,
      and each acceptance criterion met, unmet or unverified, with its evidence.
-   - **Standards**: `/reviewer` when an `AGENTS.md` § Verification names it and it's installed; the data specialist it
-     names (`/rls-review`, `/drizzle-expert`) when the change touches the schema, migrations or policies;
+   - **Standards**: `/reviewer` when an `AGENTS.md` § Verification names it and it's installed (in the session's
+     skills or under the repo's `.agents/skills/` or `.claude/skills/`, never searched for elsewhere); the data
+     specialist it names (`/rls-review`, `/drizzle-expert`) when the change touches the schema, migrations or policies;
      `/makerkit-custom-kit-conformance` always, as it ships with these skills. With no general review skill both named
      and installed, give it to a sub-agent with the `AGENTS.md` chain, the ADRs' paths and Fowler's smell baseline as
      judgement calls — Mysterious Name, Duplicated Code, Feature Envy, Data Clumps, Primitive Obsession, Repeated

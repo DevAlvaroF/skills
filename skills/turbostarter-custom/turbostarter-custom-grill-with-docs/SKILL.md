@@ -1,0 +1,68 @@
+---
+name: turbostarter-custom-grill-with-docs
+description: Runs a relentless interview to sharpen a plan or design, recording terms in .mysdd/docs/CONTEXT.md and offering ADRs as decisions crystallise. Use when the user wants to stress-test a plan or design before it becomes a spec.
+disable-model-invocation: true
+---
+
+**Before the first round**, call the Skill tool with "turbostarter-custom-domain-modeling" and apply its rules throughout
+this interview: it challenges the terms as they come up and records vocabulary and decisions the moment they
+crystallise, rather than at the end.
+
+Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision
+branches into the decisions that hang off it.
+
+**Context.** Keep this session lean, for orchestration, the user's decisions, commits and records: hand reading,
+searching and checks to sub-agents where that helps; a fix one's report calls for is a decision, put to the user like
+any other. Brief each one with what it needs and read what it returns, which is how you know what is going on: ask for
+what you need to act on, not raw output. It commits nothing, as a recorded SHA must be a commit this session made.
+
+Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions
+you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each
+question and give your recommended answer. Then wait for the user's answers before the next round.
+
+Format a round like so:
+
+```
+❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+
+➡️ <your recommended answer>
+
+---
+
+❓ **Q2** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+
+➡️ <your recommended answer>
+```
+
+Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that
+depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question
+still open in this round belongs to a _later_ round, not this one.
+
+Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem,
+tools, etc.), dispatch a sub-agent to find it; don't ask the user for anything you could look up yourself. Don't block
+on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent
+to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
+
+**Before the first round**, also read the project's own documentation so you never spend a question on something the
+repo already answers, as `.mysdd/docs/agents/domain.md` § Ground yourself first lists it, and dispatch the
+TurboStarter docs sub-agent its § TurboStarter docs describes. If those sections are missing, tell the user in your reply to re-run
+`/turbostarter-custom-setup-skills`, and until then read every AGENTS.md from the root down to each directory you touch,
+the ones they route you to, CONTEXT.md and the ADRs whose scope covers those paths. Per the frontier rule above, don't
+block round one on the docs sub-agent: only the questions downstream of its answer wait for it to report.
+
+**Mobile app, extension.** If `apps/mobile` exists and the plan may touch it, invoke `/turbostarter-custom-mobile-app`
+and apply its § Grill; likewise `apps/extension` and `/turbostarter-custom-extension`, so "which app?" enters round one. One not installed: say so
+and carry on from the kit's `AGENTS.md`.
+
+**AI kit alone.** When the plan needs accounts, organizations, subscriptions or admin, those are Core's: put the
+kit's integrate-Core route to the user in round one — which kit is the base, which Core capabilities, credits or
+plans, what a guest's data becomes at signup — rather than grilling a hand-built design the kit already answers.
+
+Understanding the architecture is a first step, not a question. Ask the user only what the docs genuinely don't answer —
+and when a question survives that reading, say what you checked, so they can see it's a real gap rather than a shortcut.
+
+The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed.
+Do not act on it until the user confirms you have reached a shared understanding. Once they confirm, tell the user to
+run `/turbostarter-custom-to-spec` here, **in this same session** while the design tree is still in context: only they can
+invoke it. The glossary terms and ADRs this session writes stay uncommitted. `/turbostarter-custom-to-issues`
+commits them with the spec.

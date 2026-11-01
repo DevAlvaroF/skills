@@ -1,0 +1,3 @@
+interface:
+  display_name: 'TurboStarter Custom Kit Conformance'
+  short_description: 'Check a change embraces the TurboStarter kit'

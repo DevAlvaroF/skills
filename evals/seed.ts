@@ -34,8 +34,11 @@ export const FEATURE_STAGES = ['4', '5', '6', '7'] as const
 export type FeatureStage = (typeof FEATURE_STAGES)[number]
 export const SPEC_STATES = ['none', 'empty', 'saved', 'committed', 'recorded', 'malformed', 'duplicate'] as const
 export type SpecState = (typeof SPEC_STATES)[number]
-/** The Features `seed-feature` builds: slugify on `fixtures/node-app`, member-count on `fixtures/makerkit-app`. */
-export const FEATURES = ['slugify', 'member-count'] as const
+/**
+ * The Features `seed-feature` builds: slugify on `fixtures/node-app`, member-count on `fixtures/makerkit-app`,
+ * guest-upgrade (an auth change) on `fixtures/turbostarter-app`.
+ */
+export const FEATURES = ['slugify', 'member-count', 'guest-upgrade'] as const
 export type FeatureName = (typeof FEATURES)[number]
 
 /** The agents the seeded attempts name: the prompts' coder and reviewer labels. */
@@ -90,6 +93,7 @@ const CODE_BASES: Record<string, { app: string; file: string; holds: string }> =
   slugify: { app: 'node-app', file: 'src/text.js', holds: 'export function capitalize' },
   'word-count': { app: 'node-app', file: 'src/text.js', holds: 'export function capitalize' },
   'member-count': { app: 'makerkit-app', file: 'apps/web/lib/server/workspace.service.js', holds: 'export function createWorkspaceService' },
+  'guest-upgrade': { app: 'turbostarter-app', file: 'packages/api/src/middleware.js', holds: 'export function enforceAuth' },
 }
 
 /** Lays a code fixture over the repo, which must be built from the app fixture it was written against; returns its paths. */
@@ -160,7 +164,7 @@ function checkSpec(full: string, state: SpecState): void {
  * Every state but `committed`/`recorded` leaves the spec untracked, as Step 2 does. `secret` then appends a
  * secret-shaped line to Further Notes, uncommitted, for the publication check. `settled` starts from the fixture
  * with its open question answered, as a passing review leaves it. `fixture` names the spec, `slugify` by default;
- * `member-count` has only a settled one.
+ * `member-count` and `guest-upgrade` have only a settled one.
  */
 export function seedSpec(
   repo: string, specPath: string, state: SpecState,
@@ -289,8 +293,6 @@ function finishPlan(repo: string, full: string, jobId: string): Seeded {
 
 /* ---------- Feature (steps 4–7) ---------- */
 
-const ISSUE_FIXTURES = join(FIXTURES, 'issues/slugify')
-
 /** Throws unless every issue in the Feature parses with `IssueFileSchema` and each `blockedBy` names one of them. */
 function checkIssues(issuesDir: string): void {
   const issues = readdirSync(issuesDir).filter((name) => name.endsWith('.json')).map((name) => {
@@ -316,22 +318,40 @@ function phaseOneRecord(code: string, findings: Findings): string {
   ].join('\n')
 }
 
-const IMPLEMENTATION_RECORD = [
+const implementationRecord = (verification: string, review: string) => [
   'Implementation record',
-  'Verification: npm test, 4 tests, 4 passed.',
-  'Review: the two-axis review of src/text.js and test/text.test.js found nothing to change.',
+  `Verification: ${verification}`,
+  `Review: ${review}`,
   'Left open: none. ADRs superseded: none.',
   'Deviations and tradeoffs: None.',
 ].join('\n')
 
+/** The Features seeded one step after another: their fixtures, the commits steps 4 and 5 make, and step 5's record. */
+const LINEAR_FEATURES = {
+  slugify: {
+    split: 'SPEC: Split slugify into two issues',
+    code: 'CODE: Add slugify',
+    record: implementationRecord('npm test, 4 tests, 4 passed.',
+      'the two-axis review of src/text.js and test/text.test.js found nothing to change.'),
+  },
+  'guest-upgrade': {
+    split: "SPEC: Keep a guest's work at signup",
+    code: "CODE: Move a guest's chats and credits to the account they link",
+    record: implementationRecord('npm test, 6 tests, 6 passed.',
+      'spec fidelity against US-001 and US-002 found nothing to change; /turbostarter-custom-kit-conformance: CONFORMS; /better-auth-best-practices: no findings.'),
+  },
+} as const
+
 /**
- * A Feature at `<repo>/<feature dir>` as the step before `at` leaves it, built on the slugify fixtures. The repo
+ * A Feature at `<repo>/<feature dir>` as the step before `at` leaves it, built on the slugify fixtures, or with
+ * `feature` the guest-upgrade ones (an auth change, on `repo --fixture turbostarter-app`, up to `6`). The repo
  * needs a tracker (`repo --setup committed|local`); in local mode, where `.mysdd/features/` is ignored, every
  * Feature file stays untracked and a review commits the empty marker, as the tracker says.
  *
  * - `4`: the settled spec with a finished first review (`seedSpec … recorded`), as Step 3 leaves it.
- * - `5`: plus `fixtures/issues/slugify/` (02 is blocked by 01), committed with the spec as `SPEC: …` (local: no commit).
- * - `6`: plus `fixtures/code/slugify` committed as `CODE: Add slugify` with `Issue:` and `Spec:` trailers, and issue
+ * - `5`: plus `fixtures/issues/<feature>/` (slugify's 02 is blocked by 01), committed with the spec as `SPEC: …`
+ *   (local: no commit).
+ * - `6`: plus `fixtures/code/<feature>` committed as its `CODE: …` with `Issue:` and `Spec:` trailers, and issue
  *   01 advanced as implement leaves it: criteria ticked, `codeCommit`, the implementation record, uncommitted.
  * - `7`: plus a phase 1 record on issue 01, committed alone as `REVIEW HISTORY: Record final review attempt 1`
  *   (local: the marker), its SHA then written to `reviewHistoryCommit`, uncommitted. `findings` as for `seedPlan`'s
@@ -346,23 +366,27 @@ export function seedFeature(
   if ((at === '7') !== (options.findings !== undefined)) throw new Error('--findings none|some goes with --at 7, and only there')
   if (!existsSync(join(repo, '.mysdd/issue-tracker.md'))) throw new Error('seed-feature needs a tracker: make the repo with --setup committed|local')
   if (options.feature === 'member-count') return seedMemberCount(repo, featureDir, at, options.brief)
+  const name = options.feature ?? 'slugify'
+  const feature = LINEAR_FEATURES[name]
+  if (name === 'guest-upgrade' && at === '7') throw new Error('--feature guest-upgrade seeds --at 4, 5 or 6: its findings fixture is slugify\'s')
+  const issueFixtures = join(FIXTURES, 'issues', name)
   const local = ignored(repo, '.mysdd/features/')
   const full = join(repo, featureDir)
   const specPath = `${featureDir}/spec.md`
 
-  seedSpec(repo, specPath, 'recorded', { brief: options.brief, settled: true })
+  seedSpec(repo, specPath, 'recorded', { brief: options.brief, settled: true, fixture: name })
   if (at === '4') return { full, head: head(repo) }
 
   const issuesDir = join(full, 'issues')
   mkdirSync(issuesDir, { recursive: true })
-  const issuePaths = readdirSync(ISSUE_FIXTURES).sort().map((name) => {
-    const issue = JSON.parse(readFileSync(join(ISSUE_FIXTURES, name), 'utf8')) as JsonObject
+  const issuePaths = readdirSync(issueFixtures).sort().map((file) => {
+    const issue = JSON.parse(readFileSync(join(issueFixtures, file), 'utf8')) as JsonObject
     issue.spec = specPath
-    writeFileSync(join(issuesDir, name), `${JSON.stringify(issue, null, 2)}\n`)
-    return `${featureDir}/issues/${name}`
+    writeFileSync(join(issuesDir, file), `${JSON.stringify(issue, null, 2)}\n`)
+    return `${featureDir}/issues/${file}`
   })
   checkIssues(issuesDir)
-  if (!local) commit(repo, ['SPEC: Split slugify into two issues'], [specPath, ...issuePaths])
+  if (!local) commit(repo, [feature.split], [specPath, ...issuePaths])
   if (at === '5') return { full, head: head(repo) }
 
   const issuePath = issuePaths[0]!
@@ -372,11 +396,11 @@ export function seedFeature(
     writeFileSync(issueFull, `${JSON.stringify(issue, null, 2)}\n`)
     checkIssues(issuesDir)
   }
-  const code = commit(repo, ['CODE: Add slugify', `Issue: ${issuePath}\nSpec: ${specPath}`], applyCode(repo, 'slugify'))
+  const code = commit(repo, [feature.code, `Issue: ${issuePath}\nSpec: ${specPath}`], applyCode(repo, name))
   for (const criterion of issue.acceptanceCriteria) criterion.done = true
   issue.status = 'done-coding-awaiting-final-review'
   issue.codeCommit = code
-  issue.comments.push({ author: CODER, body: IMPLEMENTATION_RECORD })
+  issue.comments.push({ author: CODER, body: feature.record })
   writeIssue()
   if (at === '6') return { full, head: head(repo) }
 

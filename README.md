@@ -3,12 +3,15 @@
 Custom skills for Claude Code and Codex, installed per project with
 [`npx skills`](https://github.com/vercel-labs/skills).
 
-The repo ships two flavours of the same eight skills; Makerkit Custom adds two
-more, `kit-conformance` and `mobile-app`. **Install one per project, never both.**
+The repo ships three flavours of the same eight skills; Makerkit Custom adds two
+more, `kit-conformance` and `mobile-app`, and TurboStarter Custom three,
+`kit-conformance`, `mobile-app` and `extension`. **Install one flavour per
+project, never two.**
 
 | Flavour | Use it for |
 |---|---|
 | **Makerkit Custom Skills** (`makerkit-custom-*`) | [Makerkit](https://makerkit.dev) repos — Next.js or TanStack Start, on Supabase or Drizzle; knows its `AGENTS.md` layout, RLS or app-level tenancy and `.mdoc` docs; reports where it has fallen behind the kit; keeps the glossary and scoped, binding ADRs under `.mysdd/docs/`, out of the always-loaded `AGENTS.md`; guides the optional Expo mobile app in `apps/native` |
+| **TurboStarter Custom Skills** (`turbostarter-custom-*`) | [TurboStarter](https://www.turbostarter.dev) repos — the Core kit (Next.js web, Expo mobile, WXT extension), the AI kit alone or combined with Core, and the Edge kit (TanStack Start on Cloudflare); knows its `AGENTS.md`, its online docs, its `upstream` remote, its app-level tenancy and AI credits; reports where it has fallen behind the kit; keeps the glossary and scoped, binding ADRs under `.mysdd/docs/`; guides the mobile app (`apps/mobile`) and the extension (`apps/extension`) through optional skills |
 | **Modified Matt Skills** (`modified-matt-*`) | Any other repo — root `CONTEXT.md` glossary, scoped and binding ADRs under `.mysdd/docs/adr/` |
 
 A third group, **Prompt-kanban companion**, holds one flavour-neutral skill,
@@ -30,7 +33,7 @@ npx skills@latest add devalvarof/skills
 Then, in the menu:
 
 1. **Skills** — highlight *one* flavour's heading and press space. Don't use
-   *Select All*; that takes both flavours. Using prompt-kanban's Simple
+   *Select All*; that takes every flavour. Using prompt-kanban's Simple
    board? Also tick *Prompt-kanban companion*.
 2. **Agents** — Claude Code (preselected), plus Codex if you use it.
 3. **Method** — `Symlink`.
@@ -40,7 +43,8 @@ Commit what it wrote (`.agents/skills/`, `.claude/skills/`,
 `skills-lock.json`) and restart your agents.
 
 Finally, run the setup skill once in the project —
-`/modified-matt-setup-skills` or `/makerkit-custom-setup-skills` (in Codex,
+`/modified-matt-setup-skills`, `/makerkit-custom-setup-skills` or
+`/turbostarter-custom-setup-skills` (in Codex,
 `$` instead of `/`). The other skills depend on the files it writes.
 
 ### With prompt-kanban's Simple board, also install `kanban-jobs`
@@ -76,17 +80,17 @@ npx skills remove
 ```
 
 Tick what to drop in the menu. To switch flavours, remove everything, then
-install the other one.
+install the other flavour.
 
 ### Gotchas
 
 - Agents load skills at startup — restart after any install or update.
 - Don't add `-y`, `-s` or `--all` to `add`: they skip the menu and install
-  both flavours.
+  every flavour.
 - Don't also install the same skills globally, or `mattpocock/skills` in the
   same project — the agent will see every skill twice.
 
-### Where work lives (both flavours)
+### Where work lives (every flavour)
 
 - Each feature is a directory, `.mysdd/features/<NN>-<feature-slug>/`, holding
   its `spec.md` and one JSON file per issue under `issues/`. The agent
@@ -110,7 +114,7 @@ install the other one.
   `.git/info/exclude` or a global excludes file, only shows you the line.
   No skill force-adds or untracks a file.
 
-### Where decisions live (both flavours)
+### Where decisions live (every flavour)
 
 - Decisions go one per file in `.mysdd/docs/adr/`, created the first time
   one is needed. Each ADR's `scope` frontmatter lists the paths it binds
@@ -136,8 +140,8 @@ install the other one.
 `scope` existed still work as repo-wide, reading their `**Status:**` line;
 re-run setup to add frontmatter to them.
 
-**Makerkit:** the glossary is `.mysdd/docs/CONTEXT.md`, one for the whole
-repo, and `AGENTS.md` keeps conventions only. Upgrading from the version
+**Makerkit and TurboStarter:** the glossary is `.mysdd/docs/CONTEXT.md`, one
+for the whole repo, and `AGENTS.md` keeps conventions only. Upgrading from the version
 that kept `## Vocabulary` / `## Decisions` in `AGENTS.md`? Re-run setup: it
 offers to move them out.
 
@@ -194,7 +198,7 @@ share:
 | **3 Review PRD Spec** | reviewer, fresh session | `reviewer` (warns if missing), `to-spec` (required) | `spec.md`, following `to-spec`'s `REVIEW.md` | edits `spec.md` in place, asking you about every gap rather than assuming, open questions kept in the spec; never cuts User Stories or renumbers an ID; only appends to the Decision log. Once the spec passes: one attempt in its Spec Record, then its `commit` and `commits.spec-review`, left uncommitted | only once the spec passes: `REVIEW HISTORY: Record spec review attempt <N>` + `Spec:` — the spec alone (local: empty marker) |
 | **4 Spec to Issues** | coder, fresh session | `to-issues` | spec, existing issues (reconciled by `slug`, never regenerated) | one issue JSON per vertical slice: `ready-for-agent`, `blockedBy`, `testBoundaries`, `covers`, commit fields `null`; after your approval, ADRs added for the spec's standing decisions and retired for dropped ones | `SPEC: <subject>`, no trailers — spec (with step 3's SHA edit), issues, glossary, ADRs (local: glossary and ADRs only) |
 | **5 Implement** | coder, auto mode | `implement`, `tdd` | issue, its spec when `spec` isn't `null`, ADRs | code, its own two-axis review (`REVIEW.md`); then the issue: criteria ticked, `done-coding-awaiting-final-review`, `codeCommit`, an implementation record with `Deviations and tradeoffs:`; at most one Sub-issue for approved deferrals | `CODE: <subject>` + `Issue:`/`Spec:` trailers — code, agreed ADRs and `AGENTS.md` convention lines; the issue file stays uncommitted |
-| **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required), `kit-conformance` (Makerkit, via final-review) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, `Findings` numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing, never changes `status` | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file and its Sub-issue (local: empty marker) |
+| **6 Final Review** (phase 1) | reviewer, fresh session | `reviewer`, `final-review` (required), `kit-conformance` (Makerkit, TurboStarter, via final-review) | issue, the change's commits, spec, ADRs, implementation record | phase 1 record in `comments`: attempt, `Reviewed commits`, `Verdict: PASS` or `NEEDS FIXES`, `Findings` numbered `BLOCKING`/`SUGGESTION`; then `reviewHistoryCommit`, left uncommitted. Fixes nothing, never changes `status` | `REVIEW HISTORY: Record final review attempt <N>` + `Issue:` — the whole issue file and its Sub-issue (local: empty marker) |
 | **7 Fix Findings** (phase 2) | coder, fresh session, plan mode | `final-review` (required), `tdd` | latest phase 1 record, implementation record, earlier phase 2 records answering it | FIX / REJECT / DEFER per finding → your approval → fixes, checks; at most one Sub-issue for approved DEFERs; phase 2 record (attempt, `Answers`, `Outcome`, `Verdicts`, `Checks`, `Fix commit`, `Attempt plans`, `ADRs superseded`); `reviewCodeCommit`; `done-final-review` only on COMPLETE | `CODE REVIEW FIXES: <subject>` + trailers if code changed; `ATTEMPT PLANS: final review <issue path> attempt <K>` for plans it created, every outcome; on COMPLETE, `Closed Issue: <issue path>` (issue, its Sub-issue, board file if changed; none in local mode) |
 
 Step 7 always runs, even after a PASS with zero findings: the checks still
@@ -274,9 +278,43 @@ Same steps, gates and commits under `makerkit-custom-*`, except:
   shows, the upstream cause. It never edits itself; you update the pack
   here. A change the repo made itself is not drift.
 
+### Where TurboStarter differs
+
+Same steps, gates and commits under `turbostarter-custom-*`, and the same
+glossary, grounding, checks, review and skill-drift rules as Makerkit's above,
+except:
+
+- **Kits.** Setup and kit-conformance detect the kit — Core, AI, Edge, or AI
+  combined with Core — from the `upstream` remote, else its files, and setup
+  records it in the root `AGENTS.md` § Kit edits. Kit-conformance reads one
+  file per kit (`CORE.md`, `AI.md`, `EDGE.md`) and, for AI with Core, both
+  plus `AI-CORE.md`: the integration recipe's rules (one `customer` table,
+  metering checked before any model call, one client of each, one migration
+  history) as BLOCKING findings.
+- **Docs are online.** The kit ships none in the repo: one sub-agent reads
+  `https://www.turbostarter.dev/<docs base>/<page>.md`, or the docs MCP
+  server when the session has it, per `.mysdd/docs/agents/domain.md`
+  § TurboStarter docs.
+- **No versions.** TurboStarter has no version number or changelog, so each
+  kit's row is checked at an upstream commit, and skill drift compares it
+  with `git merge-base HEAD upstream/main`.
+- **Verification.** The kit's `AGENTS.md` has no `## Verification`; setup
+  writes one from the scripts `package.json` actually has (never
+  `pnpm typecheck`, which the kits don't define).
+- **Reviews.** No RLS specialist: the standards pass is `/reviewer`, the auth
+  skill the kit installs when auth changes, and kit-conformance.
+- **AI kit alone.** Accounts, organizations, billing or admin come from Core
+  by the kit's integrate-Core recipe, never built by hand: grill asks it in
+  round one, the spec's Decision log records the base and the metering
+  policy, and to-issues slices it auth first.
+- **Mobile app and extension** (`apps/mobile`, `apps/extension`) each have an
+  optional skill, `/turbostarter-custom-mobile-app` and
+  `/turbostarter-custom-extension`; each step invokes the one the work
+  touches, or says to install it.
+
 ### Steps A–E: a Job (`kanban-jobs`)
 
-Flavour-neutral, installed beside either flavour. B–E require `kanban-jobs`,
+Flavour-neutral, installed beside any flavour. B–E require `kanban-jobs`,
 and their prompts stop unless its `SKILL.md` states `Job Record contract: 2`
 (the skill stops too on a prompt naming another number). Step E, like 7,
 changes no code before you approve its triage, and always runs. Step D
@@ -288,7 +326,7 @@ never `HEAD` or a range.
 | **A Generate Plan** | coder, fresh session, plan mode | none | the Job's title and description | a plan under `.claude/plans` ending with the empty `<job-record id="<jobId>">` block; you bind it in the app | nothing |
 | **B Review Plan** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required) | the plan, the code as it stands | edits the plan in place, questions and the user's answers under `Open questions` above the record; once none is open, attempt `B` (`changes`), then its `commit` and `commits.plan-review` | `REVIEW HISTORY: Record step B attempt <N>` — the plan alone (ignored plan: empty marker) |
 | **C Code** | coder, fresh session | `tdd`, `kanban-jobs` (required) | the plan and its answered questions | code, checks, self-review; attempt `C` (`outcome`, `deviations`), with its `commit` and `commits.code` when it committed | `CODE: <subject>` — code only, and only when COMPLETE; never the plan |
-| **D Review Code** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required), `kit-conformance` (Makerkit) | the Job's recorded code commits, the plan | no source change; attempt `D` (`reviewedCommits`, `verdict`, `findings`), then its `commit` and `commits.code-review` | `REVIEW HISTORY: Record step D attempt <N>` — the plan, whatever the verdict (ignored: marker) |
+| **D Review Code** | reviewer, fresh session | `reviewer`, `kanban-jobs` (required), `kit-conformance` (Makerkit, TurboStarter) | the Job's recorded code commits, the plan | no source change; attempt `D` (`reviewedCommits`, `verdict`, `findings`), then its `commit` and `commits.code-review` | `REVIEW HISTORY: Record step D attempt <N>` — the plan, whatever the verdict (ignored: marker) |
 | **E Fix Findings** | coder, fresh session, plan mode | `tdd`, `kanban-jobs` (required) | latest D attempt's findings, latest C attempt's deviations | FIX / REJECT / DEFER → your approval → fixes, checks; attempt `E` (`outcome`, `attemptPlans`, `verdicts`), with its `commit` and `commits.code-fix` when it committed | `CODE REVIEW FIXES: <subject>` if COMPLETE with code; `ATTEMPT PLANS: step E <jobId> attempt <N>` for plans it created; `JOB HISTORY: Record step E attempt <N>` — the plan, every outcome (ignored: none, no marker) |
 
 **The Job Record.** Each Job owns one block of its plan: a column-zero
@@ -325,8 +363,8 @@ step on a plan you name: it proposes the next step from the record, asks for
 what a prompt would have handed it, and follows `STEP-A.md` for a plan written
 by hand.
 
-In a Makerkit project with `makerkit-custom-kit-conformance` installed, the
-app ticks it on step D (name it when running D by hand): it reviews exactly
+In a Makerkit or TurboStarter project with its flavour's `kit-conformance`
+installed, the app ticks it on step D (name it when running D by hand): it reviews exactly
 the commits D hands it.
 
 ---
@@ -340,6 +378,7 @@ the commits D hands it.
 scripts/gen-marketplace.mjs       # regenerates it
 skills/
   makerkit-custom/<skill>/        # SKILL.md, optional reference .md files and agents/openai.yaml — no scripts
+  turbostarter-custom/<skill>/
   modified-matt/<skill>/
   kanban/kanban-jobs/             # the flavour-neutral Job procedure: SKILL.md and STEP-A…E.md
 matt/skills                       # copy of upstream mattpocock/skills, for reference
@@ -373,7 +412,7 @@ evals/                            # end-to-end skill evals through Codex, run fr
   done rule, hard limit or verbatim command, a full chain per group for a
   contract bump, old against new only for a claimed token saving.
 - **The flavours are independent copies, not mirrors.** Port a fix to the
-  other flavour only if it's about generic skill mechanics.
+  other flavours only if it's about generic skill mechanics.
 - Keep the flavour prefix on every flavour skill's name; `kanban-jobs` belongs
   to no flavour.
 - `description` is all the agent sees before loading a skill — write it as
