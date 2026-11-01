@@ -13,6 +13,7 @@ Scaffold what the engineering skills assume:
 - `.mysdd/docs/agents/domain.md`, from [domain.md](./domain.md): how to ground yourself in the repo's `AGENTS.md`
   files, READMEs and the TurboStarter docs, and where the glossary (`.mysdd/docs/CONTEXT.md`) and scoped ADRs live.
 - An `## Agent skills` block in the root instruction file pointing at both, and naming the kit.
+- On request, TurboStarter's docs MCP server in `.mcp.json` and `.codex/config.toml`.
 
 Conventions need nothing generated: the repo's own `AGENTS.md` files are their documentation, and TurboStarter keeps
 its product docs online, not in the repo. Don't seed `CONTEXT.md` or `adr/`: domain-modeling creates them when they're
@@ -28,9 +29,9 @@ commit; it commits nothing, as a recorded SHA must be a commit this session made
 Read what exists; don't assume: the root `AGENTS.md` and `CLAUDE.md` (is `CLAUDE.md` a real document or just an
 `@AGENTS.md` import?) and any `## Agent skills` block; every other `AGENTS.md` outside `node_modules`; the kit's agent
 files under `.agents/` and `skills-lock.json`, and which skills are installed; the root `AGENTS.md`'s commit rules; the
-root `package.json` scripts; `.mysdd/issue-tracker.md` and its
-`Tracker contract:` line; `.mysdd/docs/agents/domain.md`; Features and issues under `.mysdd/features/`; old-layout
-Feature directories directly under `.mysdd/`; and what Git ignores and tracks under `.mysdd/`.
+root `package.json` scripts; the MCP servers `.mcp.json` and `.codex/config.toml` register; `.mysdd/issue-tracker.md`
+and its `Tracker contract:` line; `.mysdd/docs/agents/domain.md`; Features and issues under `.mysdd/features/`;
+old-layout Feature directories directly under `.mysdd/`; and what Git ignores and tracks under `.mysdd/`.
 
 **Which kit.** `git remote get-url upstream` naming `turbostarter/core`, `/ai` or `/edge` is the strongest signal.
 The files decide otherwise: Edge has `wrangler.jsonc` and `src/routeTree.gen.ts` and no `apps/`; AI has
@@ -76,12 +77,29 @@ the specialist § Verification names. With neither installed, say so.
 **Commits.** The kit's `AGENTS.md` has its own commit convention and commits only when asked, while the skills commit
 with the tracker's subjects: propose the block's `### Commits` exception, so agents never choose between them.
 
+**Docs MCP server.** The kit ships no MCP config. Unless both files already register
+`https://www.turbostarter.dev/mcp`, offer to add TurboStarter's docs server: public and read-only (`search_docs`,
+`read_doc`), nothing to install or run, and the other skills use it first. Declined: they read the same pages from the
+website. Merge into an existing file, keeping its other servers:
+
+```json
+{ "mcpServers": { "turbostarter": { "type": "http", "url": "https://www.turbostarter.dev/mcp" } } }
+```
+
+```toml
+[mcp_servers.turbostarter]
+url = "https://www.turbostarter.dev/mcp"
+```
+
+Codex reads a project's `.codex/config.toml` only once the project is trusted. Both take effect in the next session.
+
 **Upgrades.** Each section of [UPGRADE.md](./UPGRADE.md) that applies.
 
 ## 3. Confirm
 
-Draft the `## Agent skills` block, the § Verification section, both generated files and every agreed rule change or
-migration. For a file that exists, show the delta, not the whole file. Let the user edit before writing.
+Draft the `## Agent skills` block, the § Verification section, both generated files, any agreed MCP entries and every
+agreed rule change or migration. For a file that exists, show the delta, not the whole file. Let the user edit
+before writing.
 
 ## 4. Write
 
@@ -142,7 +160,7 @@ Write each generated file from its seed. An existing `domain.md` takes the seed'
 sections, named in the report; an existing tracker follows [UPGRADE.md](./UPGRADE.md). The tracker must hold
 exactly one `Tracker contract: 7` line, directly under the title: every reader stops on anything else. Beyond the
 block, its § Verification lines, a root file seeded on request, the UPGRADE.md moves and approved mobile or extension stubs,
-leave every `AGENTS.md` alone.
+leave every `AGENTS.md` alone. Write the agreed MCP entries last, merged as § 2 shows.
 
 ## 5. Done
 
