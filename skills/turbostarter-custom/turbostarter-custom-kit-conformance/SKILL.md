@@ -51,10 +51,10 @@ say in the notes which skill to install.
 1. Binding ADRs under `.mysdd/docs/adr/` whose scope covers the path.
 2. Every `AGENTS.md` from the root down to each touched directory, plus the files it routes a concern to.
 3. The kit's own current code doing the same job — the version you'll merge with. Name the exemplar path.
-4. The TurboStarter docs, through one sub-agent you don't wait on. The kit ships none in the repo: use the docs MCP
-   server's `search_docs` and `read_doc` when the session has it, else read
+4. The TurboStarter docs, through one sub-agent you don't wait on. The kit ships none in the repo yet: use both the
+   docs MCP server's `search_docs` and `read_doc`, when the session has it, and
    `https://www.turbostarter.dev/<docs base>/<page>.md` with the kit row's docs base (any page is served as markdown
-   with `.md`; `/llms.txt` lists them).
+   with `.md`; `/llms.txt` lists them), since either can hold what the other misses.
    Ask how the touched concern is meant to work, answered briefly with the pages it used.
 5. The kit's own skills and agents (`.agents/skills/`, `.agents/agents/`).
 
