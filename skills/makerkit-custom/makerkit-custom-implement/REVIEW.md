@@ -10,7 +10,8 @@ Review along two axes, as **parallel sub-agents**, so one axis can't colour the 
   (`/rls-review`, `/drizzle-expert`) when the change touches the schema, migrations or policies, and
   `/makerkit-custom-kit-conformance`, always: it ships with these skills. Hand them the binding ADRs' paths too. Run the
   **Standards fallback** here only when § Verification names no general review skill or the one it names isn't installed
-  — a specialist doesn't count — unless the project names its own fallback. If no standards review can run at all,
+  (in the session's skills or under the repo's `.agents/skills/` or `.claude/skills/`, never searched for elsewhere) — a
+  specialist doesn't count — unless the project names its own fallback. If no standards review can run at all,
   report that in the final report and the implementation record; never report the axis as passed.
 
 ## Hand them the commands, not the diff

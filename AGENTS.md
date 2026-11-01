@@ -66,16 +66,18 @@ examples — because an example is the cheapest exact definition.
 ## Self-contained skills
 
 A skill gives the same result without prompt-kanban and with only its own
-directory installed. The exception is `makerkit-custom`: the pack is always
-installed whole, so its skills may require one another (implement and
-final-review always run `/makerkit-custom-kit-conformance`). No links into
+directory installed. The exceptions are the kit flavours, `makerkit-custom` and
+`turbostarter-custom`: each pack is always installed whole, so its skills may
+require one another (implement and final-review always run its
+`kit-conformance`); their optional mobile and extension skills are named
+with what to do when they are missing. No links into
 another skill's files; name another skill by its invocation
 (`/modified-matt-implement`) instead.
 
 ## Size budget
 
 prompt-kanban's `tests/unit/domain/skills-size-budget.test.ts` holds a ceiling
-per file and per group (`modified-matt`, `makerkit-custom`, `kanban`), and
+per file and per group (`modified-matt`, `makerkit-custom`, `turbostarter-custom`, `kanban`), and
 allows only `*.md` and `agents/openai.yaml` under `skills/`. Raise a ceiling
 only in a commit that names the incident the extra text answers. Splitting text
 into a new file moves its bytes, it doesn't earn a ceiling: the group still

@@ -26,7 +26,7 @@ failed ||= skills.length > 0
 
 const specSkills = specSkillProblems(root)
 for (const problem of specSkills) console.log(`✗ skills: ${problem}`)
-if (specSkills.length === 0) console.log('✓ skills: to-spec states the Spec Record the app reads, in both flavours')
+if (specSkills.length === 0) console.log('✓ skills: to-spec states the Spec Record the app reads, in every flavour')
 failed ||= specSkills.length > 0
 
 for (const path of files) {

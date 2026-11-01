@@ -1,0 +1,5 @@
+interface:
+  display_name: 'TurboStarter Custom Final Review'
+  short_description: 'Review and commit the findings; the coder triages and closes'
+policy:
+  allow_implicit_invocation: false

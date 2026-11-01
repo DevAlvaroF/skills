@@ -1009,6 +1009,155 @@
           }
         }
       ]
+    },
+    {
+      "id": "ts-spec",
+      "eval_id": 27,
+      "flavour": "turbostarter-custom",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour turbostarter-custom --skills <new|old> --setup committed --fixture turbostarter-app",
+      "why": "Steps 1-4 on turbostarter-custom over the combined AI + Core fixture: the same records and commits as mk-spec, with the work grounded in the kit — a model call charged through deductCredits before it runs, the route guarded by enforceAuth. New only, one run.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Summarize",
+        "description": "Add POST /api/ai/summarize beside the chat route: it summarises the posted text for 2 credits, charged before the model runs and refunded when it fails, for any signed-in or anonymous user. Test it like the chat route."
+      },
+      "steps": [
+        {
+          "label": "1-grill",
+          "step": "grill",
+          "answers": "Answer from the brief; one route, no new table; the model stands in as a function argument like the chat route's; empty text is a 400 and charges nothing; no length cap.",
+          "verify": [
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:1-grill>"},
+            {"kind": "commits", "since": "<head:1-grill>", "count": 0}
+          ]
+        },
+        {
+          "label": "2-spec",
+          "step": "spec-generate",
+          "resume": "1-grill",
+          "verify": [
+            {"kind": "commits", "since": "<head:1-grill>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "spec", "path": "<spec>", "attempts": 0, "recorded": false, "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$"]},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]}
+          ]
+        },
+        {
+          "label": "3-spec-review",
+          "step": "spec-review",
+          "flags": "--spec <spec>",
+          "answers": "Accept your recommendations; no length cap; the test boundaries are right.",
+          "verify": [
+            {"kind": "commits", "since": "<head:3-spec-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record spec review attempt 1$"], "trailers": [["Spec: <spec>"]], "paths": [["<spec>"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:3-spec-review>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "before": "<run>/steps/3-spec-review.spec-before", "patterns": ["^## Decision log$[\\s\\S]*^<spec-record>$"], "worktree": "dirty", "committedAttempt": true},
+            {"kind": "recorded-subject", "specPath": "<spec>", "subject": "^REVIEW HISTORY: Record spec review attempt 1$"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]},
+            {"kind": "history", "since": "<head:3-spec-review>", "absent": "AKIA[0-9A-Z]{16}"}
+          ]
+        },
+        {
+          "label": "4-to-issues",
+          "step": "spec-to-issues",
+          "answers": "Approve the breakdown and the ADR changes.",
+          "flags": "--spec <spec>",
+          "verify": [
+            {"kind": "commits", "since": "<head:4-to-issues>", "count": 1, "subjects": ["^SPEC: "]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:4-to-issues>"},
+            {"kind": "spec", "path": "<spec>", "attempts": 1, "recorded": true, "sha": "<the SHA step 3 recorded>", "before": "<run>/steps/4-to-issues.spec-before", "worktree": "clean"},
+            {"kind": "spec-marker", "path": "<spec>", "briefId": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b"},
+            {"kind": "file", "path": "<spec>", "patterns": ["^- \\*\\*US-001\\*\\*"]}
+          ],
+          "checks": [
+            "the SPEC: commit holds the spec and every issue file it wrote (fill `paths`)",
+            "every issues/*.json parses with IssueFileSchema, status ready-for-agent"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ts-agile-6-auth",
+      "eval_id": 28,
+      "flavour": "turbostarter-custom",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour turbostarter-custom --skills <new|old> --setup committed --fixture turbostarter-app",
+      "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-guest-upgrade --at 6 --feature guest-upgrade --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "Phase 1 on turbostarter-custom over an auth change, the combined fixture's AGENTS.md naming the auth specialist as setup now writes it: the same record and commit as mm-agile-6, and the Standards pass runs /better-auth-best-practices beside /turbostarter-custom-kit-conformance. Closes the review's gap where setup never named the specialist, so the reviews never ran it. Not hermetic by design: kit-conformance reads the TurboStarter docs online and may reach the kit's upstream (git ls-remote), as its SKILL.md asks. The fixture names /reviewer without shipping it, so the Standards fallback runs, and no agent should look for it outside the repo.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Keep a guest's work at signup",
+        "description": "When a guest signs up, Better Auth deletes the anonymous user and their chats and credits go with it. Move them to the account they link, in the anonymous plugin's onLinkAccount, and test it."
+      },
+      "steps": [
+        {
+          "label": "6-final-review",
+          "step": "final-review",
+          "issue": ".mysdd/features/01-guest-upgrade/issues/01-guest-data-on-signup.json",
+          "commitSha": "<head:seed>",
+          "verify": [
+            {"kind": "commits", "since": "<head:6-final-review>", "count": 1, "subjects": ["^REVIEW HISTORY: Record final review attempt 1$"], "paths": [["<issue>"]], "trailers": [["Issue: <issue>"]]},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:6-final-review>"},
+            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"reviewHistoryCommit": "recorded", "reviewCodeCommit": "none"}, "commentPatterns": ["^Final review, phase 1, attempt 1$", "^Reviewed commits: <head:seed>$", "^Verdict: (PASS|NEEDS FIXES)$"]},
+            {"kind": "recorded-subject", "issuePath": "<issue>", "field": "reviewHistoryCommit", "subject": "^REVIEW HISTORY: Record final review attempt 1$"}
+          ],
+          "checks": [
+            "the run invoked /better-auth-best-practices on the change (its `Better Auth review` heading in the transcript), and /turbostarter-custom-kit-conformance"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ts-agile-7-triage",
+      "eval_id": 29,
+      "flavour": "turbostarter-custom",
+      "configurations": ["new"],
+      "runs": 1,
+      "repo": "npm run -s skill-evals -- repo /tmp/pk-e2e/<id>-<new|old> --flavour turbostarter-custom --skills <new|old> --setup committed",
+      "seed": "npm run -s skill-evals -- seed-feature /tmp/pk-e2e/<id>-<new|old> .mysdd/features/01-slugify --at 7 --findings some --brief 6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+      "why": "turbostarter-custom's PHASE-2 is its own text, like mk's: its subjects, records and strict triage are graded on the same slugify seed, so every expectation is mk-agile-7-triage's. The seed's repo has no § Verification and names no review skill, so the check order and a check-time review skill's findings go untested here.",
+      "brief": {
+        "id": "6f1d2c3b-4a5e-4f60-8b7a-9c0d1e2f3a4b",
+        "title": "Slugify",
+        "description": "Add slugify(text) to src/text.js: lower-case, ASCII letters and digits kept, runs of anything else become one hyphen, no leading or trailing hyphen. Export it and test it."
+      },
+      "steps": [
+        {
+          "label": "7-review-fix",
+          "step": "review-fix",
+          "issue": ".mysdd/features/01-slugify/issues/01-slugify-words.json",
+          "answers": "Finding 1: FIX it as you propose; I approve that. Finding 2: I haven't decided yet; don't fix or record it until I do.",
+          "verify": [
+            {"kind": "commits", "since": "<head:7-review-fix>", "count": 0},
+            {"kind": "sentinel"},
+            {"kind": "reflog", "since": "<head:7-review-fix>"},
+            {"kind": "issue", "path": "<issue>", "status": "done-coding-awaiting-final-review", "recorded": {"reviewCodeCommit": "none"}},
+            {"kind": "unchanged", "paths": ["src", "test"]}
+          ],
+          "then": {
+            "answers": "Finding 2: REJECT it; capitalize doesn't guard against null either, and callers pass strings. Asked to agree to stop with the work unfinished (INCOMPLETE or BLOCKED): I don't agree; carry on.",
+            "verify": [
+              {"kind": "commits", "since": "<head:7-review-fix>", "count": 2, "subjects": ["^CODE REVIEW FIXES: ", "^Closed Issue: <issue>$"], "paths": [["src/text.js", "test/text.test.js"], ["<issue>"]], "trailers": [["Issue: <issue>", "Spec: <spec>"], []]},
+              {"kind": "sentinel"},
+              {"kind": "reflog", "since": "<head:7-review-fix>"},
+              {"kind": "issue", "path": "<issue>", "status": "done-final-review", "recorded": {"reviewCodeCommit": "recorded"}, "commentPatterns": ["^Final review, phase 2, attempt 1$", "^Outcome: COMPLETE$", "^1\\. FIXED", "^2\\. REJECTED"]},
+              {"kind": "recorded-subject", "issuePath": "<issue>", "field": "reviewCodeCommit", "subject": "^CODE REVIEW FIXES: "}
+            ],
+            "checks": [
+              "npm test passes",
+              "slugify('snake_case') has no underscore"
+            ]
+          }
+        }
+      ]
     }
   ],
   "every_spec_step": [

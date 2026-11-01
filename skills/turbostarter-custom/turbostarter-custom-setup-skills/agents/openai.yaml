@@ -1,0 +1,5 @@
+interface:
+  display_name: 'TurboStarter Custom Skills Setup'
+  short_description: 'Configures a repo for the engineering skills'
+policy:
+  allow_implicit_invocation: false

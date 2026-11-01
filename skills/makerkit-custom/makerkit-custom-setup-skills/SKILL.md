@@ -28,7 +28,8 @@ commit; it commits nothing, as a recorded SHA must be a commit this session made
 
 Read what exists; don't assume: the root `AGENTS.md` and `CLAUDE.md` (is `CLAUDE.md` a real document or just an
 `@AGENTS.md` import?) and any `## Agent skills` block; every other `AGENTS.md` outside `node_modules`, and other
-convention sources such as `.cursor/rules`; `.mysdd/issue-tracker.md` and its `Tracker contract:` line;
+convention sources such as `.cursor/rules`; which skills are installed; `.mysdd/issue-tracker.md` and its
+`Tracker contract:` line;
 `.mysdd/docs/agents/domain.md`; Features and issues under `.mysdd/features/`; old-layout Feature directories directly
 under `.mysdd/`; and what Git ignores and tracks under `.mysdd/`.
 
@@ -58,7 +59,7 @@ reading only it never sees the root `AGENTS.md`: ask whether to add the import o
 
 ## 3. Confirm
 
-Draft the `## Agent skills` block, the § Verification line, both generated files and every agreed rule change or
+Draft the `## Agent skills` block, the § Verification lines, both generated files and every agreed rule change or
 migration. For a file that exists, show the delta, not the whole file. Let the user edit before writing.
 
 ## 4. Write
@@ -95,17 +96,20 @@ local change before one. The app's `config/`, navigation and i18n files are mean
 that can't hold a comment (JSON) or a deleted one is named, with its why, in the commit body.
 ```
 
-Add this line once to the same file's `## Verification`, creating the section if missing and replacing an older one
-ending `, when installed.`:
+Add these lines once each to the same file's `## Verification`, creating the section if missing and replacing an older
+one ending `, when installed.`. The second names the installed data specialist (`/rls-review` on the Supabase kits,
+`/drizzle-expert` on Drizzle), as the reviews run only the one § Verification names; with neither installed, leave it
+out and say so.
 
 ```markdown
 - Run `/makerkit-custom-kit-conformance` on the change.
+- When the change touches the schema, migrations or policies, run `/rls-review` on it.
 ```
 
 Write each generated file from its seed. An existing `domain.md` takes the seed's changes and keeps the user's own
-sections, named in the report; an existing tracker follows [UPGRADE.md](./UPGRADE.md). The tracker must end with
+sections, named in the report; an existing tracker follows [UPGRADE.md](./UPGRADE.md). The tracker must hold
 exactly one `Tracker contract: 7` line, directly under the title: every reader stops on anything else. Beyond the
-block, its § Verification line, a root file seeded on request, the UPGRADE.md moves and approved mobile stubs, leave
+block, its § Verification lines, a root file seeded on request, the UPGRADE.md moves and approved mobile stubs, leave
 every `AGENTS.md` alone.
 
 ## 5. Done
