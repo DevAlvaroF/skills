@@ -42,6 +42,15 @@ Don't block on it: carry on with whatever doesn't depend on its answer — the f
 slices or spec sections it can't change, the implementation parts it can't touch — and pick the rest up when it
 reports. Never hand a part that depends on its answer to another sub-agent before the answer is in.
 
+## Makerkit MCP server
+
+The kit ships a `makerkit` MCP server in `.mcp.json` (built from `tooling/mcp-server` or `packages/mcp-server`). When
+the session has it, use its read-only lookups to find what the kit already provides before writing your own:
+`components_search` and `get_component_props` for UI, `get_database_summary` and `get_table_info` for the schema,
+`get_scripts` for commands. The repo still wins where they differ. Never call one that changes state — a database
+reset, migration or seed, an environment write, the dev server, translations, PRDs or mailbox edits — unless the user
+asks: the skills' own steps decide what runs and what is written. Not in the session: read the code.
+
 ## Before exploring, read these
 
 - **`.mysdd/docs/CONTEXT.md`**, the glossary.
