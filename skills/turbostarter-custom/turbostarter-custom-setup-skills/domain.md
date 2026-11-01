@@ -35,11 +35,13 @@ Grill, to-spec, to-issues and implement send you here before they start. Read th
 
 ## TurboStarter docs
 
-The kit ships no docs in the repo; they are online. When the session has TurboStarter's docs MCP server (`turbostarter`,
-which setup offers to add), use it first: `search_docs` finds the pages and `read_doc` reads one, by its docs URL.
-Otherwise every page is served as markdown by adding `.md` to its URL. The base is the kit's:
-`https://www.turbostarter.dev/docs/web` (Core web), `/docs/mobile`, `/docs/extension`, `/ai/docs` (AI, and
-`/ai/docs/integrate-core-kit` for AI combined with Core) and `/edge/docs` (Edge); `/llms.txt` lists the pages.
+The kit ships no docs in the repo yet; they are online, reached two ways, and the sub-agent uses both, since either
+can hold what the other misses. TurboStarter's docs MCP server (`turbostarter`, which setup offers to add):
+`search_docs` finds the pages and `read_doc` reads one, by its docs URL. The website: every page is served as markdown
+by adding `.md` to its URL, from the kit's base — `https://www.turbostarter.dev/docs/web` (Core web), `/docs/mobile`,
+`/docs/extension`, `/ai/docs` (AI, and `/ai/docs/integrate-core-kit` for AI combined with Core) and `/edge/docs`
+(Edge) — and `/llms.txt` lists the pages. Search with the server, check the website's list and pages too, and report
+where they differ. With no server in the session, use the website and say the server is missing.
 Never read them in your own context: they would crowd out the work. Dispatch one sub-agent, name the one or two topics
 the work touches (e.g., organizations, billing, credits), and ask how the feature is _meant_ to work there, answered
 briefly with the pages it relied on. Where its answer and the repo differ, follow the repo. With no network, skip it

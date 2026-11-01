@@ -79,8 +79,8 @@ with the tracker's subjects: propose the block's `### Commits` exception, so age
 
 **Docs MCP server.** The kit ships no MCP config. Unless both files already register
 `https://www.turbostarter.dev/mcp`, offer to add TurboStarter's docs server: public and read-only (`search_docs`,
-`read_doc`), nothing to install or run, and the other skills use it first. Declined: they read the same pages from the
-website. Merge into an existing file, keeping its other servers:
+`read_doc`), nothing to install or run, and the other skills use it beside the website. Declined: they use the website
+alone. Merge into an existing file, keeping its other servers:
 
 ```json
 { "mcpServers": { "turbostarter": { "type": "http", "url": "https://www.turbostarter.dev/mcp" } } }
